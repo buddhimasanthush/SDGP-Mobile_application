@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
+import 'pages/main_navigation_page.dart';
 
 void main() {
   runApp(const MediFindApp());
@@ -18,7 +18,7 @@ class MediFindApp extends StatelessWidget {
         fontFamily: 'Poppins',
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const MainNavigationPage(),
     );
   }
 }
