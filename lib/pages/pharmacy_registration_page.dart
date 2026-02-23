@@ -9,7 +9,7 @@ class PharmacyRegistrationPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Background with decorative circles (same as home page)
+          // Background with decorative circles
           _buildBackground(),
 
           // Main content
@@ -18,7 +18,8 @@ class PharmacyRegistrationPage extends StatelessWidget {
               children: [
                 // Header
                 Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0, vertical: 10),
                   child: Row(
                     children: [
                       IconButton(
@@ -28,110 +29,145 @@ class PharmacyRegistrationPage extends StatelessWidget {
                         ),
                         onPressed: () => Navigator.pop(context),
                       ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Pharmacy Registration',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFFFAFAFA),
-                          fontSize: 20,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
+                      const Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Pharmacy Registration',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Color(0xFFFAFAFA),
+                                fontSize: 20,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              'Register your pharmacy to the system',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Color(0xFFA2E0FF),
+                                fontSize: 10,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      const SizedBox(width: 48), // Balance the back button
                     ],
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // Subtitle
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 95),
-                  child: Text(
-                    'Register your pharmacy to the system',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFFA2E0FF),
-                      fontSize: 10,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
-                    ),
                   ),
                 ),
 
                 const Spacer(),
 
-                // Illustration placeholder
-                Container(
-                  width: 222,
-                  height: 121,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: const Icon(
-                    Icons.store,
-                    size: 60,
-                    color: Colors.white54,
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                // Description
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 46),
-                  child: Text(
-                    'Here\'s The portal for register your pharmacy',
-                    style: TextStyle(
-                      color: Color(0xFF2D2D2D),
-                      fontSize: 20,
-                      fontFamily: 'Arimo',
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                // Register Button
+                // White card with content
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 39),
-                  child: SizedBox(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Container(
                     width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const PharmacyDetailsFormPage(),
+                    padding: const EdgeInsets.all(40),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFAFAFA),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // MediFind Logo placeholder
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0796DE),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.store,
+                                size: 50,
+                                color: const Color(0xFF0796DE),
+                              ),
+                              const SizedBox(height: 5),
+                              const Text(
+                                'MediFind',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF0796DE),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'Register',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
+
+                        const SizedBox(height: 40),
+
+                        // Description text
+                        const Text(
+                          'Here\'s The portal for register your pharmacy',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFF2D2D2D),
+                            fontSize: 18,
+                            fontFamily: 'Arimo',
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
-                      ),
+
+                        const SizedBox(height: 40),
+
+                        // Register Button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PharmacyDetailsFormPage(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0796DE),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Register',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 50),
+                const Spacer(),
               ],
             ),
           ),
