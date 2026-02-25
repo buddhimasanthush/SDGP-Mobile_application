@@ -29,33 +29,29 @@ class _WelcomeBackPageState extends State<WelcomeBackPage>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Always reset to Sign In selected when page becomes active
+    setState(() {
+      _isSignInSelected = true;
+    });
+  }
+
+  @override
   void dispose() {
     _slideController.dispose();
     super.dispose();
   }
 
   void _toggleSelection(bool isSignIn) {
-    // Always animate and navigate, even if already selected
-    setState(() {
-      _isSignInSelected = isSignIn;
-    });
-
-    if (_isSignInSelected) {
-      _slideController.reverse();
-    } else {
-      _slideController.forward();
-    }
-
-    // Navigate based on selection
-    Future.delayed(const Duration(milliseconds: 700), () {
-      if (mounted) {
-        if (_isSignInSelected) {
-          Navigator.pushReplacementNamed(context, '/signin');
-        } else {
-          Navigator.pushReplacementNamed(context, '/signup');
-        }
+    // Navigate immediately without waiting for animation
+    if (mounted) {
+      if (isSignIn) {
+        Navigator.pushNamed(context, '/signin');
+      } else {
+        Navigator.pushNamed(context, '/signup');
       }
-    });
+    }
   }
 
   @override
