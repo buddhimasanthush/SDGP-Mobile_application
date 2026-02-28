@@ -10,8 +10,10 @@ class WelcomeBackPage extends StatefulWidget {
 class _WelcomeBackPageState extends State<WelcomeBackPage>
     with TickerProviderStateMixin {
   bool _isSignInSelected = true; // Default to Sign In selected
-  AnimationController? _animationController;
-  Animation<double>? _animation;
+
+  // Pill sliding animation
+  AnimationController? _slideController;
+  Animation<double>? _slideAnimation;
 
   // Floating animations for circles
   AnimationController? _floatController1;
@@ -33,12 +35,12 @@ class _WelcomeBackPageState extends State<WelcomeBackPage>
     super.initState();
 
     // Sliding pill animation
-    _animationController = AnimationController(
+    _slideController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController!, curve: Curves.easeInOut),
+    _slideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _slideController!, curve: Curves.easeInOut),
     );
 
     // Floating animations for circles
@@ -112,7 +114,7 @@ class _WelcomeBackPageState extends State<WelcomeBackPage>
 
   @override
   void dispose() {
-    _animationController?.dispose();
+    _slideController?.dispose();
     _floatController1?.dispose();
     _floatController2?.dispose();
     _floatController3?.dispose();
@@ -123,7 +125,7 @@ class _WelcomeBackPageState extends State<WelcomeBackPage>
   }
 
   void _navigateToPage(bool isSignIn) {
-    if (_animationController == null) return; // Safety check
+    if (_slideController == null) return;
 
     setState(() {
       _isSignInSelected = isSignIn;
@@ -131,35 +133,34 @@ class _WelcomeBackPageState extends State<WelcomeBackPage>
 
     // Animate the pill
     if (isSignIn) {
-      _animationController!.reverse();
+      _slideController!.reverse();
     } else {
-      _animationController!.forward();
+      _slideController!.forward();
     }
 
-    // Wait for animation to finish, then navigate
+    // Wait for animation, then navigate
     Future.delayed(const Duration(milliseconds: 350), () {
       if (mounted) {
         if (isSignIn) {
           Navigator.pushNamed(context, '/signin').then((_) {
-            // When coming back from Sign In, reset to Sign In
-            if (mounted) {
+            // Reset to Sign In when coming back
+            if (mounted && _slideController != null) {
               setState(() {
                 _isSignInSelected = true;
               });
-              _animationController?.reset();
+              _slideController!.reset();
             }
           });
         } else {
           Navigator.pushNamed(context, '/signup').then((_) {
-            // When coming back from Sign Up, keep it on Sign Up
-            if (mounted && _animationController != null) {
+            // Stay on Sign Up when coming back
+            if (mounted && _slideController != null) {
               setState(() {
                 _isSignInSelected = false;
               });
-              // Use post frame callback to ensure animation is set after rebuild
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted && _animationController != null) {
-                  _animationController!.value = 1.0;
+                if (mounted && _slideController != null) {
+                  _slideController!.value = 1.0;
                 }
               });
             }
@@ -259,31 +260,23 @@ class _WelcomeBackPageState extends State<WelcomeBackPage>
                 height: 100,
                 child: Stack(
                   children: [
-                    // Animated sliding white pill
-                    AnimatedBuilder(
-                      animation: _animation ?? AlwaysStoppedAnimation(0.0),
-                      builder: (context, child) {
-                        final screenWidth = MediaQuery.of(context).size.width;
-                        final animValue = _animation?.value ?? 0.0;
-                        final leftPosition =
-                            (animValue * (screenWidth / 2)) - 76;
-
-                        return Positioned(
-                          left: leftPosition,
-                          top: 0,
-                          bottom: 0,
-                          child: Container(
-                            width: (screenWidth / 2) + 76,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(63),
-                                topRight: Radius.circular(63),
-                              ),
-                            ),
+                    // Animated sliding white pill - using AnimatedPositioned
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      left: _isSignInSelected ? -76 : (screenWidth / 2) - 76,
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: (screenWidth / 2) + 76,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(63),
+                            topRight: Radius.circular(63),
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
 
                     // Button texts
