@@ -36,7 +36,6 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      // Check if passwords match
       if (_passwordController.text != _confirmPasswordController.text) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -47,7 +46,7 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
         return;
       }
 
-      // Navigate to document upload page
+      // Navigate to Upload Pharmacy Doc page
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -62,41 +61,38 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background
           _buildBackground(),
-
-          // Main content
           SafeArea(
             child: Column(
               children: [
                 // Header
                 Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0, vertical: 10),
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                        ),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () => Navigator.pop(context),
                       ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Pharmacy Registration',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFFFAFAFA),
-                          fontSize: 20,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
+                      const Expanded(
+                        child: Text(
+                          'Pharmacy Registration',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFFFAFAFA),
+                            fontSize: 20,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 48),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // White form container
                 Expanded(
@@ -110,89 +106,73 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
                     ),
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.fromLTRB(20, 25, 20, 20),
                       child: Form(
                         key: _formKey,
                         child: Column(
                           children: [
-                            const SizedBox(height: 20),
+                            // Drag handle
+                            Container(
+                              width: 36,
+                              height: 9,
+                              margin: const EdgeInsets.only(bottom: 20),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFECEFEE),
+                                borderRadius: BorderRadius.circular(2.5),
+                              ),
+                            ),
 
-                            // Full Name
                             _buildTextField(
                               controller: _fullNameController,
                               label: 'Full Name',
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your full name';
-                                }
-                                return null;
-                              },
+                              validator: (v) => (v == null || v.isEmpty)
+                                  ? 'Please enter your full name'
+                                  : null,
                             ),
+                            const SizedBox(height: 16),
 
-                            const SizedBox(height: 20),
-
-                            // Email
                             _buildTextField(
                               controller: _emailController,
                               label: 'Email',
                               keyboardType: TextInputType.emailAddress,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
                                   return 'Please enter your email';
-                                }
-                                if (!value.contains('@')) {
+                                if (!v.contains('@'))
                                   return 'Please enter a valid email';
-                                }
                                 return null;
                               },
                             ),
+                            const SizedBox(height: 16),
 
-                            const SizedBox(height: 20),
-
-                            // Pharmacy Name
                             _buildTextField(
                               controller: _pharmacyNameController,
                               label: 'Pharmacy Name',
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter pharmacy name';
-                                }
-                                return null;
-                              },
+                              validator: (v) => (v == null || v.isEmpty)
+                                  ? 'Please enter pharmacy name'
+                                  : null,
                             ),
+                            const SizedBox(height: 16),
 
-                            const SizedBox(height: 20),
-
-                            // Pharmacy Registration Number
                             _buildTextField(
                               controller: _registrationNumberController,
                               label: 'Pharmacy Registration Number',
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter registration number';
-                                }
-                                return null;
-                              },
+                              validator: (v) => (v == null || v.isEmpty)
+                                  ? 'Please enter registration number'
+                                  : null,
                             ),
+                            const SizedBox(height: 16),
 
-                            const SizedBox(height: 20),
-
-                            // Pharmacy Address
                             _buildTextField(
                               controller: _addressController,
                               label: 'Pharmacy Address',
                               maxLines: 2,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter pharmacy address';
-                                }
-                                return null;
-                              },
+                              validator: (v) => (v == null || v.isEmpty)
+                                  ? 'Please enter pharmacy address'
+                                  : null,
                             ),
+                            const SizedBox(height: 16),
 
-                            const SizedBox(height: 20),
-
-                            // Password
                             _buildTextField(
                               controller: _passwordController,
                               label: 'Password',
@@ -204,26 +184,19 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
                                       : Icons.visibility,
                                   color: const Color(0xFF919191),
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
+                                onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword),
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
                                   return 'Please enter a password';
-                                }
-                                if (value.length < 6) {
+                                if (v.length < 6)
                                   return 'Password must be at least 6 characters';
-                                }
                                 return null;
                               },
                             ),
+                            const SizedBox(height: 16),
 
-                            const SizedBox(height: 20),
-
-                            // Confirm Password
                             _buildTextField(
                               controller: _confirmPasswordController,
                               label: 'Confirm Password',
@@ -235,22 +208,15 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
                                       : Icons.visibility,
                                   color: const Color(0xFF919191),
                                 ),
-                                onPressed: () {
-                                  setState(() {
+                                onPressed: () => setState(() =>
                                     _obscureConfirmPassword =
-                                        !_obscureConfirmPassword;
-                                  });
-                                },
+                                        !_obscureConfirmPassword),
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please confirm your password';
-                                }
-                                return null;
-                              },
+                              validator: (v) => (v == null || v.isEmpty)
+                                  ? 'Please confirm your password'
+                                  : null,
                             ),
-
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 36),
 
                             // Verify Details Button
                             SizedBox(
@@ -260,13 +226,13 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
                                 onPressed: _submitForm,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF0796DE),
+                                  elevation: 0,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
                                 child: const Text(
                                   'Verify Details',
-                                  textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -276,7 +242,6 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 20),
                           ],
                         ),
@@ -334,10 +299,8 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
           ),
           filled: true,
           fillColor: const Color(0xFFEDEDED),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 15,
-          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         ),
       ),
     );
@@ -358,10 +321,7 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
               height: 183,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  width: 30,
-                  color: const Color(0xFF10A2EA),
-                ),
+                border: Border.all(width: 30, color: const Color(0xFF10A2EA)),
               ),
             ),
           ),
@@ -450,10 +410,7 @@ class _PharmacyDetailsFormPageState extends State<PharmacyDetailsFormPage> {
                 height: 167,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    width: 30,
-                    color: const Color(0xFF10A2EA),
-                  ),
+                  border: Border.all(width: 30, color: const Color(0xFF10A2EA)),
                 ),
               ),
             ),
