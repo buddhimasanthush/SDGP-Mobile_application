@@ -203,6 +203,16 @@ class _UploadPrescriptionOptionsPageState
                                 label: 'Take Photo',
                                 isSelected: _selectedOption == 'camera',
                                 onTap: () {
+                                  if (_otpController.text.trim().isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Please enter your doctor-issued OTP first.'),
+                                        backgroundColor: Color(0xFF0796DE),
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   setState(() => _selectedOption = 'camera');
                                   Navigator.push(
                                     context,
@@ -220,6 +230,16 @@ class _UploadPrescriptionOptionsPageState
                                 label: 'Upload From Gallery',
                                 isSelected: _selectedOption == 'gallery',
                                 onTap: () {
+                                  if (_otpController.text.trim().isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Please enter your doctor-issued OTP first.'),
+                                        backgroundColor: Color(0xFF0796DE),
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   setState(() => _selectedOption = 'gallery');
                                   Navigator.push(
                                     context,

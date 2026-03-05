@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import 'prescription_medicine_list_page.dart';
 
 class PrescriptionCameraPage extends StatefulWidget {
   const PrescriptionCameraPage({super.key});
-
   @override
   State<PrescriptionCameraPage> createState() => _PrescriptionCameraPageState();
 }
@@ -12,6 +11,21 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
   bool _flashOn = false;
 
   void _onCapture() {
+    _showDialog('Uploading prescription...', 'Please wait a moment', () {
+      // Step 2: AI scanning dialog
+      _showDialog('MediFind AI is scanning\nyour prescription...',
+          'Extracting medicine details', () {
+        // Step 3: go to medicine list
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (_) => const PrescriptionMedicineListPage()),
+        );
+      });
+    });
+  }
+
+  void _showDialog(String title, String subtitle, VoidCallback onDone) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -20,7 +34,8 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
         type: MaterialType.transparency,
         child: Center(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 30),
+            margin: const EdgeInsets.symmetric(horizontal: 40),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
             decoration: BoxDecoration(
               color: const Color(0xFF0796DE),
               borderRadius: BorderRadius.circular(20),
@@ -33,23 +48,26 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                SizedBox(height: 18),
+              children: [
+                const CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 3),
+                const SizedBox(height: 18),
                 Text(
-                  'Uploading prescription...',
-                  style: TextStyle(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
                     decoration: TextDecoration.none,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Please wait a moment',
-                  style: TextStyle(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 11,
                     color: Color(0xFFA2E0FF),
@@ -65,22 +83,8 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
 
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
-      Navigator.pop(context); // close dialog
-      // Show success snackbar then go home
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Prescription uploaded successfully!'),
-          backgroundColor: Color(0xFF0796DE),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (route) => false,
-        );
-      });
+      Navigator.pop(context);
+      onDone();
     });
   }
 
@@ -118,8 +122,7 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                 ),
               ),
             ),
-
-            // Viewfinder frame
+            // Viewfinder
             Positioned(
               left: 22,
               top: 130,
@@ -135,8 +138,7 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                 ),
               ),
             ),
-
-            // "Align prescription within frame" pill
+            // Pill
             Positioned(
               left: 0,
               right: 0,
@@ -166,7 +168,6 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                 ),
               ),
             ),
-
             // Bottom gradient + capture button
             Positioned(
               left: 0,
@@ -228,17 +229,15 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                       'Tap to capture prescription',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color(0xCCFFFEFE),
-                        fontSize: 12,
-                        fontFamily: 'Arimo',
-                        height: 1.33,
-                      ),
+                          color: Color(0xCCFFFEFE),
+                          fontSize: 12,
+                          fontFamily: 'Arimo',
+                          height: 1.33),
                     ),
                   ],
                 ),
               ),
             ),
-
             // Top bar
             SafeArea(
               child: Padding(
@@ -255,9 +254,8 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                           width: 40,
                           height: 40,
                           decoration: ShapeDecoration(
-                            color: Colors.black.withOpacity(0.40),
-                            shape: const OvalBorder(),
-                          ),
+                              color: Colors.black.withOpacity(0.40),
+                              shape: const OvalBorder()),
                           child: const Icon(Icons.arrow_back,
                               color: Colors.white, size: 20),
                         ),
@@ -265,12 +263,11 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                       const Text(
                         'Take Photo',
                         style: TextStyle(
-                          color: Color(0xFFFAFAFA),
-                          fontSize: 20,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          height: 1,
-                        ),
+                            color: Color(0xFFFAFAFA),
+                            fontSize: 20,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            height: 1),
                       ),
                       GestureDetector(
                         onTap: () => setState(() => _flashOn = !_flashOn),
@@ -278,16 +275,14 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                           width: 40,
                           height: 40,
                           decoration: ShapeDecoration(
-                            color: Colors.black.withOpacity(0.40),
-                            shape: const OvalBorder(),
-                          ),
+                              color: Colors.black.withOpacity(0.40),
+                              shape: const OvalBorder()),
                           child: Icon(
-                            _flashOn ? Icons.flash_on : Icons.flash_off,
-                            color: _flashOn
-                                ? const Color(0xFF11A2EB)
-                                : Colors.white,
-                            size: 20,
-                          ),
+                              _flashOn ? Icons.flash_on : Icons.flash_off,
+                              color: _flashOn
+                                  ? const Color(0xFF11A2EB)
+                                  : Colors.white,
+                              size: 20),
                         ),
                       ),
                     ],
