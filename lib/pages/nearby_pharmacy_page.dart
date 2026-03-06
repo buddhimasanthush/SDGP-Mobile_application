@@ -1,7 +1,30 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Custom map style — clean blue/white like the Freepik reference
+// Roads: white on light-blue canvas, water: brand blue, all clutter hidden
+// ─────────────────────────────────────────────────────────────────────────────
+const _mapStyle = '''
+[
+  { "elementType": "geometry", "stylers": [{ "color": "#daeeff" }] },
+  { "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
+  { "elementType": "labels.text.fill", "stylers": [{ "color": "#1a6fa8" }] },
+  { "elementType": "labels.text.stroke", "stylers": [{ "color": "#ffffff" }] },
+  { "featureType": "administrative", "elementType": "geometry", "stylers": [{ "visibility": "off" }] },
+  { "featureType": "administrative.locality", "elementType": "labels.text.fill", "stylers": [{ "color": "#0796DE" }] },
+  { "featureType": "poi", "stylers": [{ "visibility": "off" }] },
+  { "featureType": "poi.park", "elementType": "geometry", "stylers": [{ "color": "#b8e4c8" }] },
+  { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#ffffff" }] },
+  { "featureType": "road", "elementType": "geometry.stroke", "stylers": [{ "color": "#c8e6f7" }] },
+  { "featureType": "road", "elementType": "labels", "stylers": [{ "visibility": "off" }] },
+  { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "color": "#b0d8f0" }] },
+  { "featureType": "road.local", "stylers": [{ "visibility": "simplified" }] },
+  { "featureType": "transit", "stylers": [{ "visibility": "off" }] },
+  { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#0796DE" }] },
+  { "featureType": "water", "elementType": "labels.text.fill", "stylers": [{ "color": "#ffffff" }] }
+]
+''';
 
 // ── Demo pharmacy data ────────────────────────────────────────────────────────
 class _Pharmacy {
@@ -47,7 +70,7 @@ const _pharmacies1km = [
       cancelled: 4,
       rating: 4.8,
       brandColor: Color(0xFFD4A017),
-      latLng: LatLng(6.9020, 79.8740)),
+      latLng: LatLng(6.8980, 79.8780)),
 ];
 
 const _pharmacies5km = [
@@ -63,7 +86,7 @@ const _pharmacies5km = [
       cancelled: 4,
       rating: 4.8,
       brandColor: Color(0xFFD4A017),
-      latLng: LatLng(6.9020, 79.8740)),
+      latLng: LatLng(6.8980, 79.8780)),
   _Pharmacy(
       name: 'Healthguard',
       location: 'Colombo 5',
@@ -76,7 +99,7 @@ const _pharmacies5km = [
       cancelled: 2,
       rating: 4.6,
       brandColor: Color(0xFF9B2AA0),
-      latLng: LatLng(6.8980, 79.8680)),
+      latLng: LatLng(6.9050, 79.8820)),
   _Pharmacy(
       name: 'Osusala Pharmacy',
       location: 'Borella',
@@ -89,7 +112,7 @@ const _pharmacies5km = [
       cancelled: 3,
       rating: 4.5,
       brandColor: Color(0xFF1565C0),
-      latLng: LatLng(6.9150, 79.8760)),
+      latLng: LatLng(6.9180, 79.8760)),
 ];
 
 const _pharmacies10km = [
@@ -105,7 +128,7 @@ const _pharmacies10km = [
       cancelled: 4,
       rating: 4.8,
       brandColor: Color(0xFFD4A017),
-      latLng: LatLng(6.9020, 79.8740)),
+      latLng: LatLng(6.8980, 79.8780)),
   _Pharmacy(
       name: 'Healthguard',
       location: 'Colombo 5',
@@ -118,7 +141,7 @@ const _pharmacies10km = [
       cancelled: 2,
       rating: 4.6,
       brandColor: Color(0xFF9B2AA0),
-      latLng: LatLng(6.8980, 79.8680)),
+      latLng: LatLng(6.9050, 79.8820)),
   _Pharmacy(
       name: 'Osusala Pharmacy',
       location: 'Borella',
@@ -131,7 +154,7 @@ const _pharmacies10km = [
       cancelled: 3,
       rating: 4.5,
       brandColor: Color(0xFF1565C0),
-      latLng: LatLng(6.9150, 79.8760)),
+      latLng: LatLng(6.9180, 79.8760)),
   _Pharmacy(
       name: 'Health Link',
       location: 'Maradana',
@@ -144,7 +167,7 @@ const _pharmacies10km = [
       cancelled: 5,
       rating: 4.3,
       brandColor: Color(0xFF00897B),
-      latLng: LatLng(6.9270, 79.8650)),
+      latLng: LatLng(6.9280, 79.8700)),
   _Pharmacy(
       name: 'Jeewaka Pharma',
       location: 'Wellawatte',
@@ -157,7 +180,7 @@ const _pharmacies10km = [
       cancelled: 1,
       rating: 4.9,
       brandColor: Color(0xFFE53935),
-      latLng: LatLng(6.8780, 79.8640)),
+      latLng: LatLng(6.8820, 79.8680)),
   _Pharmacy(
       name: 'Suncity Pharmacy',
       location: 'Dehiwala',
@@ -170,7 +193,7 @@ const _pharmacies10km = [
       cancelled: 3,
       rating: 4.4,
       brandColor: Color(0xFFF57C00),
-      latLng: LatLng(6.8560, 79.8660)),
+      latLng: LatLng(6.8600, 79.8700)),
   _Pharmacy(
       name: 'Ceylinco Medicare',
       location: 'Nugegoda',
@@ -183,7 +206,7 @@ const _pharmacies10km = [
       cancelled: 2,
       rating: 4.7,
       brandColor: Color(0xFF6A1B9A),
-      latLng: LatLng(6.8720, 79.8990)),
+      latLng: LatLng(6.8740, 79.9000)),
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -200,12 +223,11 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
   bool _showMarkers = false;
   _Pharmacy? _selected;
 
-  final _mapController = MapController();
+  GoogleMapController? _mapController;
 
-  static const _userLat = 6.8935;
-  static const _userLng = 79.8740;
-  static const _userPos = LatLng(_userLat, _userLng);
-  static const _zoomLevels = [14.0, 12.5, 11.0];
+  // Narahenpita, Colombo — replace with real GPS in production
+  static const _userPos = LatLng(6.8935, 79.8780);
+  static const _zoomLevels = [15.5, 13.5, 12.0];
 
   late AnimationController _breatheCtrl;
   late Animation<double> _breatheAnim;
@@ -213,11 +235,67 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
   late Animation<double> _labelAnim;
   String _currentLabel = '1km';
   String _nextLabel = '1km';
-  double _radarScale = 1.0;
-  late AnimationController _zoomCtrl;
-  late Animation<double> _zoomAnim;
 
   static const _stageLabels = ['1km', '5km', '10km'];
+
+  // Scan radius in metres per stage
+  static const _radiusMetres = [1000.0, 5000.0, 10000.0];
+
+  Set<Circle> _buildCircles() {
+    final r = _radiusMetres[_stage];
+    return {
+      // Outermost ring — solid border, the main radius indicator
+      Circle(
+        circleId: const CircleId('ring_outer'),
+        center: _userPos,
+        radius: r,
+        strokeColor: Colors.white.withOpacity(0.90),
+        strokeWidth: 2,
+        fillColor: Colors.white.withOpacity(0.04),
+      ),
+      // 3 inner rings — progressively more subtle
+      Circle(
+        circleId: const CircleId('ring_3'),
+        center: _userPos,
+        radius: r * 0.75,
+        strokeColor: Colors.white.withOpacity(0.55),
+        strokeWidth: 1,
+        fillColor: Colors.white.withOpacity(0.04),
+      ),
+      Circle(
+        circleId: const CircleId('ring_2'),
+        center: _userPos,
+        radius: r * 0.50,
+        strokeColor: Colors.white.withOpacity(0.40),
+        strokeWidth: 1,
+        fillColor: Colors.white.withOpacity(0.05),
+      ),
+      Circle(
+        circleId: const CircleId('ring_1'),
+        center: _userPos,
+        radius: r * 0.25,
+        strokeColor: Colors.white.withOpacity(0.28),
+        strokeWidth: 1,
+        fillColor: Colors.white.withOpacity(0.06),
+      ),
+    };
+  }
+
+  Set<Marker> _buildMarkers() {
+    if (!_showMarkers) return {};
+    return _pharmacies10km
+        .map((p) => Marker(
+              markerId: MarkerId(p.name),
+              position: p.latLng,
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueAzure),
+              infoWindow: InfoWindow(
+                  title: p.name,
+                  snippet: '${p.distance} · RS.${p.price.toStringAsFixed(0)}'),
+              onTap: () => setState(() => _selected = p),
+            ))
+        .toSet();
+  }
 
   @override
   void initState() {
@@ -234,10 +312,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     _labelAnim = Tween<double>(begin: 0.0, end: 1.0)
         .animate(CurvedAnimation(parent: _labelCtrl, curve: Curves.easeInOut));
 
-    _zoomCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900));
-    _zoomAnim = const AlwaysStoppedAnimation(1.0);
-
     _runScanSequence();
   }
 
@@ -248,7 +322,7 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     await Future.delayed(const Duration(milliseconds: 3000));
     if (!mounted) return;
     _advanceStage(2);
-    await Future.delayed(const Duration(milliseconds: 2000));
+    await Future.delayed(const Duration(milliseconds: 2500));
     if (!mounted) return;
     _finishScan();
   }
@@ -260,15 +334,12 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     });
     _currentLabel = _stageLabels[next - 1];
 
-    // Animate map zoom
-    _mapController.move(_userPos, _zoomLevels[next]);
-
-    // Radar scale tween
-    final fromScale = _radarScale;
-    final toScale = next == 1 ? 0.80 : 0.62;
-    _zoomAnim = Tween<double>(begin: fromScale, end: toScale)
-        .animate(CurvedAnimation(parent: _zoomCtrl, curve: Curves.easeInOut));
-    _zoomCtrl.forward(from: 0).then((_) => _radarScale = toScale);
+    // Smooth zoom out
+    _mapController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: _userPos, zoom: _zoomLevels[next]),
+      ),
+    );
 
     // Label morph
     _labelCtrl.forward(from: 0).then((_) {
@@ -282,14 +353,14 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
       _scanning = false;
       _showMarkers = true;
     });
-    // Keep breathing animation running on results screen too
+    // Keep breathing animation going on results screen
   }
 
   @override
   void dispose() {
     _breatheCtrl.dispose();
     _labelCtrl.dispose();
-    _zoomCtrl.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 
@@ -304,207 +375,105 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     return Scaffold(
       body: Column(
         children: [
-          // ── Map + overlay area ────────────────────────────────────
+          // ── Google Map area ───────────────────────────────────────
           Expanded(
             flex: 45,
             child: Stack(
               children: [
-                // ── flutter_map base — clean tile from Stadia Maps (no API key needed) ──
-                FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: _userPos,
-                    initialZoom: _zoomLevels[0],
-                    interactionOptions: const InteractionOptions(
-                      flags: InteractiveFlag.none,
-                    ),
+                // Google Map — 2D normal view with custom blue style
+                GoogleMap(
+                  onMapCreated: (ctrl) {
+                    _mapController = ctrl;
+                    ctrl.setMapStyle(_mapStyle);
+                  },
+                  initialCameraPosition: const CameraPosition(
+                    target: _userPos,
+                    zoom: 15.5,
                   ),
-                  children: [
-                    // CartoDB Positron — ultra-clean minimal white/grey tiles
-                    TileLayer(
-                      urlTemplate:
-                          'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                      subdomains: const ['a', 'b', 'c', 'd'],
-                      userAgentPackageName: 'com.medifind.app',
-                    ),
-                    // Strong brand-blue colour wash — turns the white map blue
-                    ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        const Color(0xFF0796DE).withOpacity(0.72),
-                        BlendMode.srcATop,
-                      ),
-                      child: Container(
-                        color: const Color(0xFF0796DE),
-                      ),
-                    ),
-                  ],
+                  mapType: MapType.normal,
+                  myLocationEnabled: false,
+                  zoomControlsEnabled: false,
+                  compassEnabled: false,
+                  mapToolbarEnabled: false,
+                  rotateGesturesEnabled: false,
+                  scrollGesturesEnabled: false,
+                  zoomGesturesEnabled: false,
+                  tiltGesturesEnabled: false,
+                  markers: _buildMarkers(),
+                  circles: _buildCircles(),
                 ),
 
-                // ── Breathing radar rings (animated overlay) ──────────
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: AnimatedBuilder(
-                      animation: Listenable.merge([_breatheAnim, _zoomAnim]),
-                      builder: (_, __) => CustomPaint(
-                        painter: _RadarPainter(
-                          breatheScale: _breatheAnim.value,
-                          ringScale: _zoomAnim is AlwaysStoppedAnimation
-                              ? _radarScale
-                              : (_zoomAnim as Animation<double>).value,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // ── Pharmacy markers (after scan) ─────────────────────
-                if (_showMarkers)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      ignoring: false,
-                      child: LayoutBuilder(builder: (_, constraints) {
-                        final w = constraints.maxWidth;
-                        final h = constraints.maxHeight;
-                        // Fixed screen positions — all on land (east side, away from coast)
-                        const positions = [
-                          Offset(0.72, 0.38), // Union Chemists — inland east
-                          Offset(0.58, 0.52), // Healthguard — centre
-                          Offset(0.65, 0.25), // Osusala — north east
-                          Offset(0.80, 0.58), // Health Link — east
-                          Offset(0.55, 0.70), // Jeewaka — south centre
-                          Offset(0.70, 0.72), // Suncity — south east
-                          Offset(0.85, 0.44), // Ceylinco — far east
-                        ];
-                        return Stack(
-                            children: List.generate(
-                                min(positions.length, _pharmacies10km.length),
-                                (i) {
-                          final p = _pharmacies10km[i];
-                          final x = positions[i].dx * w;
-                          final y = positions[i].dy * h;
-                          return Positioned(
-                            left: x - 22,
-                            top: y - 46,
-                            child: GestureDetector(
-                              onTap: () => setState(() => _selected = p),
-                              child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                              color: Colors.black
-                                                  .withOpacity(0.25),
-                                              blurRadius: 6,
-                                              offset: const Offset(0, 2))
-                                        ],
-                                      ),
-                                      child: const Icon(Icons.add,
-                                          color: Color(0xFF0796DE), size: 22),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.88),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(p.name,
-                                          style: const TextStyle(
-                                              color: Color(0xFF0067A5),
-                                              fontSize: 9,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w700)),
-                                    ),
-                                  ]),
-                            ),
-                          );
-                        }));
-                      }),
-                    ),
-                  ),
-
-                // ── Top gradient — stronger so text always readable ───
+                // Top gradient — solid at top so title is always readable
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
                   height: 160,
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          const Color(0xFF0796DE),
-                          const Color(0xFF0796DE).withOpacity(0.0),
-                        ],
-                        stops: const [0.55, 1.0],
+                        colors: [Color(0xFF0796DE), Color(0x000796DE)],
+                        stops: [0.50, 1.0],
                       ),
                     ),
                   ),
                 ),
 
-                // ── Top bar ───────────────────────────────────────────
+                // Top bar — title only, no back/gps buttons
                 SafeArea(
                   bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                    child: Column(children: [
-                      Text(
-                        _scanning
-                            ? 'Searching nearby\nPhamacies'
-                            : 'Nearby\nPhamacies',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w700,
-                          height: 1.3,
-                          shadows: [
-                            Shadow(color: Colors.black26, blurRadius: 6)
-                          ],
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        Text(
+                          _scanning
+                              ? 'Searching nearby\nPhamacies'
+                              : 'Nearby\nPhamacies',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w700,
+                            height: 1.3,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 3),
-                      Row(mainAxisSize: MainAxisSize.min, children: [
-                        const Icon(Icons.location_on,
-                            color: Colors.white, size: 13),
-                        const Text('Send to ',
-                            style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 11,
-                                fontFamily: 'Poppins')),
-                        const Text('My Home',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600)),
-                        const Icon(Icons.keyboard_arrow_down,
-                            color: Colors.white, size: 15),
+                        const SizedBox(height: 4),
+                        Row(mainAxisSize: MainAxisSize.min, children: [
+                          const Icon(Icons.location_on,
+                              color: Colors.white, size: 13),
+                          const Text('Send to ',
+                              style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                  fontFamily: 'Poppins')),
+                          const Text('My Home',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600)),
+                          const Icon(Icons.keyboard_arrow_down,
+                              color: Colors.white, size: 15),
+                        ]),
                       ]),
-                    ]),
+                    ),
                   ),
                 ),
 
-                // ── Centre dot (user location) ────────────────────────
+                // User location dot (centre, breathing)
                 Center(
                   child: AnimatedBuilder(
                     animation: _breatheAnim,
                     builder: (_, __) => Transform.scale(
                       scale: _breatheAnim.value,
                       child: Container(
-                        width: 16,
-                        height: 16,
+                        width: 18,
+                        height: 18,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white,
@@ -512,10 +481,10 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                               color: const Color(0xFF0796DE), width: 3),
                           boxShadow: [
                             BoxShadow(
-                                color:
-                                    const Color(0xFF0796DE).withOpacity(0.55),
-                                blurRadius: 12,
-                                spreadRadius: 4),
+                              color: const Color(0xFF0796DE).withOpacity(0.55),
+                              blurRadius: 14,
+                              spreadRadius: 5,
+                            )
                           ],
                         ),
                       ),
@@ -533,26 +502,22 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
               decoration: const BoxDecoration(
                 color: Color(0xFFFAFAFA),
                 borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25)),
+                  topLeft: Radius.circular(25),
+                  topRight: Radius.circular(25),
+                ),
               ),
-              child: Column(
-                children: [
-                  Center(
-                      child: Container(
-                    margin: const EdgeInsets.only(top: 14, bottom: 8),
-                    width: 36,
-                    height: 5,
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFDDDDDD),
-                        borderRadius: BorderRadius.circular(3)),
-                  )),
-                  if (_scanning)
-                    _buildScanningState()
-                  else
-                    _buildResultsState(),
-                ],
-              ),
+              child: Column(children: [
+                Center(
+                    child: Container(
+                  margin: const EdgeInsets.only(top: 14, bottom: 8),
+                  width: 36,
+                  height: 5,
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFDDDDDD),
+                      borderRadius: BorderRadius.circular(3)),
+                )),
+                if (_scanning) _buildScanningState() else _buildResultsState(),
+              ]),
             ),
           ),
         ],
@@ -560,6 +525,7 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     );
   }
 
+  // ── Scanning bottom state ─────────────────────────────────────────────────
   Widget _buildScanningState() => Expanded(
         child: Center(
             child: Column(
@@ -622,6 +588,7 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
         )),
       );
 
+  // ── Results bottom state ──────────────────────────────────────────────────
   Widget _buildResultsState() {
     final pharmacies = _currentPharmacies;
     return Expanded(
@@ -800,7 +767,11 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
       );
 
   Widget _buildPharmacyCard(_Pharmacy p) => GestureDetector(
-        onTap: () => setState(() => _selected = p),
+        onTap: () {
+          setState(() => _selected = p);
+          _mapController
+              ?.animateCamera(CameraUpdate.newLatLngZoom(p.latLng, 16));
+        },
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -874,41 +845,4 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
           ]),
         ),
       );
-}
-
-// ── Radar rings painter ───────────────────────────────────────────────────────
-class _RadarPainter extends CustomPainter {
-  final double breatheScale;
-  final double ringScale;
-  _RadarPainter({required this.breatheScale, required this.ringScale});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-    final maxR = min(cx, cy) * 0.82 * ringScale * breatheScale;
-
-    for (int i = 0; i < 5; i++) {
-      final r = maxR * ((i + 1) / 5);
-      // Filled rings — visible white glow
-      canvas.drawCircle(
-          Offset(cx, cy),
-          r,
-          Paint()
-            ..color = Colors.white.withOpacity(0.08 + i * 0.04)
-            ..style = PaintingStyle.fill);
-      // Ring border — crisp white stroke
-      canvas.drawCircle(
-          Offset(cx, cy),
-          r,
-          Paint()
-            ..color = Colors.white.withOpacity(0.65)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.8);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_RadarPainter old) =>
-      old.breatheScale != breatheScale || old.ringScale != ringScale;
 }
