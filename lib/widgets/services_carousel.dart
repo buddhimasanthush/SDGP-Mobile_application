@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../pages/upload_prescription_options_page.dart';
+import '../pages/upload_prescription_main_page.dart';
 import '../pages/add_medicine_name_page.dart';
 import '../pages/previous_orders_page.dart';
 import '../pages/health_profile_page.dart';
@@ -15,7 +15,7 @@ class ServicesCarousel extends StatelessWidget {
         'name': 'Upload\nPrescription',
         'icon': Icons.upload_file_rounded,
         'gradient': [const Color(0xFF0796DE), const Color(0xFF0567A8)],
-        'page': UploadPrescriptionOptionsPage(),
+        'page': const UploadPrescriptionMainPage(),
       },
       {
         'name': 'Reminder',
