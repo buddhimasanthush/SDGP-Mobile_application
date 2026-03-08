@@ -64,16 +64,12 @@ class _AllowTrackingPageState extends State<AllowTrackingPage>
   Future<void> _handleNext() async {
     await Permission.appTrackingTransparency.request();
     if (mounted) {
-      // Pop everything until we're back at /home (MainNavigationPage)
-      // then push /home with reminder tab if needed
-      Navigator.of(context).popUntil((route) {
-        return route.settings.name == '/home' || route.isFirst;
-      });
-      // If we ended at splash/first route, push /home
-      final currentRoute = ModalRoute.of(context);
-      if (currentRoute == null || currentRoute.settings.name != '/home') {
-        Navigator.of(context).pushReplacementNamed('/home');
-      }
+      // Navigate to /home and make sure it shows the reminder tab
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/home',
+        (route) => false,
+        arguments: {'initialTab': 1}, // reminder tab index
+      );
     }
   }
 

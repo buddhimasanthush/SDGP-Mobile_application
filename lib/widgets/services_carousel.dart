@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../pages/upload_prescription_main_page.dart';
-import '../pages/add_medicine_name_page.dart';
+import '../pages/reminder_page.dart';
 import '../pages/previous_orders_page.dart';
 import '../pages/health_profile_page.dart';
 import '../pages/pharmacy_registration_page.dart';
@@ -21,8 +21,8 @@ class ServicesCarousel extends StatelessWidget {
         'name': 'Reminder',
         'icon': Icons.alarm_rounded,
         'gradient': [const Color(0xFF0796DE), const Color(0xFF0567A8)],
-        // Always goes to add reminder flow from home services
-        'page': const AddMedicineNamePage(),
+        // Shows landing page with floating cards first
+        'page': const ReminderPage(),
       },
       {
         'name': 'Past\nOrders',

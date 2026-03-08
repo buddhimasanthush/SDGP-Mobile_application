@@ -198,15 +198,15 @@ class CameraCapturePage extends StatelessWidget {
               ),
             ),
 
-            // Instruction label - FIXED: Narrower and moved down
+            // Instruction label — centred horizontally
             Positioned(
-              top: 105, // Moved down from 90 to 105
-              left: 80, // Added left margin
-              right: 80, // Added right margin
+              top: 115,
+              left: 0,
+              right: 0,
               child: Center(
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(100),
@@ -219,7 +219,6 @@ class CameraCapturePage extends StatelessWidget {
                       fontSize: 13,
                       fontFamily: 'Arimo',
                       fontWeight: FontWeight.w400,
-                      height: 1.43,
                     ),
                   ),
                 ),
@@ -235,16 +234,56 @@ class CameraCapturePage extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: Card(
-          child: Padding(
-            padding: EdgeInsets.all(20),
+      barrierColor: Colors.black.withOpacity(0.45),
+      builder: (context) => Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 50),
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 28),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                    color: const Color(0xFF0796DE).withOpacity(0.18),
+                    blurRadius: 24,
+                    offset: const Offset(0, 6)),
+              ],
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Uploading document...'),
+                const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3.5,
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF0796DE)),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Uploading document...',
+                  style: TextStyle(
+                    color: Color(0xFF2D2D2D),
+                    fontSize: 15,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Please wait',
+                  style: TextStyle(
+                    color: Color(0xFF9F9EA5),
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                    decoration: TextDecoration.none,
+                  ),
+                ),
               ],
             ),
           ),

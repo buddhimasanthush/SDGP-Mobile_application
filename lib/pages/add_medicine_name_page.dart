@@ -75,11 +75,19 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
   late AnimationController _floatController2;
   late AnimationController _floatController3;
   late AnimationController _floatController4;
+  late AnimationController _floatController5;
+  late AnimationController _floatController6;
+  late AnimationController _floatController7;
+  late AnimationController _floatController8;
 
   late Animation<Offset> _floatAnimation1;
   late Animation<Offset> _floatAnimation2;
   late Animation<Offset> _floatAnimation3;
   late Animation<Offset> _floatAnimation4;
+  late Animation<Offset> _floatAnimation5;
+  late Animation<Offset> _floatAnimation6;
+  late Animation<Offset> _floatAnimation7;
+  late Animation<Offset> _floatAnimation8;
 
   @override
   void initState() {
@@ -131,6 +139,18 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
     _floatController4 = AnimationController(
         duration: const Duration(seconds: 3, milliseconds: 500), vsync: this)
       ..repeat(reverse: true);
+    _floatController5 = AnimationController(
+        duration: const Duration(seconds: 4, milliseconds: 200), vsync: this)
+      ..repeat(reverse: true);
+    _floatController6 = AnimationController(
+        duration: const Duration(seconds: 5, milliseconds: 500), vsync: this)
+      ..repeat(reverse: true);
+    _floatController7 = AnimationController(
+        duration: const Duration(seconds: 3, milliseconds: 700), vsync: this)
+      ..repeat(reverse: true);
+    _floatController8 = AnimationController(
+        duration: const Duration(seconds: 4, milliseconds: 800), vsync: this)
+      ..repeat(reverse: true);
 
     _floatAnimation1 =
         Tween<Offset>(begin: Offset.zero, end: const Offset(25, -35)).animate(
@@ -148,6 +168,22 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
         Tween<Offset>(begin: Offset.zero, end: const Offset(-25, -30)).animate(
             CurvedAnimation(
                 parent: _floatController4, curve: Curves.easeInOut));
+    _floatAnimation5 =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(20, 28)).animate(
+            CurvedAnimation(
+                parent: _floatController5, curve: Curves.easeInOut));
+    _floatAnimation6 =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(-30, -22)).animate(
+            CurvedAnimation(
+                parent: _floatController6, curve: Curves.easeInOut));
+    _floatAnimation7 =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(18, -25)).animate(
+            CurvedAnimation(
+                parent: _floatController7, curve: Curves.easeInOut));
+    _floatAnimation8 =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(-22, 32)).animate(
+            CurvedAnimation(
+                parent: _floatController8, curve: Curves.easeInOut));
   }
 
   @override
@@ -164,6 +200,10 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
     _floatController2.dispose();
     _floatController3.dispose();
     _floatController4.dispose();
+    _floatController5.dispose();
+    _floatController6.dispose();
+    _floatController7.dispose();
+    _floatController8.dispose();
     super.dispose();
   }
 
@@ -547,6 +587,23 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
 
                           const SizedBox(height: 16),
 
+                          // Time badges sit right below the Rings button
+                          if (_selectedTimes.isNotEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 40),
+                              child: Wrap(
+                                spacing: 9,
+                                runSpacing: 8,
+                                alignment: WrapAlignment.center,
+                                children: _selectedTimes
+                                    .map((t) => _buildTimeBadge(t))
+                                    .toList(),
+                              ),
+                            ),
+
+                          const SizedBox(height: 16),
+
                           // Frequency section slides up after Next
                           if (_showFrequency)
                             SlideTransition(
@@ -588,23 +645,6 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
                 ),
               ),
             ),
-
-            // Time badges float above gradient, below Next button
-            if (_showReminderTime && _selectedTimes.isNotEmpty)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: _showFrequency ? 220 : 168,
-                child: Center(
-                  child: Wrap(
-                    spacing: 9,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.center,
-                    children:
-                        _selectedTimes.map((t) => _buildTimeBadge(t)).toList(),
-                  ),
-                ),
-              ),
 
             // Next button
             Positioned(
@@ -1159,209 +1199,244 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
           );
         },
       ),
-      Positioned(
-        left: 292.47,
-        top: -117,
-        child: Transform.rotate(
-          angle: 0.40,
-          child: Container(
-            width: 167,
-            height: 167,
-            decoration: const ShapeDecoration(
-              shape: OvalBorder(
-                  side: BorderSide(width: 30, color: Color(0xFF10A2EA))),
-            ),
-          ),
-        ),
+      // ── Static-turned-animated lower circles ─────────────────
+      AnimatedBuilder(
+        animation: _floatAnimation1,
+        builder: (context, child) {
+          final o = _floatAnimation1.value;
+          return Positioned(
+              left: 292.47 + o.dx,
+              top: -117 + o.dy,
+              child: Transform.rotate(
+                  angle: 0.40,
+                  child: Container(
+                      width: 167,
+                      height: 167,
+                      decoration: const ShapeDecoration(
+                          shape: OvalBorder(
+                              side: BorderSide(
+                                  width: 30, color: Color(0xFF10A2EA)))))));
+        },
       ),
-      Positioned(
-        left: 366.60,
-        top: 919.60,
-        child: Container(
-          width: 183,
-          height: 183,
-          decoration: const ShapeDecoration(
-            shape: OvalBorder(
-                side: BorderSide(width: 30, color: Color(0xFF10A2EA))),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation2,
+        builder: (context, child) {
+          final o = _floatAnimation2.value;
+          return Positioned(
+              left: 366.60 + o.dx,
+              top: 919.60 + o.dy,
+              child: Container(
+                  width: 183,
+                  height: 183,
+                  decoration: const ShapeDecoration(
+                      shape: OvalBorder(
+                          side: BorderSide(
+                              width: 30, color: Color(0xFF10A2EA))))));
+        },
       ),
-      Positioned(
-        left: 273.59,
-        top: 622.74,
-        child: Opacity(
-          opacity: 0.30,
-          child: Transform.rotate(
-            angle: 6.17,
-            child: Container(
-              width: 153.81,
-              height: 153.81,
-              decoration: const ShapeDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment(0.93, 0.35),
-                  end: Alignment(0.06, 0.40),
-                  colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
-                ),
-                shape: OvalBorder(),
-              ),
-            ),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation3,
+        builder: (context, child) {
+          final o = _floatAnimation3.value;
+          return Positioned(
+              left: 273.59 + o.dx,
+              top: 622.74 + o.dy,
+              child: Opacity(
+                  opacity: 0.30,
+                  child: Transform.rotate(
+                      angle: 6.17,
+                      child: Container(
+                          width: 153.81,
+                          height: 153.81,
+                          decoration: const ShapeDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment(0.93, 0.35),
+                                  end: Alignment(0.06, 0.40),
+                                  colors: [
+                                    Color(0xAFFDEDCA),
+                                    Color(0xFF0A9BE2)
+                                  ]),
+                              shape: OvalBorder())))));
+        },
       ),
-      Positioned(
-        left: 371.30,
-        top: 757.60,
-        child: Opacity(
-          opacity: 0.30,
-          child: Transform.rotate(
-            angle: 3.71,
-            child: Container(
-              width: 89.35,
-              height: 89.35,
-              decoration: const ShapeDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment(0.93, 0.35),
-                  end: Alignment(0.06, 0.40),
-                  colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)],
-                ),
-                shape: OvalBorder(),
-              ),
-            ),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation4,
+        builder: (context, child) {
+          final o = _floatAnimation4.value;
+          return Positioned(
+              left: 371.30 + o.dx,
+              top: 757.60 + o.dy,
+              child: Opacity(
+                  opacity: 0.30,
+                  child: Transform.rotate(
+                      angle: 3.71,
+                      child: Container(
+                          width: 89.35,
+                          height: 89.35,
+                          decoration: const ShapeDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment(0.93, 0.35),
+                                  end: Alignment(0.06, 0.40),
+                                  colors: [
+                                    Color(0xFFFDEDCA),
+                                    Color(0xFF0A9BE2)
+                                  ]),
+                              shape: OvalBorder())))));
+        },
       ),
-      Positioned(
-        left: 292.61,
-        top: 787.82,
-        child: Opacity(
-          opacity: 0.30,
-          child: Transform.rotate(
-            angle: 6.17,
-            child: Container(
-              width: 94.08,
-              height: 94.08,
-              decoration: const ShapeDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment(0.93, 0.35),
-                  end: Alignment(0.06, 0.40),
-                  colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
-                ),
-                shape: OvalBorder(),
-              ),
-            ),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation5,
+        builder: (context, child) {
+          final o = _floatAnimation5.value;
+          return Positioned(
+              left: 292.61 + o.dx,
+              top: 787.82 + o.dy,
+              child: Opacity(
+                  opacity: 0.30,
+                  child: Transform.rotate(
+                      angle: 6.17,
+                      child: Container(
+                          width: 94.08,
+                          height: 94.08,
+                          decoration: const ShapeDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment(0.93, 0.35),
+                                  end: Alignment(0.06, 0.40),
+                                  colors: [
+                                    Color(0xAFFDEDCA),
+                                    Color(0xFF0A9BE2)
+                                  ]),
+                              shape: OvalBorder())))));
+        },
       ),
-      Positioned(
-        left: 93.13,
-        top: 755.42,
-        child: Transform.rotate(
-          angle: 3.54,
-          child: Container(
-            width: 167,
-            height: 167,
-            decoration: const ShapeDecoration(
-              shape: OvalBorder(
-                  side: BorderSide(width: 30, color: Color(0xFF10A2EA))),
-            ),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation6,
+        builder: (context, child) {
+          final o = _floatAnimation6.value;
+          return Positioned(
+              left: 93.13 + o.dx,
+              top: 755.42 + o.dy,
+              child: Transform.rotate(
+                  angle: 3.54,
+                  child: Container(
+                      width: 167,
+                      height: 167,
+                      decoration: const ShapeDecoration(
+                          shape: OvalBorder(
+                              side: BorderSide(
+                                  width: 30, color: Color(0xFF10A2EA)))))));
+        },
       ),
-      Positioned(
-        left: 249.59,
-        top: 336.74,
-        child: Opacity(
-          opacity: 0.30,
-          child: Transform.rotate(
-            angle: 6.17,
-            child: Container(
-              width: 153.81,
-              height: 153.81,
-              decoration: const ShapeDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment(0.93, 0.35),
-                  end: Alignment(0.06, 0.40),
-                  colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
-                ),
-                shape: OvalBorder(),
-              ),
-            ),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation7,
+        builder: (context, child) {
+          final o = _floatAnimation7.value;
+          return Positioned(
+              left: 249.59 + o.dx,
+              top: 336.74 + o.dy,
+              child: Opacity(
+                  opacity: 0.30,
+                  child: Transform.rotate(
+                      angle: 6.17,
+                      child: Container(
+                          width: 153.81,
+                          height: 153.81,
+                          decoration: const ShapeDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment(0.93, 0.35),
+                                  end: Alignment(0.06, 0.40),
+                                  colors: [
+                                    Color(0xAFFDEDCA),
+                                    Color(0xFF0A9BE2)
+                                  ]),
+                              shape: OvalBorder())))));
+        },
       ),
-      Positioned(
-        left: 371.17,
-        top: 421.47,
-        child: Opacity(
-          opacity: 0.30,
-          child: Transform.rotate(
-            angle: 3.71,
-            child: Container(
-              width: 89.35,
-              height: 89.35,
-              decoration: const ShapeDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment(0.93, 0.35),
-                  end: Alignment(0.06, 0.40),
-                  colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)],
-                ),
-                shape: OvalBorder(),
-              ),
-            ),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation8,
+        builder: (context, child) {
+          final o = _floatAnimation8.value;
+          return Positioned(
+              left: 371.17 + o.dx,
+              top: 421.47 + o.dy,
+              child: Opacity(
+                  opacity: 0.30,
+                  child: Transform.rotate(
+                      angle: 3.71,
+                      child: Container(
+                          width: 89.35,
+                          height: 89.35,
+                          decoration: const ShapeDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment(0.93, 0.35),
+                                  end: Alignment(0.06, 0.40),
+                                  colors: [
+                                    Color(0xFFFDEDCA),
+                                    Color(0xFF0A9BE2)
+                                  ]),
+                              shape: OvalBorder())))));
+        },
       ),
-      Positioned(
-        left: 209,
-        top: 505.49,
-        child: Opacity(
-          opacity: 0.30,
-          child: Transform.rotate(
-            angle: 6.17,
-            child: Container(
-              width: 94.08,
-              height: 94.08,
-              decoration: const ShapeDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment(0.93, 0.35),
-                  end: Alignment(0.06, 0.40),
-                  colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
-                ),
-                shape: OvalBorder(),
-              ),
-            ),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation1,
+        builder: (context, child) {
+          final o = _floatAnimation1.value;
+          return Positioned(
+              left: 209 + o.dy,
+              top: 505.49 - o.dx, // cross-axis for variety
+              child: Opacity(
+                  opacity: 0.30,
+                  child: Transform.rotate(
+                      angle: 6.17,
+                      child: Container(
+                          width: 94.08,
+                          height: 94.08,
+                          decoration: const ShapeDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment(0.93, 0.35),
+                                  end: Alignment(0.06, 0.40),
+                                  colors: [
+                                    Color(0xAFFDEDCA),
+                                    Color(0xFF0A9BE2)
+                                  ]),
+                              shape: OvalBorder())))));
+        },
       ),
-      Positioned(
-        left: 69.13,
-        top: 469.42,
-        child: Transform.rotate(
-          angle: 3.54,
-          child: Container(
-            width: 167,
-            height: 167,
-            decoration: const ShapeDecoration(
-              shape: OvalBorder(
-                  side: BorderSide(width: 30, color: Color(0xFF10A2EA))),
-            ),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation3,
+        builder: (context, child) {
+          final o = _floatAnimation3.value;
+          return Positioned(
+              left: 69.13 + o.dx,
+              top: 469.42 + o.dy,
+              child: Transform.rotate(
+                  angle: 3.54,
+                  child: Container(
+                      width: 167,
+                      height: 167,
+                      decoration: const ShapeDecoration(
+                          shape: OvalBorder(
+                              side: BorderSide(
+                                  width: 30, color: Color(0xFF10A2EA)))))));
+        },
       ),
-      Positioned(
-        left: 490,
-        top: 284,
-        child: Transform.rotate(
-          angle: 3.14,
-          child: Container(
-            width: 183,
-            height: 183,
-            decoration: const ShapeDecoration(
-              shape: OvalBorder(
-                  side: BorderSide(width: 30, color: Color(0xFF10A2EA))),
-            ),
-          ),
-        ),
+      AnimatedBuilder(
+        animation: _floatAnimation5,
+        builder: (context, child) {
+          final o = _floatAnimation5.value;
+          return Positioned(
+              left: 490 + o.dx,
+              top: 284 + o.dy,
+              child: Transform.rotate(
+                  angle: 3.14,
+                  child: Container(
+                      width: 183,
+                      height: 183,
+                      decoration: const ShapeDecoration(
+                          shape: OvalBorder(
+                              side: BorderSide(
+                                  width: 30, color: Color(0xFF10A2EA)))))));
+        },
       ),
     ];
   }

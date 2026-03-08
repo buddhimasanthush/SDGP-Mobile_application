@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home_page.dart';
 
 class DocVerificationFailedPage extends StatelessWidget {
   const DocVerificationFailedPage({super.key});
@@ -6,376 +7,279 @@ class DocVerificationFailedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: const Color(0xFF0796DE),
+        child: Stack(children: [
           _buildBackground(),
           SafeArea(
-            child: Column(
-              children: [
-                // Header
-                Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const Expanded(
-                        child: Text(
-                          'Submitted Documents',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFFFAFAFA),
-                            fontSize: 20,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 48),
-                    ],
-                  ),
-                ),
-
-                const Spacer(),
-
-                // White card with content
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 21),
-                  width: 333,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFAFAFA),
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Failed icon with document and X symbol
-                      SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: Stack(
-                          children: [
-                            // Outer circle
-                            Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFFE5EEF1),
-                                border: Border.all(
-                                  width: 4,
-                                  color: const Color(0xFFBADDE9),
-                                ),
-                              ),
-                            ),
-                            // Document lines (white bars)
-                            Positioned(
-                              left: 33,
-                              top: 60,
-                              child: Container(
-                                width: 54,
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(9),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Color(0x234B4B4B),
-                                      blurRadius: 20,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              left: 37.5,
-                              top: 80,
-                              child: Container(
-                                width: 45,
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(9),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Color(0x234B4B4B),
-                                      blurRadius: 20,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // Red/Pink X circle
-                            Positioned(
-                              left: 38,
-                              top: 8,
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Color(0xFFD74444),
-                                      Color(0xFFF87DB1)
-                                    ],
-                                  ),
-                                  border: Border.all(
-                                    width: 3,
-                                    color: Colors.white.withOpacity(0.5),
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                  size: 24,
-                                  weight: 700,
-                                ),
-                              ),
-                            ),
-                            // Small red dots
-                            Positioned(
-                              left: 93.5,
-                              top: 64,
-                              child: Container(
-                                width: 11,
-                                height: 11,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Color(0xFFD74444),
-                                      Color(0xFFF87DB1)
-                                    ],
-                                  ),
-                                  border: Border.all(
-                                    width: 3,
-                                    color: Colors.white.withOpacity(0.5),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              left: 15.5,
-                              top: 50,
-                              child: Container(
-                                width: 11,
-                                height: 11,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Color(0xFFD74444),
-                                      Color(0xFFF87DB1)
-                                    ],
-                                  ),
-                                  border: Border.all(
-                                    width: 3,
-                                    color: Colors.white.withOpacity(0.5),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 50),
-
-                      // Failed message
-                      const Text(
-                        'Your submitted documents could not be verified.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF2D2D2D),
-                          fontSize: 22,
-                          fontFamily: 'Arimo',
-                          fontWeight: FontWeight.w400,
-                          height: 1.2,
-                        ),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Subtitle
-                      const Text(
-                        'Please review your uploaded documents and resubmit\nvalid registration details for approval.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF495565),
-                          fontSize: 12,
-                          fontFamily: 'Arimo',
-                          fontWeight: FontWeight.w400,
-                          height: 1.33,
-                        ),
-                      ),
-
-                      const SizedBox(height: 40),
-
-                      // Continue button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 54,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Go back to upload page to try again
-                            Navigator.pop(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0796DE),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Continue',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const Spacer(),
-              ],
-            ),
-          ),
-        ],
+              child: Column(children: [
+            _buildHeader(context),
+            const Spacer(),
+            _buildCard(context),
+            const Spacer(),
+          ])),
+        ]),
       ),
     );
   }
 
-  Widget _buildBackground() {
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Row(children: [
+        IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context)),
+        const Expanded(
+            child: Text('Submitted Documents',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Color(0xFFFAFAFA),
+                    fontSize: 20,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500))),
+        const SizedBox(width: 48),
+      ]),
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
     return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: const Color(0xFF0796DE),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 37,
-            top: -99,
-            child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 21),
+      padding: const EdgeInsets.fromLTRB(30, 30, 30, 30),
+      decoration: BoxDecoration(
+          color: const Color(0xFFFAFAFA),
+          borderRadius: BorderRadius.circular(25)),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        // ── Figma failed illustration ───────────────────────────────
+        SizedBox(
+          width: 120,
+          height: 120,
+          child: Stack(clipBehavior: Clip.none, children: [
+            // Outer circle with border
+            Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFE5EEF1),
+                    border: Border.all(
+                        width: 4,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                        color: const Color(0xFFBADDE9)))),
+            // Document body
+            Positioned(
+                left: 21,
+                top: -15,
+                child: Container(
+                  width: 78,
+                  height: 117,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(9),
+                      gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0xFFF9FDFF), Color(0x00F9FDFF)]),
+                      boxShadow: const [
+                        BoxShadow(
+                            color: Color(0x0F4B4B4B),
+                            blurRadius: 30,
+                            offset: Offset(0, 4))
+                      ]),
+                )),
+            // Document line 1
+            Positioned(
+                left: 33,
+                top: 60,
+                child: Container(
+                  width: 54,
+                  height: 10,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(9),
+                      boxShadow: const [
+                        BoxShadow(
+                            color: Color(0x234B4B4B),
+                            blurRadius: 20,
+                            offset: Offset(0, 4))
+                      ]),
+                )),
+            // Document line 2
+            Positioned(
+                left: 37,
+                top: 80,
+                child: Container(
+                  width: 45,
+                  height: 10,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(9),
+                      boxShadow: const [
+                        BoxShadow(
+                            color: Color(0x234B4B4B),
+                            blurRadius: 20,
+                            offset: Offset(0, 4))
+                      ]),
+                )),
+            // Red X circle badge
+            Positioned(
+                left: 38,
+                top: 8,
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0xFFD74444), Color(0xFFF87DB1)]),
+                      border: Border.all(
+                          width: 3, color: Colors.white.withOpacity(0.50))),
+                  child: const Icon(Icons.close, color: Colors.white, size: 22),
+                )),
+            // Small red dot — right
+            Positioned(
+                left: 93,
+                top: 64,
+                child: Container(
+                  width: 11,
+                  height: 11,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0xFFD74444), Color(0xFFF87DB1)]),
+                      border: Border.all(
+                          width: 3, color: Colors.white.withOpacity(0.50))),
+                )),
+            // Small red dot — left
+            Positioned(
+                left: 15,
+                top: 50,
+                child: Container(
+                  width: 11,
+                  height: 11,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0xFFD74444), Color(0xFFF87DB1)]),
+                      border: Border.all(
+                          width: 3, color: Colors.white.withOpacity(0.50))),
+                )),
+          ]),
+        ),
+
+        const SizedBox(height: 32),
+        const Text('Your submitted documents could not be verified.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: Color(0xFF2D2D2D),
+                fontSize: 20,
+                fontFamily: 'Arimo',
+                fontWeight: FontWeight.w400,
+                height: 1.3)),
+        const SizedBox(height: 16),
+        const Text(
+            'Please review your uploaded documents and resubmit valid registration details for approval.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: Color(0xFF495565),
+                fontSize: 12,
+                fontFamily: 'Arimo',
+                height: 1.33)),
+        const SizedBox(height: 32),
+        SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomePage()),
+                  (route) => false),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0796DE),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+              child: const Text('Continue',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500)),
+            )),
+      ]),
+    );
+  }
+
+  Widget _buildBackground() {
+    return Stack(children: [
+      Positioned(
+          left: 37,
+          top: -99,
+          child: Container(
               width: 183,
               height: 183,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(width: 30, color: const Color(0xFF10A2EA)),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 130.01,
-            top: 197.85,
-            child: Opacity(
+              decoration: const ShapeDecoration(
+                  shape: OvalBorder(
+                      side: BorderSide(width: 30, color: Color(0xFF10A2EA)))))),
+      Positioned(
+          left: 130,
+          top: 198,
+          child: Opacity(
               opacity: 0.30,
-              child: Transform.rotate(
-                angle: 3.03,
-                child: Container(
-                  width: 153.81,
-                  height: 153.81,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: const Alignment(0.93, 0.35),
-                      end: const Alignment(0.06, 0.40),
-                      colors: [
-                        const Color(0xAFFDEDCA),
-                        const Color(0xFF0A9BE2)
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 32.30,
-            top: 63,
-            child: Opacity(
-              opacity: 0.30,
-              child: Transform.rotate(
-                angle: 0.57,
-                child: Container(
-                  width: 89.35,
-                  height: 89.35,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: const Alignment(0.93, 0.35),
-                      end: const Alignment(0.06, 0.40),
-                      colors: [
-                        const Color(0xFFFDEDCA),
-                        const Color(0xFF0A9BE2)
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 110.98,
-            top: 32.77,
-            child: Opacity(
-              opacity: 0.30,
-              child: Transform.rotate(
-                angle: 3.03,
-                child: Container(
-                  width: 94.08,
-                  height: 94.08,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: const Alignment(0.93, 0.35),
-                      end: const Alignment(0.06, 0.40),
-                      colors: [
-                        const Color(0xAFFDEDCA),
-                        const Color(0xFF0A9BE2)
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 310.47,
-            top: 65.17,
-            child: Transform.rotate(
-              angle: 0.40,
               child: Container(
-                width: 167,
-                height: 167,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(width: 30, color: const Color(0xFF10A2EA)),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+                  width: 154,
+                  height: 154,
+                  decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                          begin: Alignment(0.93, 0.35),
+                          end: Alignment(0.06, 0.40),
+                          colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]))))),
+      Positioned(
+          left: 32,
+          top: 63,
+          child: Opacity(
+              opacity: 0.30,
+              child: Container(
+                  width: 89,
+                  height: 89,
+                  decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                          begin: Alignment(0.93, 0.35),
+                          end: Alignment(0.06, 0.40),
+                          colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)]))))),
+      Positioned(
+          left: 111,
+          top: 33,
+          child: Opacity(
+              opacity: 0.30,
+              child: Container(
+                  width: 94,
+                  height: 94,
+                  decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                          begin: Alignment(0.93, 0.35),
+                          end: Alignment(0.06, 0.40),
+                          colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]))))),
+      Positioned(
+          left: 310,
+          top: 65,
+          child: Container(
+              width: 167,
+              height: 167,
+              decoration: const ShapeDecoration(
+                  shape: OvalBorder(
+                      side: BorderSide(width: 30, color: Color(0xFF10A2EA)))))),
+    ]);
   }
 }

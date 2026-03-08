@@ -23,24 +23,129 @@ class _ReminderPageState extends State<ReminderPage> {
   }
 }
 
-// ── Your original landing page — completely unchanged ─────────────────────────
+// ── Animated landing page ─────────────────────────────────────────────────────
 class _ReminderLandingPage extends StatefulWidget {
   @override
   State<_ReminderLandingPage> createState() => _ReminderLandingPageState();
 }
 
-class _ReminderLandingPageState extends State<_ReminderLandingPage> {
+class _ReminderLandingPageState extends State<_ReminderLandingPage>
+    with TickerProviderStateMixin {
+  late List<AnimationController> _fcs;
+  late List<Animation<Offset>> _fas;
+
+  // Card bob animations — each card floats up/down independently
+  late AnimationController _cardFloat1;
+  late AnimationController _cardFloat2;
+  late AnimationController _cardFloat3;
+  late AnimationController _cardFloat4;
+  late Animation<double> _cardAnim1;
+  late Animation<double> _cardAnim2;
+  late Animation<double> _cardAnim3;
+  late Animation<double> _cardAnim4;
+
+  @override
+  void initState() {
+    super.initState();
+    final durations = [3000, 4000, 5000, 3500, 4200, 5500, 3700, 4800];
+    final offsets = [
+      const Offset(25, -35),
+      const Offset(-20, 30),
+      const Offset(35, 20),
+      const Offset(-25, -30),
+      const Offset(20, 28),
+      const Offset(-30, -22),
+      const Offset(18, -25),
+      const Offset(-22, 32),
+    ];
+    _fcs = List.generate(
+        8,
+        (i) => AnimationController(
+              vsync: this,
+              duration: Duration(milliseconds: durations[i]),
+            )..repeat(reverse: true));
+    _fas = List.generate(
+        8,
+        (i) => Tween<Offset>(begin: Offset.zero, end: offsets[i]).animate(
+            CurvedAnimation(parent: _fcs[i], curve: Curves.easeInOut)));
+
+    // Card bob animations — all start immediately but from different points
+    // so they're always out of phase with each other
+    _cardFloat1 = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 2800))
+      ..forward();
+    _cardFloat2 = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 3200))
+      ..value = 0.4 // start 40% through the cycle
+      ..forward();
+    _cardFloat3 = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 2600))
+      ..value = 0.7 // start 70% through the cycle
+      ..forward();
+    _cardFloat4 = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 3500))
+      ..value = 0.2 // start 20% through the cycle
+      ..forward();
+
+    // Repeat all in reverse once they reach the end
+    _cardFloat1.addStatusListener((s) {
+      if (s == AnimationStatus.completed)
+        _cardFloat1.reverse();
+      else if (s == AnimationStatus.dismissed) _cardFloat1.forward();
+    });
+    _cardFloat2.addStatusListener((s) {
+      if (s == AnimationStatus.completed)
+        _cardFloat2.reverse();
+      else if (s == AnimationStatus.dismissed) _cardFloat2.forward();
+    });
+    _cardFloat3.addStatusListener((s) {
+      if (s == AnimationStatus.completed)
+        _cardFloat3.reverse();
+      else if (s == AnimationStatus.dismissed) _cardFloat3.forward();
+    });
+    _cardFloat4.addStatusListener((s) {
+      if (s == AnimationStatus.completed)
+        _cardFloat4.reverse();
+      else if (s == AnimationStatus.dismissed) _cardFloat4.forward();
+    });
+
+    _cardAnim1 = Tween<double>(begin: 0, end: -12)
+        .animate(CurvedAnimation(parent: _cardFloat1, curve: Curves.easeInOut));
+    _cardAnim2 = Tween<double>(begin: 0, end: -10)
+        .animate(CurvedAnimation(parent: _cardFloat2, curve: Curves.easeInOut));
+    _cardAnim3 = Tween<double>(begin: 0, end: -14)
+        .animate(CurvedAnimation(parent: _cardFloat3, curve: Curves.easeInOut));
+    _cardAnim4 = Tween<double>(begin: 0, end: -11)
+        .animate(CurvedAnimation(parent: _cardFloat4, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    for (final c in _fcs) c.dispose();
+    _cardFloat1.dispose();
+    _cardFloat2.dispose();
+    _cardFloat3.dispose();
+    _cardFloat4.dispose();
+    super.dispose();
+  }
+
   void _showUnderDevelopmentDialog() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const AddMedicineNamePage()),
-    ).then((_) => setState(() {})); // refresh so routing re-evaluates on return
+    ).then((_) => setState(() {}));
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    return AnimatedBuilder(
+      animation: Listenable.merge(
+          [..._fcs, _cardFloat1, _cardFloat2, _cardFloat3, _cardFloat4]),
+      builder: (context, _) => _buildScaffold(context),
+    );
+  }
 
+  Widget _buildScaffold(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -50,6 +155,35 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
         child: Stack(
           children: [
             ..._buildDecorativeCircles(),
+
+            // Back button — top left
+            Positioned(
+              top: 0,
+              left: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 4),
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.20),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Bottom gradient overlay
             Positioned(
               left: 0,
               right: 0,
@@ -71,9 +205,11 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                 ),
               ),
             ),
+
+            // Creatine card
             Positioned(
               left: -60.66,
-              top: 41.61,
+              top: 41.61 + _cardAnim1.value,
               child: Transform.rotate(
                 angle: -0.02,
                 child: _buildReminderCard(
@@ -86,9 +222,11 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                 ),
               ),
             ),
+
+            // Drink Water card
             Positioned(
               left: 146.82,
-              top: 122,
+              top: 122 + _cardAnim2.value,
               child: Transform.rotate(
                 angle: 0.09,
                 child: _buildReminderCard(
@@ -100,9 +238,11 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                 ),
               ),
             ),
+
+            // Probiotics card
             Positioned(
               left: 13,
-              top: 247.59,
+              top: 247.59 + _cardAnim3.value,
               child: Transform.rotate(
                 angle: -0.08,
                 child: _buildReminderCard(
@@ -114,9 +254,11 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                 ),
               ),
             ),
+
+            // Birth Control card
             Positioned(
               left: 64.02,
-              top: 330,
+              top: 330 + _cardAnim4.value,
               child: Transform.rotate(
                 angle: 0.04,
                 child: _buildReminderCard(
@@ -128,6 +270,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                 ),
               ),
             ),
+
+            // MediFind logo
             Positioned(
               left: 0,
               right: 0,
@@ -141,6 +285,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                 ),
               ),
             ),
+
+            // Add Reminder button
             Positioned(
               left: 0,
               right: 0,
@@ -352,8 +498,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
   List<Widget> _buildDecorativeCircles() {
     return [
       Positioned(
-          left: 124.48,
-          top: 5.38,
+          left: 124.48 + _fas[0].value.dx,
+          top: 5.38 + _fas[0].value.dy,
           child: Transform.rotate(
               angle: 0.53,
               child: Container(
@@ -364,8 +510,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                           side: BorderSide(
                               width: 30, color: Color(0xFF10A2EA))))))),
       Positioned(
-          left: 112.01,
-          top: 104.44,
+          left: 112.01 + _fas[1].value.dx,
+          top: 104.44 + _fas[1].value.dy,
           child: Opacity(
               opacity: 0.30,
               child: Transform.rotate(
@@ -380,8 +526,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                               colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]),
                           shape: OvalBorder()))))),
       Positioned(
-          left: 14.30,
-          top: -19.87,
+          left: 14.30 + _fas[2].value.dx,
+          top: -19.87 + _fas[2].value.dy,
           child: Opacity(
               opacity: 0.30,
               child: Transform.rotate(
@@ -396,8 +542,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                               colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)]),
                           shape: OvalBorder()))))),
       Positioned(
-          left: 92.99,
-          top: 216.82,
+          left: 92.99 + _fas[3].value.dx,
+          top: 216.82 + _fas[3].value.dy,
           child: Opacity(
               opacity: 0.30,
               child: Transform.rotate(
@@ -412,8 +558,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                               colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]),
                           shape: OvalBorder()))))),
       Positioned(
-          left: 292.47,
-          top: -117,
+          left: 292.47 + _fas[0].value.dx,
+          top: -117 + _fas[0].value.dy,
           child: Transform.rotate(
               angle: 0.40,
               child: Container(
@@ -424,8 +570,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                           side: BorderSide(
                               width: 30, color: Color(0xFF10A2EA))))))),
       Positioned(
-          left: 366.60,
-          top: 919.60,
+          left: 366.60 + _fas[4].value.dx,
+          top: 919.60 + _fas[4].value.dy,
           child: Container(
               width: 183,
               height: 183,
@@ -433,8 +579,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                   shape: OvalBorder(
                       side: BorderSide(width: 30, color: Color(0xFF10A2EA)))))),
       Positioned(
-          left: 273.59,
-          top: 622.74,
+          left: 273.59 + _fas[5].value.dx,
+          top: 622.74 + _fas[5].value.dy,
           child: Opacity(
               opacity: 0.30,
               child: Transform.rotate(
@@ -449,8 +595,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                               colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]),
                           shape: OvalBorder()))))),
       Positioned(
-          left: 371.30,
-          top: 757.60,
+          left: 371.30 + _fas[6].value.dx,
+          top: 757.60 + _fas[6].value.dy,
           child: Opacity(
               opacity: 0.30,
               child: Transform.rotate(
@@ -465,8 +611,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                               colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)]),
                           shape: OvalBorder()))))),
       Positioned(
-          left: 292.61,
-          top: 787.82,
+          left: 292.61 + _fas[7].value.dx,
+          top: 787.82 + _fas[7].value.dy,
           child: Opacity(
               opacity: 0.30,
               child: Transform.rotate(
@@ -481,8 +627,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                               colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]),
                           shape: OvalBorder()))))),
       Positioned(
-          left: 93.13,
-          top: 755.42,
+          left: 93.13 + _fas[1].value.dx,
+          top: 755.42 + _fas[1].value.dy,
           child: Transform.rotate(
               angle: 3.54,
               child: Container(
@@ -493,8 +639,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                           side: BorderSide(
                               width: 30, color: Color(0xFF10A2EA))))))),
       Positioned(
-          left: 249.59,
-          top: 336.74,
+          left: 249.59 + _fas[2].value.dx,
+          top: 336.74 + _fas[2].value.dy,
           child: Opacity(
               opacity: 0.30,
               child: Transform.rotate(
@@ -509,8 +655,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                               colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]),
                           shape: OvalBorder()))))),
       Positioned(
-          left: 371.17,
-          top: 421.47,
+          left: 371.17 + _fas[3].value.dx,
+          top: 421.47 + _fas[3].value.dy,
           child: Opacity(
               opacity: 0.30,
               child: Transform.rotate(
@@ -525,8 +671,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                               colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)]),
                           shape: OvalBorder()))))),
       Positioned(
-          left: 209,
-          top: 505.49,
+          left: 209 + _fas[4].value.dx,
+          top: 505.49 + _fas[4].value.dy,
           child: Opacity(
               opacity: 0.30,
               child: Transform.rotate(
@@ -541,8 +687,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                               colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]),
                           shape: OvalBorder()))))),
       Positioned(
-          left: 69.13,
-          top: 469.42,
+          left: 69.13 + _fas[5].value.dx,
+          top: 469.42 + _fas[5].value.dy,
           child: Transform.rotate(
               angle: 3.54,
               child: Container(
@@ -553,8 +699,8 @@ class _ReminderLandingPageState extends State<_ReminderLandingPage> {
                           side: BorderSide(
                               width: 30, color: Color(0xFF10A2EA))))))),
       Positioned(
-          left: 490,
-          top: 284,
+          left: 490 + _fas[6].value.dx,
+          top: 284 + _fas[6].value.dy,
           child: Transform.rotate(
               angle: 3.14,
               child: Container(
