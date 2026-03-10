@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'sign_up_page.dart';
+import 'user_store.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -218,8 +219,14 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () =>
-                              Navigator.pushReplacementNamed(context, '/home'),
+                          onPressed: () {
+                            final u = _usernameCtrl.text.trim();
+                            if (u.isNotEmpty) {
+                              UserStore.instance.profileName =
+                                  u[0].toUpperCase() + u.substring(1);
+                            }
+                            Navigator.pushReplacementNamed(context, '/home');
+                          },
                           style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF0796DE),
                               shape: RoundedRectangleBorder(

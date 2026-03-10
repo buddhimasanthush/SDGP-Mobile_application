@@ -24,6 +24,8 @@ class MediFindApp extends StatelessWidget {
         fontFamily: 'Poppins',
         useMaterial3: true,
       ),
+      // Starts at splash → terms → sign in/sign up → home
+      // Users cannot reach home without completing auth flow
       home: const SplashScreen(),
       routes: {
         '/terms': (context) => const TermsOfServicesPage(),
