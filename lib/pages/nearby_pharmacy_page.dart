@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'payment_gateway_page.dart';
 
 // ── Custom blue/white map style ───────────────────────────────────────────────
 const _mapStyle = '''
@@ -246,7 +247,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
   static const _radiusMetres = [1000.0, 5000.0, 10000.0];
   static const _stageLabels = ['1km', '5km', '10km'];
 
-  // ── Animations ───────────────────────────────────────────────────────────
   late AnimationController _breatheCtrl;
   late Animation<double> _breatheAnim;
   late AnimationController _labelCtrl;
@@ -254,7 +254,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
   String _currentLabel = '1km';
   String _nextLabel = '1km';
 
-  // ── Map circles (real geo radius — static, no animation needed) ──────────
   Set<Circle> _buildCircles() {
     final r = _radiusMetres[_stage];
     return {
@@ -289,9 +288,7 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     };
   }
 
-  // ── Markers — hidden during scan; shown as cross+name after ─────────────
   Set<Marker> _buildMarkers() => {};
-  // Custom Flutter cross markers are drawn via Stack overlay (see _buildMapOverlay)
 
   @override
   void initState() {
@@ -351,7 +348,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     super.dispose();
   }
 
-  // ── Location picker bottom sheet ─────────────────────────────────────────
   void _showLocationPicker() {
     showModalBottomSheet(
       context: context,
@@ -374,11 +370,9 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(children: [
-        // ── Map area ────────────────────────────────────────────────
         Expanded(
           flex: 45,
           child: Stack(children: [
-            // Google Map base
             GoogleMap(
               onMapCreated: (ctrl) {
                 _mapController = ctrl;
@@ -398,8 +392,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
               markers: _buildMarkers(),
               circles: _buildCircles(),
             ),
-
-            // ── Breathing rings overlay (Flutter-animated, always visible) ──
             Positioned.fill(
               child: IgnorePointer(
                 child: AnimatedBuilder(
@@ -410,12 +402,8 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                 ),
               ),
             ),
-
-            // ── Cross pharmacy markers overlay (after scan) ─────────────────
             if (_showMarkers)
               Positioned.fill(child: _buildPharmacyMarkerOverlay()),
-
-            // Top gradient
             Positioned(
               top: 0,
               left: 0,
@@ -432,8 +420,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                 ),
               ),
             ),
-
-            // Top bar
             SafeArea(
               bottom: false,
               child: Align(
@@ -455,7 +441,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                       ),
                     ),
                     const SizedBox(height: 5),
-                    // ── Tappable delivery location ──
                     GestureDetector(
                       onTap: _showLocationPicker,
                       child: Container(
@@ -490,8 +475,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                 ),
               ),
             ),
-
-            // User centre dot
             Center(
               child: AnimatedBuilder(
                 animation: _breatheAnim,
@@ -518,8 +501,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
             ),
           ]),
         ),
-
-        // ── Bottom sheet ────────────────────────────────────────────
         Expanded(
           flex: 55,
           child: Container(
@@ -546,24 +527,19 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     );
   }
 
-  // ── Cross markers overlay on map ──────────────────────────────────────────
   Widget _buildPharmacyMarkerOverlay() {
     return LayoutBuilder(builder: (_, constraints) {
       final w = constraints.maxWidth;
       final h = constraints.maxHeight;
-
-      // Approximate screen positions for Colombo area at zoom 12
-      // These are relative to map centre — backend will replace with real projection
       final positions = [
-        Offset(w * 0.52, h * 0.42), // Union Chemists
-        Offset(w * 0.56, h * 0.36), // Healthguard
-        Offset(w * 0.50, h * 0.28), // Osusala
-        Offset(w * 0.48, h * 0.22), // Health Link
-        Offset(w * 0.44, h * 0.55), // Jeewaka
-        Offset(w * 0.42, h * 0.68), // Suncity
-        Offset(w * 0.65, h * 0.50), // Ceylinco
+        Offset(w * 0.52, h * 0.42),
+        Offset(w * 0.56, h * 0.36),
+        Offset(w * 0.50, h * 0.28),
+        Offset(w * 0.48, h * 0.22),
+        Offset(w * 0.44, h * 0.55),
+        Offset(w * 0.42, h * 0.68),
+        Offset(w * 0.65, h * 0.50),
       ];
-
       return Stack(
           children:
               List.generate(min(positions.length, _pharmacies10km.length), (i) {
@@ -575,7 +551,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
           child: GestureDetector(
             onTap: () => setState(() => _selected = p),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              // White circle with blue cross
               Container(
                 width: 36,
                 height: 36,
@@ -593,7 +568,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                     const Icon(Icons.add, color: Color(0xFF0796DE), size: 24),
               ),
               const SizedBox(height: 3),
-              // Name pill
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
@@ -618,7 +592,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     });
   }
 
-  // ── Scanning bottom content ───────────────────────────────────────────────
   Widget _buildScanningState() => Expanded(
         child: Center(
             child: Column(
@@ -681,7 +654,6 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
         )),
       );
 
-  // ── Results bottom content ────────────────────────────────────────────────
   Widget _buildResultsState() {
     final pharmacies = _currentPharmacies;
     return Expanded(
@@ -808,25 +780,34 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
             ]),
             const SizedBox(height: 14),
             SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Order confirmed!'),
-                          backgroundColor: Color(0xFF0796DE))),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0796DE),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30))),
-                  child: const Text('Confirm',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600)),
-                )),
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                // ── FIXED: open payment gateway instead of snackbar ──
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PaymentGatewayPage(
+                        amount: 'RS.${p.price.toStringAsFixed(0)}',
+                        pharmacyName: p.name,
+                      ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0796DE),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30))),
+                child: const Text('Confirm',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600)),
+              ),
+            ),
           ]),
         ),
       );
@@ -971,7 +952,6 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        // Handle
         Container(
             margin: const EdgeInsets.only(top: 12, bottom: 16),
             width: 36,
@@ -979,8 +959,6 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
             decoration: BoxDecoration(
                 color: const Color(0xFFDDDDDD),
                 borderRadius: BorderRadius.circular(2))),
-
-        // Title
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Align(
@@ -994,8 +972,6 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
           ),
         ),
         const SizedBox(height: 14),
-
-        // Search bar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
@@ -1020,8 +996,6 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
           ),
         ),
         const SizedBox(height: 18),
-
-        // Saved addresses
         const Padding(
           padding: EdgeInsets.only(left: 20, bottom: 8),
           child: Align(
@@ -1033,7 +1007,6 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w600))),
         ),
-
         ...(_savedAddresses).map((addr) {
           final label = addr['label'] as String;
           final icon = addr['icon'] as IconData;
@@ -1099,8 +1072,6 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
             ),
           );
         }),
-
-        // Add new address button
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: GestureDetector(
@@ -1143,21 +1114,16 @@ class _RingsPainter extends CustomPainter {
     final cx = size.width / 2;
     final cy = size.height / 2;
     final maxR = min(cx, cy) * 0.80 * scale;
-
-    // 4 rings: outer bright, inner fades
     final strokes = [0.75, 0.55, 0.38, 0.22];
     final fills = [0.07, 0.05, 0.04, 0.03];
-
     for (int i = 3; i >= 0; i--) {
       final r = maxR * ((i + 1) / 4);
-      // fill
       canvas.drawCircle(
           Offset(cx, cy),
           r,
           Paint()
             ..color = Colors.white.withOpacity(fills[i])
             ..style = PaintingStyle.fill);
-      // stroke
       canvas.drawCircle(
           Offset(cx, cy),
           r,

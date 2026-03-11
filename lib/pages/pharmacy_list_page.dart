@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'payment_gateway_page.dart';
 import 'pharmacy_detail_page.dart';
 
 class PharmacyListPage extends StatefulWidget {
@@ -82,7 +83,10 @@ class _PharmacyListPageState extends State<PharmacyListPage>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ));
     _controller.forward();
   }
 
@@ -112,7 +116,10 @@ class _PharmacyListPageState extends State<PharmacyListPage>
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white),
+                        icon: const Icon(
+                          Icons.menu,
+                          color: Colors.white,
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 10),
@@ -142,7 +149,10 @@ class _PharmacyListPageState extends State<PharmacyListPage>
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.gps_fixed, color: Colors.white),
+                        icon: const Icon(
+                          Icons.gps_fixed,
+                          color: Colors.white,
+                        ),
                         onPressed: () {},
                       ),
                     ],
@@ -205,9 +215,8 @@ class _PharmacyListPageState extends State<PharmacyListPage>
                           const SizedBox(height: 20),
                           Expanded(
                             child: ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               itemCount: pharmacies.length,
                               itemBuilder: (context, index) {
                                 return _PharmacyListCard(
@@ -373,9 +382,20 @@ class _PharmacyListCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pop(context); // close bottom sheet
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PaymentGatewayPage(
+                        amount: pharmacy['total'] ?? 'RS.0',
+                        pharmacyName: pharmacy['name'] ?? 'Pharmacy',
+                      ),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4DD0E1),
+                  backgroundColor: const Color(0xFF0796DE),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
