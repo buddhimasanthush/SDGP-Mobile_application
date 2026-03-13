@@ -1,135 +1,330 @@
 import 'package:flutter/material.dart';
+import 'order_store.dart';
 
-class PreviousOrdersPage extends StatelessWidget {
+class PreviousOrdersPage extends StatefulWidget {
   const PreviousOrdersPage({super.key});
 
   @override
+  State<PreviousOrdersPage> createState() => _PreviousOrdersPageState();
+}
+
+class _PreviousOrdersPageState extends State<PreviousOrdersPage>
+    with TickerProviderStateMixin {
+  late AnimationController _headerController;
+  late Animation<double> _headerFade;
+
+  @override
+  void initState() {
+    super.initState();
+    _headerController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    _headerFade =
+        CurvedAnimation(parent: _headerController, curve: Curves.easeOut);
+    _headerController.forward();
+  }
+
+  @override
+  void dispose() {
+    _headerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Demo data - replace with actual data later
-    final List<Map<String, dynamic>> orders = [];
+    final orders = OrderStore.instance.orders;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Past Orders',
-          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500),
-        ),
-        backgroundColor: const Color(0xFF0796DE),
-        foregroundColor: Colors.white,
-      ),
-      body: orders.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: const Color(0xFF001D70),
+      body: Column(
+        children: [
+          // ── Header ────────────────────────────────────────────────
+          Container(
+            color: const Color(0xFF0796DE),
+            child: SafeArea(
+              bottom: false,
+              child: Stack(
                 children: [
-                  Icon(Icons.history, size: 100, color: Colors.grey[300]),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'No previous purchases',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF919191),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Your order history will appear here',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Poppins',
-                      color: Color(0xFF919191),
+                  // Decorative circles
+                  Positioned(
+                      right: -30,
+                      top: -40,
+                      child: Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  width: 22,
+                                  color: Colors.white.withOpacity(0.12))))),
+                  Positioned(
+                      left: -20,
+                      bottom: -20,
+                      child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.06)))),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 16, 20),
+                    child: FadeTransition(
+                      opacity: _headerFade,
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  IconButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      icon: const Icon(Icons.arrow_back,
+                                          color: Colors.white, size: 24)),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.15),
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
+                                    child: Text(
+                                        '${orders.length} order${orders.length != 1 ? 's' : ''}',
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w500)),
+                                  ),
+                                ]),
+                            const SizedBox(height: 4),
+                            const Padding(
+                              padding: EdgeInsets.only(left: 16),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Past Orders',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 26,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w700)),
+                                    Text('Your delivery history',
+                                        style: TextStyle(
+                                            color: Color(0xFFD0EEFF),
+                                            fontSize: 13,
+                                            fontFamily: 'Poppins')),
+                                  ]),
+                            ),
+                          ]),
                     ),
                   ),
                 ],
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                return _OrderItem(
-                  orderId: order['id'],
-                  date: order['date'],
-                  items: order['items'],
-                  total: order['total'],
-                );
-              },
             ),
+          ),
+
+          // ── Content ───────────────────────────────────────────────
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                  color: Color(0xFFF5F7FF),
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28))),
+              child: orders.isEmpty
+                  ? _buildEmptyState()
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                      itemCount: orders.length,
+                      itemBuilder: (context, index) {
+                        return _OrderCard(order: orders[index], index: index);
+                      },
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF0796DE).withOpacity(0.08)),
+            child: Icon(Icons.receipt_long_rounded,
+                color: const Color(0xFF0796DE).withOpacity(0.4), size: 48),
+          ),
+          const SizedBox(height: 20),
+          const Text('No orders yet',
+              style: TextStyle(
+                  color: Color(0xFF0F172A),
+                  fontSize: 18,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Text('Your completed orders will appear here',
+              style: TextStyle(
+                  color: const Color(0xFF64748B).withOpacity(0.8),
+                  fontSize: 13,
+                  fontFamily: 'Poppins')),
+        ],
+      ),
     );
   }
 }
 
-class _OrderItem extends StatelessWidget {
-  final String orderId;
-  final String date;
-  final int items;
-  final double total;
+class _OrderCard extends StatefulWidget {
+  final OrderItem order;
+  final int index;
+  const _OrderCard({required this.order, required this.index});
 
-  const _OrderItem({
-    required this.orderId,
-    required this.date,
-    required this.items,
-    required this.total,
-  });
+  @override
+  State<_OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends State<_OrderCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<Offset> _slide;
+  late Animation<double> _fade;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 450));
+    _slide = Tween<Offset>(begin: const Offset(0, 0.25), end: Offset.zero)
+        .animate(
+            CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+    _fade = Tween<double>(begin: 0, end: 1).animate(_animController);
+
+    Future.delayed(Duration(milliseconds: 80 * widget.index), () {
+      if (mounted) _animController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F4F4),
-        border: Border.all(width: 1, color: const Color(0xFFEFEFEF)),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final order = widget.order;
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(
+        position: _slide,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                    color: const Color(0xFF0796DE).withOpacity(0.07),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4))
+              ]),
+          child: Column(
             children: [
-              Text(
-                'Order #$orderId',
-                style: const TextStyle(
-                  color: Color(0xFF1E1E1E),
-                  fontSize: 16,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                ),
+              // Top row
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: Row(children: [
+                  // Pharmacy icon
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                        color: const Color(0xFF0796DE).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(14)),
+                    child: const Icon(Icons.local_pharmacy_rounded,
+                        color: Color(0xFF0796DE), size: 26),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(order.pharmacyName,
+                              style: const TextStyle(
+                                  color: Color(0xFF0F172A),
+                                  fontSize: 15,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 2),
+                          Text(order.deliveredAt,
+                              style: const TextStyle(
+                                  color: Color(0xFF94A3B8),
+                                  fontSize: 11,
+                                  fontFamily: 'Poppins')),
+                        ]),
+                  ),
+                  // Status badge
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFF4CAF50).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20)),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                              color: Color(0xFF4CAF50),
+                              shape: BoxShape.circle)),
+                      const SizedBox(width: 5),
+                      const Text('Delivered',
+                          style: TextStyle(
+                              color: Color(0xFF4CAF50),
+                              fontSize: 11,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600)),
+                    ]),
+                  ),
+                ]),
               ),
-              Text(
-                date,
-                style: const TextStyle(
-                  color: Color(0xFF919191),
-                  fontSize: 14,
-                  fontFamily: 'Poppins',
-                ),
+
+              // Divider
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+
+              // Bottom row
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(children: [
+                        const Icon(Icons.tag_rounded,
+                            color: Color(0xFF94A3B8), size: 14),
+                        const SizedBox(width: 4),
+                        Text(order.orderId,
+                            style: const TextStyle(
+                                color: Color(0xFF94A3B8),
+                                fontSize: 12,
+                                fontFamily: 'Poppins')),
+                      ]),
+                      Text(order.amount,
+                          style: const TextStyle(
+                              color: Color(0xFF0796DE),
+                              fontSize: 16,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700)),
+                    ]),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            '$items items',
-            style: const TextStyle(
-              color: Color(0xFF919191),
-              fontSize: 14,
-              fontFamily: 'Poppins',
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            'Total: Rs. ${total.toStringAsFixed(2)}',
-            style: const TextStyle(
-              color: Color(0xFF0796DE),
-              fontSize: 16,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

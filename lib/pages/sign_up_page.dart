@@ -18,7 +18,6 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
   bool _rememberMe = true;
   bool _obscurePassword = true;
   bool _obscureRePassword = true;
-
   String _selectedEmoji = '';
   Color _selectedColor = const Color(0xFF0796DE);
 
@@ -32,7 +31,6 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
     Color(0xFFF44336),
     Color(0xFF009688),
   ];
-
   static const _emojiOptions = [
     '😀',
     '😎',
@@ -64,11 +62,10 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
     super.initState();
     _slideController = AnimationController(
         duration: const Duration(milliseconds: 600), vsync: this);
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1.0),
-      end: Offset.zero,
-    ).animate(
-        CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 1.0), end: Offset.zero).animate(
+            CurvedAnimation(
+                parent: _slideController, curve: Curves.easeOutCubic));
     _slideController.forward();
   }
 
@@ -122,11 +119,10 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
     UserStore.instance.emoji = _selectedEmoji;
 
     Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-          builder: (_) =>
-              OnboardingFlowPage(destination: const MainNavigationPage())),
-    );
+        context,
+        MaterialPageRoute(
+            builder: (_) =>
+                OnboardingFlowPage(destination: const MainNavigationPage())));
   }
 
   void _showEmojiPicker() {
@@ -161,52 +157,50 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
           const SizedBox(height: 20),
           Wrap(spacing: 12, runSpacing: 12, children: [
             GestureDetector(
-              onTap: () {
-                setState(() => _selectedEmoji = '');
-                Navigator.pop(context);
-              },
-              child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _selectedEmoji.isEmpty
-                          ? _selectedColor
-                          : Colors.white.withOpacity(0.1),
-                      border: Border.all(
-                          color: _selectedEmoji.isEmpty
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.2),
-                          width: 2)),
-                  child: Icon(Icons.person_rounded,
-                      color: _selectedEmoji.isEmpty
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.5),
-                      size: 28)),
-            ),
+                onTap: () {
+                  setState(() => _selectedEmoji = '');
+                  Navigator.pop(context);
+                },
+                child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _selectedEmoji.isEmpty
+                            ? _selectedColor
+                            : Colors.white.withOpacity(0.1),
+                        border: Border.all(
+                            color: _selectedEmoji.isEmpty
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.2),
+                            width: 2)),
+                    child: Icon(Icons.person_rounded,
+                        color: _selectedEmoji.isEmpty
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.5),
+                        size: 28))),
             ..._emojiOptions.map((e) => GestureDetector(
-                  onTap: () {
-                    setState(() => _selectedEmoji = e);
-                    Navigator.pop(context);
-                  },
-                  child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _selectedEmoji == e
-                              ? Colors.white.withOpacity(0.2)
-                              : Colors.white.withOpacity(0.07),
-                          border: Border.all(
-                              color: _selectedEmoji == e
-                                  ? Colors.white
-                                  : Colors.transparent,
-                              width: 2)),
-                      child: Center(
-                          child:
-                              Text(e, style: const TextStyle(fontSize: 28)))),
-                )),
+                onTap: () {
+                  setState(() => _selectedEmoji = e);
+                  Navigator.pop(context);
+                },
+                child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _selectedEmoji == e
+                            ? Colors.white.withOpacity(0.2)
+                            : Colors.white.withOpacity(0.07),
+                        border: Border.all(
+                            color: _selectedEmoji == e
+                                ? Colors.white
+                                : Colors.transparent,
+                            width: 2)),
+                    child: Center(
+                        child:
+                            Text(e, style: const TextStyle(fontSize: 28)))))),
           ]),
           const SizedBox(height: 8),
         ]),
@@ -216,20 +210,20 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // KEY: Scaffold is dark. Top section gets its own white Container.
-    // This means zero white gap at the bottom.
+    final topPadding = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: const Color(0xFF001D70),
       body: Column(
         children: [
-          // ── WHITE top section ─────────────────────────────────────────
-          Container(
-            color: Colors.white,
-            child: SafeArea(
-              bottom: false,
+          // ── WHITE top section — bleeds behind status bar ──────────────
+          ClipRect(
+            child: Container(
+              color: Colors.white,
               child: Stack(
+                clipBehavior: Clip.hardEdge,
                 children: [
-                  // Decorative circles (only within this white area)
+                  // Decorative circles
                   Positioned(
                       left: -21,
                       top: -117,
@@ -287,71 +281,66 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                                   border: Border.all(
                                       width: 30,
                                       color: const Color(0xFF10A2EA)))))),
-
-                  // Content
+                  // Content — padded below status bar
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 8, 24, 20),
+                    padding: EdgeInsets.fromLTRB(8, topPadding + 8, 24, 20),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            IconButton(
-                                onPressed: () => Navigator.pop(context),
-                                icon: const Icon(Icons.arrow_back, size: 24),
-                                color: const Color(0xFF0A2C8B)),
-                            Image.asset('assets/images/New logo VERT 1.png',
-                                width: 120,
-                                height: 66,
-                                errorBuilder: (_, __, ___) => const Text(
-                                    'MediFind',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF0796DE)))),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Create Your\nFree Account',
-                                  style: TextStyle(
-                                      color: Color(0xFF0A2C8B),
-                                      fontSize: 28,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w600,
-                                      height: 1.15,
-                                      letterSpacing: -0.3)),
-                              const SizedBox(height: 4),
-                              Text(
-                                  'Join thousands finding their medications with us.',
-                                  style: TextStyle(
-                                      color: const Color(0xFF034A83)
-                                          .withOpacity(0.75),
-                                      fontSize: 12,
-                                      fontFamily: 'Poppins')),
-                            ],
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                IconButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    icon:
+                                        const Icon(Icons.arrow_back, size: 24),
+                                    color: const Color(0xFF0A2C8B)),
+                                Image.asset('assets/images/New logo VERT 1.png',
+                                    width: 120,
+                                    height: 66,
+                                    errorBuilder: (_, __, ___) => const Text(
+                                        'MediFind',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF0796DE)))),
+                              ]),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Create Your\nFree Account',
+                                      style: TextStyle(
+                                          color: Color(0xFF0A2C8B),
+                                          fontSize: 28,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.15,
+                                          letterSpacing: -0.3)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                      'Join thousands finding their medications with us.',
+                                      style: TextStyle(
+                                          color: const Color(0xFF034A83)
+                                              .withOpacity(0.75),
+                                          fontSize: 12,
+                                          fontFamily: 'Poppins')),
+                                ]),
                           ),
-                        ),
-                      ],
-                    ),
+                        ]),
                   ),
                 ],
               ),
             ),
           ),
 
-          // ── DARK sliding card — overlaps white section by 28px ────────
+          // ── DARK sliding card ─────────────────────────────────────────
           Expanded(
             child: SlideTransition(
               position: _slideAnimation,
               child: Container(
-                // Negative top margin pulls card up over the white edge
-                margin: const EdgeInsets.only(top: -28),
                 decoration: const BoxDecoration(
                     color: Color(0xFF001D70),
                     borderRadius: BorderRadius.only(
@@ -360,236 +349,227 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(24, 20, 24, 48),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // drag handle
-                      Center(
-                          child: Container(
-                              width: 30,
-                              height: 9,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                      color: const Color(0xFF979797))))),
-                      const SizedBox(height: 24),
-
-                      // ── Avatar ────────────────────────────────────────
-                      Center(
-                          child: Column(children: [
-                        GestureDetector(
-                          onTap: _showEmojiPicker,
-                          child: Stack(
-                            alignment: Alignment.bottomRight,
-                            children: [
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 250),
-                                width: 88,
-                                height: 88,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // drag handle
+                        Center(
+                            child: Container(
+                                width: 30,
+                                height: 9,
                                 decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: _selectedEmoji.isEmpty
-                                      ? _selectedColor
-                                      : Colors.white.withOpacity(0.12),
-                                  border: Border.all(
-                                      color: _selectedColor, width: 3),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: _selectedColor.withOpacity(0.45),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 6))
-                                  ],
-                                ),
-                                child: Center(
-                                    child: _selectedEmoji.isEmpty
-                                        ? const Icon(Icons.person_rounded,
-                                            color: Colors.white, size: 44)
-                                        : Text(_selectedEmoji,
-                                            style:
-                                                const TextStyle(fontSize: 42))),
-                              ),
-                              Container(
-                                  width: 26,
-                                  height: 26,
-                                  decoration: BoxDecoration(
-                                      color: _selectedColor,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                          color: const Color(0xFF001D70),
-                                          width: 2)),
-                                  child: const Icon(Icons.edit_rounded,
-                                      color: Colors.white, size: 13)),
-                            ],
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: const Color(0xFF979797))))),
+                        const SizedBox(height: 24),
+
+                        // Avatar
+                        Center(
+                            child: Column(children: [
+                          GestureDetector(
+                            onTap: _showEmojiPicker,
+                            child: Stack(
+                                alignment: Alignment.bottomRight,
+                                children: [
+                                  AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 250),
+                                      width: 88,
+                                      height: 88,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: _selectedEmoji.isEmpty
+                                              ? _selectedColor
+                                              : Colors.white.withOpacity(0.12),
+                                          border: Border.all(
+                                              color: _selectedColor, width: 3),
+                                          boxShadow: [
+                                            BoxShadow(
+                                                color: _selectedColor
+                                                    .withOpacity(0.45),
+                                                blurRadius: 20,
+                                                offset: const Offset(0, 6))
+                                          ]),
+                                      child: Center(
+                                          child: _selectedEmoji.isEmpty
+                                              ? const Icon(Icons.person_rounded,
+                                                  color: Colors.white, size: 44)
+                                              : Text(_selectedEmoji,
+                                                  style: const TextStyle(
+                                                      fontSize: 42)))),
+                                  Container(
+                                      width: 26,
+                                      height: 26,
+                                      decoration: BoxDecoration(
+                                          color: _selectedColor,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: const Color(0xFF001D70),
+                                              width: 2)),
+                                      child: const Icon(Icons.edit_rounded,
+                                          color: Colors.white, size: 13)),
+                                ]),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text('Tap to choose avatar',
+                          const SizedBox(height: 8),
+                          Text('Tap to choose avatar',
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.5),
+                                  fontSize: 11,
+                                  fontFamily: 'Poppins')),
+                        ])),
+                        const SizedBox(height: 24),
+
+                        _label('Full Name'), const SizedBox(height: 8),
+                        _field(
+                            controller: _nameController,
+                            hint: 'Enter your name'),
+                        const SizedBox(height: 16),
+
+                        _label('Email'), const SizedBox(height: 8),
+                        _field(
+                            controller: _emailController,
+                            hint: 'example@email.com',
+                            keyboardType: TextInputType.emailAddress),
+                        const SizedBox(height: 16),
+
+                        _label('Password'), const SizedBox(height: 8),
+                        _field(
+                            controller: _passwordController,
+                            obscure: _obscurePassword,
+                            suffix: IconButton(
+                                icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    color: Colors.white,
+                                    size: 20),
+                                onPressed: () => setState(() =>
+                                    _obscurePassword = !_obscurePassword))),
+                        const SizedBox(height: 16),
+
+                        _label('Re-Enter Password'), const SizedBox(height: 8),
+                        _field(
+                            controller: _rePasswordController,
+                            obscure: _obscureRePassword,
+                            suffix: IconButton(
+                                icon: Icon(
+                                    _obscureRePassword
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    color: Colors.white,
+                                    size: 20),
+                                onPressed: () => setState(() =>
+                                    _obscureRePassword = !_obscureRePassword))),
+                        const SizedBox(height: 24),
+
+                        _label('Profile Colour'),
+                        const SizedBox(height: 4),
+                        Text(
+                            'Changes the avatar background colour in real time',
                             style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withOpacity(0.45),
                                 fontSize: 11,
                                 fontFamily: 'Poppins')),
-                      ])),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 14),
+                        Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: _palette.map((c) {
+                              final sel = c == _selectedColor;
+                              return GestureDetector(
+                                  onTap: () =>
+                                      setState(() => _selectedColor = c),
+                                  child: AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: c,
+                                          border: Border.all(
+                                              color: sel
+                                                  ? Colors.white
+                                                  : Colors.transparent,
+                                              width: 3),
+                                          boxShadow: sel
+                                              ? [
+                                                  BoxShadow(
+                                                      color:
+                                                          c.withOpacity(0.65),
+                                                      blurRadius: 10,
+                                                      spreadRadius: 1)
+                                                ]
+                                              : []),
+                                      child: sel
+                                          ? const Icon(Icons.check_rounded,
+                                              color: Colors.white, size: 20)
+                                          : null));
+                            }).toList()),
+                        const SizedBox(height: 20),
 
-                      // ── Fields ────────────────────────────────────────
-                      _label('Full Name'),
-                      const SizedBox(height: 8),
-                      _field(
-                          controller: _nameController, hint: 'Enter your name'),
-                      const SizedBox(height: 16),
-
-                      _label('Email'),
-                      const SizedBox(height: 8),
-                      _field(
-                          controller: _emailController,
-                          hint: 'example@email.com',
-                          keyboardType: TextInputType.emailAddress),
-                      const SizedBox(height: 16),
-
-                      _label('Password'),
-                      const SizedBox(height: 8),
-                      _field(
-                          controller: _passwordController,
-                          obscure: _obscurePassword,
-                          suffix: IconButton(
-                              icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
+                        Row(children: [
+                          SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: Checkbox(
+                                  value: _rememberMe,
+                                  onChanged: (v) =>
+                                      setState(() => _rememberMe = v ?? false),
+                                  fillColor: WidgetStateProperty.all(
+                                      const Color(0xFF2196F3)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(2)))),
+                          const SizedBox(width: 6),
+                          const Text('Remember me',
+                              style: TextStyle(
                                   color: Colors.white,
-                                  size: 20),
-                              onPressed: () => setState(
-                                  () => _obscurePassword = !_obscurePassword))),
-                      const SizedBox(height: 16),
+                                  fontSize: 10,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w400)),
+                        ]),
+                        const SizedBox(height: 28),
 
-                      _label('Re-Enter Password'),
-                      const SizedBox(height: 8),
-                      _field(
-                          controller: _rePasswordController,
-                          obscure: _obscureRePassword,
-                          suffix: IconButton(
-                              icon: Icon(
-                                  _obscureRePassword
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                  color: Colors.white,
-                                  size: 20),
-                              onPressed: () => setState(() =>
-                                  _obscureRePassword = !_obscureRePassword))),
-                      const SizedBox(height: 24),
-
-                      // ── Colour picker ─────────────────────────────────
-                      _label('Profile Colour'),
-                      const SizedBox(height: 4),
-                      Text('Changes the avatar background colour in real time',
-                          style: TextStyle(
-                              color: Colors.white.withOpacity(0.45),
-                              fontSize: 11,
-                              fontFamily: 'Poppins')),
-                      const SizedBox(height: 14),
-                      Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: _palette.map((c) {
-                            final sel = c == _selectedColor;
-                            return GestureDetector(
-                                onTap: () => setState(() => _selectedColor = c),
-                                child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: c,
-                                        border: Border.all(
-                                            color: sel
-                                                ? Colors.white
-                                                : Colors.transparent,
-                                            width: 3),
-                                        boxShadow: sel
-                                            ? [
-                                                BoxShadow(
-                                                    color: c.withOpacity(0.65),
-                                                    blurRadius: 10,
-                                                    spreadRadius: 1)
-                                              ]
-                                            : []),
-                                    child: sel
-                                        ? const Icon(Icons.check_rounded,
-                                            color: Colors.white, size: 20)
-                                        : null));
-                          }).toList()),
-                      const SizedBox(height: 20),
-
-                      // ── Remember me ───────────────────────────────────
-                      Row(children: [
                         SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: Checkbox(
-                                value: _rememberMe,
-                                onChanged: (v) =>
-                                    setState(() => _rememberMe = v ?? false),
-                                fillColor: WidgetStateProperty.all(
-                                    const Color(0xFF2196F3)),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(2)))),
-                        const SizedBox(width: 6),
-                        const Text('Remember me',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                                letterSpacing: -0.10)),
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                                onPressed: _submit,
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF0796DE),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(100)),
+                                    elevation: 4,
+                                    shadowColor: Colors.black.withOpacity(0.2)),
+                                child: const Text('Create Account',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w700)))),
+                        const SizedBox(height: 28),
+
+                        Center(
+                            child: GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: RichText(
+                                    text: const TextSpan(children: [
+                                  TextSpan(
+                                      text: 'Already have an account?  ',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                          fontFamily: 'Poppins')),
+                                  TextSpan(
+                                      text: 'Sign In',
+                                      style: TextStyle(
+                                          color: Color(0xFF0796DE),
+                                          fontSize: 13,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w700)),
+                                ])))),
                       ]),
-                      const SizedBox(height: 28),
-
-                      // ── Create Account button ─────────────────────────
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: _submit,
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0796DE),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(100)),
-                              elevation: 4,
-                              shadowColor: Colors.black.withOpacity(0.2)),
-                          child: const Text('Create Account',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700)),
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-
-                      // ── Sign in link ──────────────────────────────────
-                      Center(
-                          child: GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: RichText(
-                            text: const TextSpan(children: [
-                          TextSpan(
-                              text: 'Already have an account?  ',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontFamily: 'Poppins')),
-                          TextSpan(
-                              text: 'Sign In',
-                              style: TextStyle(
-                                  color: Color(0xFF0796DE),
-                                  fontSize: 13,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700)),
-                        ])),
-                      )),
-                    ],
-                  ),
                 ),
               ),
             ),
@@ -615,31 +595,30 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
     TextInputType? keyboardType,
   }) {
     return TextField(
-      controller: controller,
-      obscureText: obscure,
-      keyboardType: keyboardType,
-      style: const TextStyle(
-          color: Colors.white,
-          fontSize: 13,
-          fontFamily: 'Poppins',
-          fontWeight: FontWeight.w500),
-      decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-              color: Colors.white.withOpacity(0.45),
-              fontSize: 13,
-              fontFamily: 'Poppins'),
-          filled: false,
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(100),
-              borderSide:
-                  BorderSide(color: Colors.white.withOpacity(0.5), width: 1)),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(100),
-              borderSide: const BorderSide(color: Colors.white, width: 2)),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          suffixIcon: suffix),
-    );
+        controller: controller,
+        obscureText: obscure,
+        keyboardType: keyboardType,
+        style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+                color: Colors.white.withOpacity(0.45),
+                fontSize: 13,
+                fontFamily: 'Poppins'),
+            filled: false,
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(100),
+                borderSide:
+                    BorderSide(color: Colors.white.withOpacity(0.5), width: 1)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(100),
+                borderSide: const BorderSide(color: Colors.white, width: 2)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            suffixIcon: suffix));
   }
 }

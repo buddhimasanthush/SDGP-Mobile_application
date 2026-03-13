@@ -1,22 +1,24 @@
 import 'dart:math';
+import 'order_store.dart';
 import 'package:flutter/material.dart';
-import 'order_tracking_page.dart';
 
-class PaymentSuccessPage extends StatefulWidget {
-  final String amount;
+class DeliverySuccessPage extends StatefulWidget {
   final String pharmacyName;
+  final String amount;
+  final String orderId;
 
-  const PaymentSuccessPage({
+  const DeliverySuccessPage({
     super.key,
-    required this.amount,
     required this.pharmacyName,
+    required this.amount,
+    required this.orderId,
   });
 
   @override
-  State<PaymentSuccessPage> createState() => _PaymentSuccessPageState();
+  State<DeliverySuccessPage> createState() => _DeliverySuccessPageState();
 }
 
-class _PaymentSuccessPageState extends State<PaymentSuccessPage>
+class _DeliverySuccessPageState extends State<DeliverySuccessPage>
     with TickerProviderStateMixin {
   late AnimationController _circleController;
   late AnimationController _checkController;
@@ -29,13 +31,11 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
   late Animation<Offset> _contentSlide;
   late Animation<double> _confettiAnim;
 
-  final String _transactionId = '#MF${Random().nextInt(900000) + 100000}';
-
   final _confettiItems = List.generate(
-      20,
+      22,
       (i) => _ConfettiDot(
             x: Random().nextDouble(),
-            y: Random().nextDouble() * 0.5,
+            y: Random().nextDouble() * 0.6,
             size: Random().nextDouble() * 8 + 5,
             color: [
               const Color(0xFF0796DE),
@@ -43,7 +43,8 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
               const Color(0xFFFFD700),
               const Color(0xFFFF6B6B),
               Colors.white,
-            ][Random().nextInt(5)],
+              const Color(0xFF9C27B0),
+            ][Random().nextInt(6)],
             speed: Random().nextDouble() * 0.4 + 0.3,
           ));
 
@@ -71,6 +72,17 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
             CurvedAnimation(parent: _contentController, curve: Curves.easeOut));
     _confettiAnim =
         CurvedAnimation(parent: _confettiController, curve: Curves.easeOut);
+
+    // Save to order history
+    final now = DateTime.now();
+    OrderStore.instance.addOrder(OrderItem(
+      pharmacyName: widget.pharmacyName,
+      amount: widget.amount,
+      orderId: widget.orderId,
+      deliveredAt:
+          '${now.day}/${now.month}/${now.year}  •  ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
+      status: 'Delivered',
+    ));
 
     Future.delayed(
         const Duration(milliseconds: 100), () => _circleController.forward());
@@ -157,7 +169,7 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
                 children: [
                   const Spacer(flex: 2),
 
-                  // Animated check icon
+                  // Animated icon
                   ScaleTransition(
                     scale: _circleScale,
                     child: Container(
@@ -184,7 +196,7 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
                                       Color(0xFF11A2EB),
                                       Color(0xFF0796DE)
                                     ])),
-                            child: const Icon(Icons.check_rounded,
+                            child: const Icon(Icons.home_rounded,
                                 color: Colors.white, size: 46),
                           ),
                         ),
@@ -194,21 +206,21 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
 
                   const SizedBox(height: 28),
 
-                  // Title
+                  // Text
                   SlideTransition(
                     position: _contentSlide,
                     child: FadeTransition(
                       opacity: _contentOpacity,
                       child: Column(children: [
-                        const Text('Payment Successful!',
+                        const Text('Order Delivered!',
                             style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 26,
+                                fontSize: 28,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w700)),
                         const SizedBox(height: 8),
                         Text(
-                            'Your order from ${widget.pharmacyName}\nhas been confirmed.',
+                            'Your order from ${widget.pharmacyName}\nhas been delivered successfully.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.white.withOpacity(0.65),
@@ -247,12 +259,12 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
                           const Divider(color: Colors.white12, height: 24),
                           _ReceiptRow(
                               label: 'Status',
-                              value: 'Confirmed',
+                              value: 'Delivered ✓',
                               valueColor: const Color(0xFF4CAF50)),
                           const SizedBox(height: 8),
                           _ReceiptRow(
-                              label: 'Transaction ID',
-                              value: _transactionId,
+                              label: 'Order ID',
+                              value: widget.orderId,
                               valueColor: Colors.white70),
                         ]),
                       ),
@@ -261,21 +273,15 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
 
                   const Spacer(flex: 3),
 
-                  // Track Order button
+                  // Button
                   FadeTransition(
                     opacity: _contentOpacity,
                     child: SizedBox(
                       width: double.infinity,
                       height: 54,
                       child: ElevatedButton(
-                        onPressed: () => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => OrderTrackingPage(
-                                      pharmacyName: widget.pharmacyName,
-                                      pharmacyAddress: 'No 317, Jathikapola',
-                                      amount: widget.amount,
-                                    ))),
+                        onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                            context, '/home', (_) => false),
                         style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF0796DE),
                             shape: RoundedRectangleBorder(
@@ -283,39 +289,16 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage>
                             elevation: 8,
                             shadowColor:
                                 const Color(0xFF0796DE).withOpacity(0.5)),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.location_on_rounded,
-                                color: Colors.white, size: 20),
-                            SizedBox(width: 8),
-                            Text('Track Order',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w700)),
-                          ],
-                        ),
+                        child: const Text('Back to Home',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w700)),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-
-                  // Back to home (secondary)
-                  FadeTransition(
-                    opacity: _contentOpacity,
-                    child: TextButton(
-                      onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                          context, '/home', (_) => false),
-                      child: Text('Back to Home',
-                          style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 14,
-                              fontFamily: 'Poppins')),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
