@@ -1,8 +1,13 @@
-/// Simple singleton to share user data across pages.
+// Simple singleton to store user data across pages
 class UserStore {
-  static final UserStore instance = UserStore._();
   UserStore._();
+  static final UserStore instance = UserStore._();
 
-  String profileName = 'User';
-  String emoji = '';
+  String name = 'User';
+  String email = '';
+  String emoji = '👤';
+
+  // Alias so existing code using profileName still works
+  String get profileName => name;
+  set profileName(String value) => name = value;
 }
