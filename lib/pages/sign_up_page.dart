@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'user_store.dart';
+import 'onboarding_flow_page.dart';
+import 'main_navigation_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -8,20 +10,17 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
-  final _nameCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-  final _confirmCtrl = TextEditingController();
-  bool _obscurePass = true, _obscureConfirm = true;
-  String _emoji = '';
-  Color _color = const Color(0xFF0796DE);
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _rePasswordController = TextEditingController();
 
-  // Validation errors
-  String? _nameError, _passError, _confirmError;
+  bool _rememberMe = true;
+  bool _obscurePassword = true;
+  bool _obscureRePassword = true;
 
-  late AnimationController _slideCtrl;
-  late Animation<Offset> _slideAnim;
-  late List<AnimationController> _fcs;
-  late List<Animation<double>> _fxs, _fys;
+  String _selectedEmoji = '';
+  Color _selectedColor = const Color(0xFF0796DE);
 
   static const _palette = [
     Color(0xFF0796DE),
@@ -34,154 +33,182 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
     Color(0xFF009688),
   ];
 
+  static const _emojiOptions = [
+    '😀',
+    '😎',
+    '🥳',
+    '😍',
+    '🤩',
+    '😊',
+    '🔥',
+    '💪',
+    '🌟',
+    '🦁',
+    '🐯',
+    '🦊',
+    '🐧',
+    '🐬',
+    '🦋',
+    '🌈',
+    '⚡',
+    '🎯',
+    '🏆',
+    '💎',
+  ];
+
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
-    _slideCtrl = AnimationController(
+    _slideController = AnimationController(
         duration: const Duration(milliseconds: 600), vsync: this);
-    _slideAnim = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
-        .animate(
-            CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOutCubic));
-    _slideCtrl.forward();
-
-    final dur = [3200, 4000, 5100, 3600, 4400];
-    final dx = [18.0, -16.0, 22.0, -18.0, 14.0];
-    final dy = [-22.0, 20.0, 14.0, -18.0, 20.0];
-    _fcs = List.generate(
-        5,
-        (i) => AnimationController(
-            vsync: this, duration: Duration(milliseconds: dur[i]))
-          ..repeat(reverse: true));
-    _fxs = List.generate(
-        5,
-        (i) => Tween<double>(begin: 0, end: dx[i]).animate(
-            CurvedAnimation(parent: _fcs[i], curve: Curves.easeInOut)));
-    _fys = List.generate(
-        5,
-        (i) => Tween<double>(begin: 0, end: dy[i]).animate(
-            CurvedAnimation(parent: _fcs[i], curve: Curves.easeInOut)));
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1.0),
+      end: Offset.zero,
+    ).animate(
+        CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
+    _slideController.forward();
   }
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
-    _passCtrl.dispose();
-    _confirmCtrl.dispose();
-    _slideCtrl.dispose();
-    for (final c in _fcs) c.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _rePasswordController.dispose();
+    _slideController.dispose();
     super.dispose();
   }
 
-  bool _validate() {
-    final name = _nameCtrl.text.trim();
-    final pass = _passCtrl.text;
-    final confirm = _confirmCtrl.text;
-    setState(() {
-      _nameError = name.isEmpty ? 'Please enter a profile name' : null;
-      _passError =
-          pass.length < 6 ? 'Password must be at least 6 characters' : null;
-      _confirmError = pass != confirm ? 'Passwords do not match' : null;
-    });
-    return _nameError == null && _passError == null && _confirmError == null;
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 13)),
+      backgroundColor: const Color(0xFFEF5350),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+    ));
   }
 
   void _submit() {
-    if (!_validate()) return;
-    final name = _nameCtrl.text.trim();
-    UserStore.instance.profileName = name[0].toUpperCase() + name.substring(1);
-    UserStore.instance.emoji = _emoji;
-    Navigator.pushReplacementNamed(context, '/home');
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final rePass = _rePasswordController.text;
+
+    if (name.isEmpty) {
+      _showError('Please enter your full name');
+      return;
+    }
+    if (email.isEmpty || !email.contains('@')) {
+      _showError('Please enter a valid email address');
+      return;
+    }
+    if (password.length < 6) {
+      _showError('Password must be at least 6 characters');
+      return;
+    }
+    if (password != rePass) {
+      _showError('Passwords do not match');
+      return;
+    }
+
+    UserStore.instance.name = name[0].toUpperCase() + name.substring(1);
+    UserStore.instance.email = email;
+    UserStore.instance.avatarColorValue = _selectedColor.value;
+    UserStore.instance.emoji = _selectedEmoji;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+          builder: (_) =>
+              OnboardingFlowPage(destination: const MainNavigationPage())),
+    );
   }
 
-  void _pickEmoji() {
-    final ctrl = TextEditingController(text: _emoji);
+  void _showEmojiPicker() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: const Color(0xFF001D70),
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const SizedBox(height: 16),
           Container(
               width: 36,
               height: 4,
               decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(2))),
-          const SizedBox(height: 16),
-          const Text('Choose your avatar emoji',
+          const SizedBox(height: 18),
+          const Text('Choose your avatar',
               style: TextStyle(
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: 16,
                   fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600)),
+                  fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
-          Text('Type or paste any emoji below',
+          Text('Tap an emoji to set it as your avatar',
               style: TextStyle(
                   color: Colors.white.withOpacity(0.5),
                   fontSize: 12,
                   fontFamily: 'Poppins')),
           const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: TextField(
-                controller: ctrl,
-                autofocus: true,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 40),
-                maxLength: 2,
-                decoration: InputDecoration(
-                    counterText: '',
-                    hintText: '😊',
-                    hintStyle: TextStyle(
-                        fontSize: 40, color: Colors.white.withOpacity(0.3)),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.08),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none))),
-          ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(children: [
-              Expanded(
-                  child: OutlinedButton(
-                onPressed: () => Navigator.pop(ctx),
-                style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white38),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(100)),
-                    padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: const Text('Cancel',
-                    style:
-                        TextStyle(color: Colors.white, fontFamily: 'Poppins')),
-              )),
-              const SizedBox(width: 12),
-              Expanded(
-                  child: ElevatedButton(
-                onPressed: () {
-                  setState(() => _emoji = ctrl.text.trim());
-                  Navigator.pop(ctx);
-                },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0796DE),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(100)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    elevation: 0),
-                child: const Text('Done',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600)),
-              )),
-            ]),
-          ),
-          const SizedBox(height: 28),
+          Wrap(spacing: 12, runSpacing: 12, children: [
+            GestureDetector(
+              onTap: () {
+                setState(() => _selectedEmoji = '');
+                Navigator.pop(context);
+              },
+              child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _selectedEmoji.isEmpty
+                          ? _selectedColor
+                          : Colors.white.withOpacity(0.1),
+                      border: Border.all(
+                          color: _selectedEmoji.isEmpty
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.2),
+                          width: 2)),
+                  child: Icon(Icons.person_rounded,
+                      color: _selectedEmoji.isEmpty
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.5),
+                      size: 28)),
+            ),
+            ..._emojiOptions.map((e) => GestureDetector(
+                  onTap: () {
+                    setState(() => _selectedEmoji = e);
+                    Navigator.pop(context);
+                  },
+                  child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _selectedEmoji == e
+                              ? Colors.white.withOpacity(0.2)
+                              : Colors.white.withOpacity(0.07),
+                          border: Border.all(
+                              color: _selectedEmoji == e
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              width: 2)),
+                      child: Center(
+                          child:
+                              Text(e, style: const TextStyle(fontSize: 28)))),
+                )),
+          ]),
+          const SizedBox(height: 8),
         ]),
       ),
     );
@@ -189,197 +216,288 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // KEY: Scaffold is dark. Top section gets its own white Container.
+    // This means zero white gap at the bottom.
     return Scaffold(
       backgroundColor: const Color(0xFF001D70),
       body: Column(
         children: [
-          AnimatedBuilder(
-            animation: Listenable.merge(_fcs),
-            builder: (ctx, _) => Container(
-              color: Colors.white,
-              child: SafeArea(
-                bottom: false,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    _ring(-21 + _fxs[0].value, -117 + _fys[0].value, 183, 0),
-                    _blob(72 + _fxs[1].value, 179 + _fys[1].value, 153, 3.03,
-                        const Color(0xAFFDEDCA), const Color(0xFF0A9BE2)),
-                    _blob(-25 + _fxs[2].value, 45 + _fys[2].value, 89, 0.57,
-                        const Color(0xFFFDEDCA), const Color(0xFF0A9BE2)),
-                    _blob(52 + _fxs[3].value, 14 + _fys[3].value, 94, 3.03,
-                        const Color(0xAFFDEDCA), const Color(0xFF0A9BE2)),
-                    _ring(240 + _fxs[4].value, 130 + _fys[4].value, 167, 0.40),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+          // ── WHITE top section ─────────────────────────────────────────
+          Container(
+            color: Colors.white,
+            child: SafeArea(
+              bottom: false,
+              child: Stack(
+                children: [
+                  // Decorative circles (only within this white area)
+                  Positioned(
+                      left: -21,
+                      top: -117,
+                      child: Container(
+                          width: 183,
+                          height: 183,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  width: 30, color: const Color(0xFF10A2EA))))),
+                  Positioned(
+                      left: 72,
+                      top: 80,
+                      child: Opacity(
+                          opacity: 0.25,
+                          child: Container(
+                              width: 154,
+                              height: 154,
+                              decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                      begin: Alignment(0.93, 0.35),
+                                      end: Alignment(0.06, 0.40),
+                                      colors: [
+                                        Color(0xAFFDEDCA),
+                                        Color(0xFF0A9BE2)
+                                      ]))))),
+                  Positioned(
+                      left: -26,
+                      top: 45,
+                      child: Opacity(
+                          opacity: 0.25,
+                          child: Container(
+                              width: 89,
+                              height: 89,
+                              decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                      begin: Alignment(0.93, 0.35),
+                                      end: Alignment(0.06, 0.40),
+                                      colors: [
+                                        Color(0xFFFDEDCA),
+                                        Color(0xFF0A9BE2)
+                                      ]))))),
+                  Positioned(
+                      left: 265,
+                      top: 30,
+                      child: Transform.rotate(
+                          angle: 0.40,
+                          child: Container(
+                              width: 167,
+                              height: 167,
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      width: 30,
+                                      color: const Color(0xFF10A2EA)))))),
+
+                  // Content
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 24, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  IconButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      icon: const Icon(Icons.arrow_back,
-                                          size: 24),
-                                      color: const Color(0xFF0A2C8B)),
-                                  Image.asset(
-                                      'assets/images/New logo VERT 1.png',
-                                      width: 132,
-                                      height: 74,
-                                      errorBuilder: (_, __, ___) => const Text(
-                                          'MediFind',
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFF0796DE)))),
-                                ]),
-                            const SizedBox(height: 16),
-                            const Text('Create Your\nFree Account',
-                                style: TextStyle(
-                                    color: Color(0xFF0A2C8B),
-                                    fontSize: 32,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                    height: 1.1,
-                                    letterSpacing: -0.32)),
-                            const SizedBox(height: 6),
-                            const Text(
-                                'Join thousands of users finding\ntheir medications with us.',
-                                style: TextStyle(
-                                    color: Color(0xFF034A83),
-                                    fontSize: 12,
-                                    fontFamily: 'Poppins',
-                                    letterSpacing: -0.12)),
-                          ]),
+                            IconButton(
+                                onPressed: () => Navigator.pop(context),
+                                icon: const Icon(Icons.arrow_back, size: 24),
+                                color: const Color(0xFF0A2C8B)),
+                            Image.asset('assets/images/New logo VERT 1.png',
+                                width: 120,
+                                height: 66,
+                                errorBuilder: (_, __, ___) => const Text(
+                                    'MediFind',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0796DE)))),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Create Your\nFree Account',
+                                  style: TextStyle(
+                                      color: Color(0xFF0A2C8B),
+                                      fontSize: 28,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.15,
+                                      letterSpacing: -0.3)),
+                              const SizedBox(height: 4),
+                              Text(
+                                  'Join thousands finding their medications with us.',
+                                  style: TextStyle(
+                                      color: const Color(0xFF034A83)
+                                          .withOpacity(0.75),
+                                      fontSize: 12,
+                                      fontFamily: 'Poppins')),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
+
+          // ── DARK sliding card — overlaps white section by 28px ────────
           Expanded(
             child: SlideTransition(
-              position: _slideAnim,
+              position: _slideAnimation,
               child: Container(
+                // Negative top margin pulls card up over the white edge
+                margin: const EdgeInsets.only(top: -28),
                 decoration: const BoxDecoration(
                     color: Color(0xFF001D70),
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(32),
                         topRight: Radius.circular(32))),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 48),
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 48),
                   child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                            child: Container(
-                                width: 30,
-                                height: 9,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        color: const Color(0xFF979797))))),
-                        const SizedBox(height: 24),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // drag handle
+                      Center(
+                          child: Container(
+                              width: 30,
+                              height: 9,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: const Color(0xFF979797))))),
+                      const SizedBox(height: 24),
 
-                        // Avatar
-                        Center(
-                            child: GestureDetector(
-                          onTap: _pickEmoji,
+                      // ── Avatar ────────────────────────────────────────
+                      Center(
                           child: Column(children: [
-                            Container(
-                                width: 80,
-                                height: 80,
+                        GestureDetector(
+                          onTap: _showEmojiPicker,
+                          child: Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                width: 88,
+                                height: 88,
                                 decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: _emoji.isEmpty
-                                        ? _color
-                                        : Colors.white.withOpacity(0.1),
-                                    border:
-                                        Border.all(color: _color, width: 3)),
+                                  shape: BoxShape.circle,
+                                  color: _selectedEmoji.isEmpty
+                                      ? _selectedColor
+                                      : Colors.white.withOpacity(0.12),
+                                  border: Border.all(
+                                      color: _selectedColor, width: 3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: _selectedColor.withOpacity(0.45),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 6))
+                                  ],
+                                ),
                                 child: Center(
-                                    child: _emoji.isEmpty
+                                    child: _selectedEmoji.isEmpty
                                         ? const Icon(Icons.person_rounded,
-                                            color: Colors.white, size: 40)
-                                        : Text(_emoji,
-                                            style: const TextStyle(
-                                                fontSize: 38)))),
-                            const SizedBox(height: 8),
-                            Row(mainAxisSize: MainAxisSize.min, children: [
-                              Icon(Icons.edit_rounded,
-                                  color: Colors.white.withOpacity(0.6),
-                                  size: 13),
-                              const SizedBox(width: 4),
-                              Text('Tap to set avatar emoji',
-                                  style: TextStyle(
-                                      color: Colors.white.withOpacity(0.6),
-                                      fontSize: 11,
-                                      fontFamily: 'Poppins')),
-                            ]),
-                          ]),
-                        )),
-                        const SizedBox(height: 24),
-
-                        _lbl('Profile Name'),
-                        _fld(
-                            ctrl: _nameCtrl,
-                            hint: 'Enter your name',
-                            error: _nameError),
-                        const SizedBox(height: 20),
-
-                        _lbl('Password'),
-                        _fld(
-                            ctrl: _passCtrl,
-                            hint: 'Min. 6 characters',
-                            obscure: _obscurePass,
-                            error: _passError,
-                            suffix: IconButton(
-                                icon: Icon(
-                                    _obscurePass
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                    color: Colors.white,
-                                    size: 20),
-                                onPressed: () => setState(
-                                    () => _obscurePass = !_obscurePass))),
-                        const SizedBox(height: 20),
-
-                        _lbl('Confirm Password'),
-                        _fld(
-                            ctrl: _confirmCtrl,
-                            obscure: _obscureConfirm,
-                            error: _confirmError,
-                            suffix: IconButton(
-                                icon: Icon(
-                                    _obscureConfirm
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                    color: Colors.white,
-                                    size: 20),
-                                onPressed: () => setState(
-                                    () => _obscureConfirm = !_obscureConfirm))),
-                        const SizedBox(height: 24),
-
-                        _lbl('Profile Colour'),
-                        Text('Shown when no emoji is set',
+                                            color: Colors.white, size: 44)
+                                        : Text(_selectedEmoji,
+                                            style:
+                                                const TextStyle(fontSize: 42))),
+                              ),
+                              Container(
+                                  width: 26,
+                                  height: 26,
+                                  decoration: BoxDecoration(
+                                      color: _selectedColor,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: const Color(0xFF001D70),
+                                          width: 2)),
+                                  child: const Icon(Icons.edit_rounded,
+                                      color: Colors.white, size: 13)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text('Tap to choose avatar',
                             style: TextStyle(
-                                color: Colors.white.withOpacity(0.45),
+                                color: Colors.white.withOpacity(0.5),
                                 fontSize: 11,
                                 fontFamily: 'Poppins')),
-                        const SizedBox(height: 14),
-                        Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children: _palette.map((c) {
-                              final sel = c == _color;
-                              return GestureDetector(
-                                onTap: () => setState(() => _color = c),
+                      ])),
+                      const SizedBox(height: 24),
+
+                      // ── Fields ────────────────────────────────────────
+                      _label('Full Name'),
+                      const SizedBox(height: 8),
+                      _field(
+                          controller: _nameController, hint: 'Enter your name'),
+                      const SizedBox(height: 16),
+
+                      _label('Email'),
+                      const SizedBox(height: 8),
+                      _field(
+                          controller: _emailController,
+                          hint: 'example@email.com',
+                          keyboardType: TextInputType.emailAddress),
+                      const SizedBox(height: 16),
+
+                      _label('Password'),
+                      const SizedBox(height: 8),
+                      _field(
+                          controller: _passwordController,
+                          obscure: _obscurePassword,
+                          suffix: IconButton(
+                              icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: Colors.white,
+                                  size: 20),
+                              onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword))),
+                      const SizedBox(height: 16),
+
+                      _label('Re-Enter Password'),
+                      const SizedBox(height: 8),
+                      _field(
+                          controller: _rePasswordController,
+                          obscure: _obscureRePassword,
+                          suffix: IconButton(
+                              icon: Icon(
+                                  _obscureRePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: Colors.white,
+                                  size: 20),
+                              onPressed: () => setState(() =>
+                                  _obscureRePassword = !_obscureRePassword))),
+                      const SizedBox(height: 24),
+
+                      // ── Colour picker ─────────────────────────────────
+                      _label('Profile Colour'),
+                      const SizedBox(height: 4),
+                      Text('Changes the avatar background colour in real time',
+                          style: TextStyle(
+                              color: Colors.white.withOpacity(0.45),
+                              fontSize: 11,
+                              fontFamily: 'Poppins')),
+                      const SizedBox(height: 14),
+                      Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: _palette.map((c) {
+                            final sel = c == _selectedColor;
+                            return GestureDetector(
+                                onTap: () => setState(() => _selectedColor = c),
                                 child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
-                                    width: 38,
-                                    height: 38,
+                                    width: 40,
+                                    height: 40,
                                     decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: c,
@@ -391,60 +509,87 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                                         boxShadow: sel
                                             ? [
                                                 BoxShadow(
-                                                    color: c.withOpacity(0.6),
-                                                    blurRadius: 8,
+                                                    color: c.withOpacity(0.65),
+                                                    blurRadius: 10,
                                                     spreadRadius: 1)
                                               ]
                                             : []),
                                     child: sel
                                         ? const Icon(Icons.check_rounded,
-                                            color: Colors.white, size: 18)
-                                        : null),
-                              );
-                            }).toList()),
-                        const SizedBox(height: 32),
+                                            color: Colors.white, size: 20)
+                                        : null));
+                          }).toList()),
+                      const SizedBox(height: 20),
 
+                      // ── Remember me ───────────────────────────────────
+                      Row(children: [
                         SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: _submit,
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0796DE),
+                            width: 18,
+                            height: 18,
+                            child: Checkbox(
+                                value: _rememberMe,
+                                onChanged: (v) =>
+                                    setState(() => _rememberMe = v ?? false),
+                                fillColor: WidgetStateProperty.all(
+                                    const Color(0xFF2196F3)),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(100)),
-                                elevation: 4),
-                            child: const Text('Create Account',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w700)),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        Center(
-                            child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: RichText(
-                              text: const TextSpan(children: [
-                            TextSpan(
-                                text: 'Already have an account?  ',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontFamily: 'Poppins')),
-                            TextSpan(
-                                text: 'Sign In',
-                                style: TextStyle(
-                                    color: Color(0xFF0796DE),
-                                    fontSize: 13,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w700)),
-                          ])),
-                        )),
+                                    borderRadius: BorderRadius.circular(2)))),
+                        const SizedBox(width: 6),
+                        const Text('Remember me',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: -0.10)),
                       ]),
+                      const SizedBox(height: 28),
+
+                      // ── Create Account button ─────────────────────────
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _submit,
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0796DE),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(100)),
+                              elevation: 4,
+                              shadowColor: Colors.black.withOpacity(0.2)),
+                          child: const Text('Create Account',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+
+                      // ── Sign in link ──────────────────────────────────
+                      Center(
+                          child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: RichText(
+                            text: const TextSpan(children: [
+                          TextSpan(
+                              text: 'Already have an account?  ',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontFamily: 'Poppins')),
+                          TextSpan(
+                              text: 'Sign In',
+                              style: TextStyle(
+                                  color: Color(0xFF0796DE),
+                                  fontSize: 13,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700)),
+                        ])),
+                      )),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -454,90 +599,47 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _lbl(String t) => Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(t,
-          style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w500)));
+  Widget _label(String text) => Text(text,
+      style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w500,
+          letterSpacing: -0.36));
 
-  Widget _fld(
-      {TextEditingController? ctrl,
-      String? hint,
-      bool obscure = false,
-      Widget? suffix,
-      String? error}) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      TextField(
-          controller: ctrl,
-          obscureText: obscure,
-          style: const TextStyle(
-              color: Colors.white, fontSize: 13, fontFamily: 'Poppins'),
-          decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(
-                  color: Colors.white.withOpacity(0.45),
-                  fontSize: 13,
-                  fontFamily: 'Poppins'),
-              filled: false,
-              enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(100),
-                  borderSide: BorderSide(
-                      color: error != null
-                          ? const Color(0xFFFF6B6B)
-                          : Colors.white.withOpacity(0.5),
-                      width: error != null ? 1.5 : 1)),
-              focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(100),
-                  borderSide: const BorderSide(color: Colors.white, width: 2)),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              suffixIcon: suffix)),
-      if (error != null) ...[
-        const SizedBox(height: 6),
-        Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: Text(error,
-              style: const TextStyle(
-                  color: Color(0xFFFF6B6B),
-                  fontSize: 11,
-                  fontFamily: 'Poppins')),
-        ),
-      ],
-    ]);
+  Widget _field({
+    required TextEditingController controller,
+    String? hint,
+    bool obscure = false,
+    Widget? suffix,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      keyboardType: keyboardType,
+      style: const TextStyle(
+          color: Colors.white,
+          fontSize: 13,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w500),
+      decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(
+              color: Colors.white.withOpacity(0.45),
+              fontSize: 13,
+              fontFamily: 'Poppins'),
+          filled: false,
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(100),
+              borderSide:
+                  BorderSide(color: Colors.white.withOpacity(0.5), width: 1)),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(100),
+              borderSide: const BorderSide(color: Colors.white, width: 2)),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          suffixIcon: suffix),
+    );
   }
-
-  Widget _ring(double l, double t, double sz, double angle) => Positioned(
-      left: l,
-      top: t,
-      child: Transform.rotate(
-          angle: angle,
-          child: Container(
-              width: sz,
-              height: sz,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border:
-                      Border.all(width: 30, color: const Color(0xFF10A2EA))))));
-
-  Widget _blob(
-          double l, double t, double sz, double angle, Color c1, Color c2) =>
-      Positioned(
-          left: l,
-          top: t,
-          child: Opacity(
-              opacity: 0.30,
-              child: Transform.rotate(
-                  angle: angle,
-                  child: Container(
-                      width: sz,
-                      height: sz,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                              begin: const Alignment(0.93, 0.35),
-                              end: const Alignment(0.06, 0.40),
-                              colors: [c1, c2]))))));
 }
