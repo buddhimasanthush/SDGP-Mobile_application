@@ -240,511 +240,537 @@ class _UploadPrescriptionOptionsPageState
 
               // White card
               Expanded(
-                child: Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                      color: Color(0xFFFAFAFA),
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(25),
-                          topRight: Radius.circular(25))),
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 19),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Drag handle
-                            Center(
-                                child: Container(
-                                    margin: const EdgeInsets.only(top: 14),
-                                    width: 36,
-                                    height: 9,
-                                    decoration: BoxDecoration(
-                                        color: const Color(0xFFECEFEE),
-                                        borderRadius:
-                                            BorderRadius.circular(2.5)))),
-                            const SizedBox(height: 24),
+                child: Stack(children: [
+                  // White fill to cover blue at very bottom
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 60,
+                    child: Container(color: const Color(0xFFFAFAFA)),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                        color: Color(0xFFFAFAFA),
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(25),
+                            topRight: Radius.circular(25))),
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 19),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Drag handle
+                              Center(
+                                  child: Container(
+                                      margin: const EdgeInsets.only(top: 14),
+                                      width: 36,
+                                      height: 9,
+                                      decoration: BoxDecoration(
+                                          color: const Color(0xFFECEFEE),
+                                          borderRadius:
+                                              BorderRadius.circular(2.5)))),
+                              const SizedBox(height: 24),
 
-                            // ── OTP Field (moved to TOP so it's required first) ──
-                            const Text('Prescription Authentication Code (OTP)',
-                                style: TextStyle(
-                                    color: Color(0xFF2D2D2D),
-                                    fontSize: 13,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500)),
-                            const SizedBox(height: 8),
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: const Color(0xFFEDEDED),
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                        color: Color(0x1A000000),
-                                        blurRadius: 4,
-                                        offset: Offset(0, 2))
-                                  ]),
-                              child: TextField(
-                                controller: _otpController,
-                                keyboardType: TextInputType.number,
-                                style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    color: Color(0xFF2D2D2D)),
-                                decoration: const InputDecoration(
-                                  hintText: 'Enter doctor-issued OTP...',
-                                  hintStyle: TextStyle(
-                                      color: Color(0xFF9E9E9E),
+                              // ── OTP Field (moved to TOP so it's required first) ──
+                              const Text(
+                                  'Prescription Authentication Code (OTP)',
+                                  style: TextStyle(
+                                      color: Color(0xFF2D2D2D),
+                                      fontSize: 13,
                                       fontFamily: 'Poppins',
-                                      fontSize: 13),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 14),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                                'This code is provided by your doctor to verify authenticity.',
-                                style: TextStyle(
-                                    color: Color(0xFF697282),
-                                    fontSize: 11,
-                                    fontFamily: 'Arimo',
-                                    fontWeight: FontWeight.w400)),
-                            const SizedBox(height: 24),
-
-                            // ── Take Photo ──────────────────────────────────
-                            _buildOptionCard(
-                              icon: Icons.camera_alt_rounded,
-                              label: 'Take Photo',
-                              isSelected: _selectedOption == 'camera',
-                              onTap: () => _requireOtp(() {
-                                setState(() => _selectedOption = 'camera');
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) =>
-                                            PrescriptionCameraPage()));
-                              }),
-                            ),
-                            const SizedBox(height: 19),
-
-                            // ── Upload From Gallery ─────────────────────────
-                            _buildOptionCard(
-                              icon: Icons.image_rounded,
-                              label: 'Upload From Gallery',
-                              isSelected: _selectedOption == 'gallery',
-                              onTap: () => _requireOtp(() {
-                                setState(() => _selectedOption = 'gallery');
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) =>
-                                            PrescriptionGalleryPage()));
-                              }),
-                            ),
-                            const SizedBox(height: 19),
-
-                            // ── Enter Manually toggle ───────────────────────
-                            GestureDetector(
-                              onTap: _toggleManual,
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                width: double.infinity,
-                                height: 94,
-                                decoration: ShapeDecoration(
-                                  color: _showManual
-                                      ? const Color(0xFFE8F6FF)
-                                      : Colors.white,
-                                  shape: RoundedRectangleBorder(
+                                      fontWeight: FontWeight.w500)),
+                              const SizedBox(height: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                    color: const Color(0xFFEDEDED),
                                     borderRadius: BorderRadius.circular(8),
-                                    side: _showManual
-                                        ? const BorderSide(
-                                            color: Color(0xFF11A2EB),
-                                            width: 1.5)
-                                        : BorderSide.none,
-                                  ),
-                                  shadows: const [
-                                    BoxShadow(
-                                        color: Color(0x3F000000),
-                                        blurRadius: 4,
-                                        offset: Offset(0, 4))
-                                  ],
-                                ),
-                                child: Row(children: [
-                                  const SizedBox(width: 19),
-                                  Container(
-                                    width: 56,
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                        color: _showManual
-                                            ? const Color(0xFF0796DE)
-                                            : const Color(0xFF11A2EB),
-                                        shape: BoxShape.circle),
-                                    child: Icon(
-                                        _showManual
-                                            ? Icons.edit_note_rounded
-                                            : Icons.edit_rounded,
-                                        color: Colors.white,
-                                        size: 27),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                      child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                        Text('Enter Medicines Manually',
-                                            style: TextStyle(
-                                                color: _showManual
-                                                    ? const Color(0xFF0796DE)
-                                                    : const Color(0xFF2D2D2D),
-                                                fontSize: 16,
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w400)),
-                                        const SizedBox(height: 2),
-                                        const Text(
-                                            'Type medicine names and dosages',
-                                            style: TextStyle(
-                                                color: Color(0xFF94A3B8),
-                                                fontSize: 11,
-                                                fontFamily: 'Poppins')),
-                                      ])),
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 14),
-                                    child: AnimatedRotation(
-                                      turns: _showManual ? 0.5 : 0,
-                                      duration:
-                                          const Duration(milliseconds: 300),
-                                      child: Icon(
-                                          Icons.keyboard_arrow_down_rounded,
-                                          color: _showManual
-                                              ? const Color(0xFF0796DE)
-                                              : const Color(0xFF94A3B8),
-                                          size: 24),
-                                    ),
-                                  ),
-                                ]),
-                              ),
-                            ),
-
-                            // ── Manual entry section ────────────────────────
-                            SizeTransition(
-                              sizeFactor: _anim,
-                              axisAlignment: -1,
-                              child: FadeTransition(
-                                opacity: _anim,
-                                child: Container(
-                                  margin: const EdgeInsets.only(top: 12),
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(
-                                          color: const Color(0xFFE5E7EB),
-                                          width: 0.83),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.04),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2))
-                                      ]),
-                                  child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              const Text('Medicines List',
-                                                  style: TextStyle(
-                                                      color: Color(0xFF0F172A),
-                                                      fontSize: 14,
-                                                      fontFamily: 'Poppins',
-                                                      fontWeight:
-                                                          FontWeight.w600)),
-                                              GestureDetector(
-                                                onTap: _addMed,
-                                                child: Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 6),
-                                                  decoration: BoxDecoration(
-                                                      color: const Color(
-                                                          0xFF0796DE),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20)),
-                                                  child: const Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Icon(Icons.add_rounded,
-                                                            color: Colors.white,
-                                                            size: 16),
-                                                        SizedBox(width: 4),
-                                                        Text('Add',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 12,
-                                                                fontFamily:
-                                                                    'Poppins',
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600)),
-                                                      ]),
-                                                ),
-                                              ),
-                                            ]),
-                                        const SizedBox(height: 14),
-                                        ...List.generate(
-                                            _meds.length,
-                                            (i) => Container(
-                                                  margin: const EdgeInsets.only(
-                                                      bottom: 12),
-                                                  padding:
-                                                      const EdgeInsets.all(14),
-                                                  decoration: BoxDecoration(
-                                                      color: const Color(
-                                                          0xFFF8FAFC),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              12),
-                                                      border: Border.all(
-                                                          color: const Color(
-                                                              0xFFE2E8F0))),
-                                                  child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
-                                                            children: [
-                                                              Container(
-                                                                padding: const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        10,
-                                                                    vertical:
-                                                                        4),
-                                                                decoration: BoxDecoration(
-                                                                    color: const Color(
-                                                                            0xFF0796DE)
-                                                                        .withOpacity(
-                                                                            0.1),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            20)),
-                                                                child: Text(
-                                                                    'Medicine ${i + 1}',
-                                                                    style: const TextStyle(
-                                                                        color: Color(
-                                                                            0xFF0796DE),
-                                                                        fontSize:
-                                                                            11,
-                                                                        fontFamily:
-                                                                            'Poppins',
-                                                                        fontWeight:
-                                                                            FontWeight.w600)),
-                                                              ),
-                                                              if (_meds.length >
-                                                                  1)
-                                                                GestureDetector(
-                                                                  onTap: () =>
-                                                                      _removeMed(
-                                                                          i),
-                                                                  child:
-                                                                      Container(
-                                                                    width: 28,
-                                                                    height: 28,
-                                                                    decoration: BoxDecoration(
-                                                                        color: const Color(0xFFEF5350).withOpacity(
-                                                                            0.1),
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(8)),
-                                                                    child: const Icon(
-                                                                        Icons
-                                                                            .remove_rounded,
-                                                                        color: Color(
-                                                                            0xFFEF5350),
-                                                                        size:
-                                                                            16),
-                                                                  ),
-                                                                ),
-                                                            ]),
-                                                        const SizedBox(
-                                                            height: 10),
-                                                        _lbl('Medicine Name *'),
-                                                        const SizedBox(
-                                                            height: 5),
-                                                        _tf(
-                                                            _meds[i].name,
-                                                            'e.g. Paracetamol 500mg',
-                                                            Icons
-                                                                .medication_rounded),
-                                                        const SizedBox(
-                                                            height: 10),
-                                                        Row(children: [
-                                                          Expanded(
-                                                              child: Column(
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                _lbl('Dosage'),
-                                                                const SizedBox(
-                                                                    height: 5),
-                                                                _tf(
-                                                                    _meds[i]
-                                                                        .dosage,
-                                                                    'e.g. 2x daily',
-                                                                    Icons
-                                                                        .access_time_rounded),
-                                                              ])),
-                                                          const SizedBox(
-                                                              width: 10),
-                                                          Expanded(
-                                                              child: Column(
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                _lbl(
-                                                                    'Quantity'),
-                                                                const SizedBox(
-                                                                    height: 5),
-                                                                _tf(
-                                                                    _meds[i]
-                                                                        .qty,
-                                                                    'e.g. 10',
-                                                                    Icons
-                                                                        .numbers_rounded,
-                                                                    num: true),
-                                                              ])),
-                                                        ]),
-                                                      ]),
-                                                )),
-                                      ]),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 28),
-
-                            // ── Guidelines ──────────────────────────────────
-                            const Text('Important Guidelines',
-                                style: TextStyle(
-                                    color: Color(0xFF2D2D2D),
-                                    fontSize: 14,
-                                    fontFamily: 'Arimo',
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.43)),
-                            const SizedBox(height: 10),
-                            _buildGuideline(
-                                'Ensure prescription is clear and readable'),
-                            _buildGuideline(
-                                'Prescription must be issued within the last 6 months'),
-                            _buildGuideline(
-                                "Doctor's signature and stamp must be visible"),
-                            _buildGuideline(
-                                'Patient name and date should be clearly visible'),
-                            const SizedBox(height: 20),
-
-                            // ── Privacy ─────────────────────────────────────
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(13),
-                              decoration: ShapeDecoration(
-                                  color: const Color(0xFFEFF6FF),
-                                  shape: RoundedRectangleBorder(
-                                      side: const BorderSide(
-                                          width: 0.83,
-                                          color: Color(0x3310A1EB)),
-                                      borderRadius: BorderRadius.circular(14))),
-                              child: const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('🔒 Privacy Protected:',
-                                        style: TextStyle(
-                                            color: Color(0xFF11A2EB),
-                                            fontSize: 12,
-                                            fontFamily: 'Arimo',
-                                            fontWeight: FontWeight.w400,
-                                            height: 1.33)),
-                                    SizedBox(height: 4),
-                                    Text(
-                                        'Your prescription data is encrypted and securely stored.',
-                                        style: TextStyle(
-                                            color: Color(0xFF354152),
-                                            fontSize: 12,
-                                            fontFamily: 'Arimo',
-                                            fontWeight: FontWeight.w400,
-                                            height: 1.33)),
-                                  ]),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // ── Continue ────────────────────────────────────
-                            SizedBox(
-                              width: double.infinity,
-                              height: 54,
-                              child: ElevatedButton(
-                                onPressed: _onContinue,
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0796DE),
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10))),
-                                child: const Text('Continue',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
+                                    boxShadow: const [
+                                      BoxShadow(
+                                          color: Color(0x1A000000),
+                                          blurRadius: 4,
+                                          offset: Offset(0, 2))
+                                    ]),
+                                child: TextField(
+                                  controller: _otpController,
+                                  keyboardType: TextInputType.number,
+                                  style: const TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 14,
+                                      color: Color(0xFF2D2D2D)),
+                                  decoration: const InputDecoration(
+                                    hintText: 'Enter doctor-issued OTP...',
+                                    hintStyle: TextStyle(
+                                        color: Color(0xFF9E9E9E),
                                         fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w500,
-                                        height: 1)),
+                                        fontSize: 13),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 14),
+                                  ),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 22),
-
-                            Center(
-                                child: Column(children: [
-                              const Text('Need help uploading?',
+                              const SizedBox(height: 6),
+                              const Text(
+                                  'This code is provided by your doctor to verify authenticity.',
                                   style: TextStyle(
                                       color: Color(0xFF697282),
-                                      fontSize: 12,
+                                      fontSize: 11,
+                                      fontFamily: 'Arimo',
+                                      fontWeight: FontWeight.w400)),
+                              const SizedBox(height: 24),
+
+                              // ── Take Photo ──────────────────────────────────
+                              _buildOptionCard(
+                                icon: Icons.camera_alt_rounded,
+                                label: 'Take Photo',
+                                isSelected: _selectedOption == 'camera',
+                                onTap: () => _requireOtp(() {
+                                  setState(() => _selectedOption = 'camera');
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              PrescriptionCameraPage()));
+                                }),
+                              ),
+                              const SizedBox(height: 19),
+
+                              // ── Upload From Gallery ─────────────────────────
+                              _buildOptionCard(
+                                icon: Icons.image_rounded,
+                                label: 'Upload From Gallery',
+                                isSelected: _selectedOption == 'gallery',
+                                onTap: () => _requireOtp(() {
+                                  setState(() => _selectedOption = 'gallery');
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              PrescriptionGalleryPage()));
+                                }),
+                              ),
+                              const SizedBox(height: 19),
+
+                              // ── Enter Manually toggle ───────────────────────
+                              GestureDetector(
+                                onTap: _toggleManual,
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 180),
+                                  width: double.infinity,
+                                  height: 94,
+                                  decoration: ShapeDecoration(
+                                    color: _showManual
+                                        ? const Color(0xFFE8F6FF)
+                                        : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      side: _showManual
+                                          ? const BorderSide(
+                                              color: Color(0xFF11A2EB),
+                                              width: 1.5)
+                                          : BorderSide.none,
+                                    ),
+                                    shadows: const [
+                                      BoxShadow(
+                                          color: Color(0x3F000000),
+                                          blurRadius: 4,
+                                          offset: Offset(0, 4))
+                                    ],
+                                  ),
+                                  child: Row(children: [
+                                    const SizedBox(width: 19),
+                                    Container(
+                                      width: 56,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                          color: _showManual
+                                              ? const Color(0xFF0796DE)
+                                              : const Color(0xFF11A2EB),
+                                          shape: BoxShape.circle),
+                                      child: Icon(
+                                          _showManual
+                                              ? Icons.edit_note_rounded
+                                              : Icons.edit_rounded,
+                                          color: Colors.white,
+                                          size: 27),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    Expanded(
+                                        child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                          Text('Enter Medicines Manually',
+                                              style: TextStyle(
+                                                  color: _showManual
+                                                      ? const Color(0xFF0796DE)
+                                                      : const Color(0xFF2D2D2D),
+                                                  fontSize: 16,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w400)),
+                                          const SizedBox(height: 2),
+                                          const Text(
+                                              'Type medicine names and dosages',
+                                              style: TextStyle(
+                                                  color: Color(0xFF94A3B8),
+                                                  fontSize: 11,
+                                                  fontFamily: 'Poppins')),
+                                        ])),
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 14),
+                                      child: AnimatedRotation(
+                                        turns: _showManual ? 0.5 : 0,
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        child: Icon(
+                                            Icons.keyboard_arrow_down_rounded,
+                                            color: _showManual
+                                                ? const Color(0xFF0796DE)
+                                                : const Color(0xFF94A3B8),
+                                            size: 24),
+                                      ),
+                                    ),
+                                  ]),
+                                ),
+                              ),
+
+                              // ── Manual entry section ────────────────────────
+                              SizeTransition(
+                                sizeFactor: _anim,
+                                axisAlignment: -1,
+                                child: FadeTransition(
+                                  opacity: _anim,
+                                  child: Container(
+                                    margin: const EdgeInsets.only(top: 12),
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                            color: const Color(0xFFE5E7EB),
+                                            width: 0.83),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.black
+                                                  .withOpacity(0.04),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 2))
+                                        ]),
+                                    child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                const Text('Medicines List',
+                                                    style: TextStyle(
+                                                        color:
+                                                            Color(0xFF0F172A),
+                                                        fontSize: 14,
+                                                        fontFamily: 'Poppins',
+                                                        fontWeight:
+                                                            FontWeight.w600)),
+                                                GestureDetector(
+                                                  onTap: _addMed,
+                                                  child: Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 6),
+                                                    decoration: BoxDecoration(
+                                                        color: const Color(
+                                                            0xFF0796DE),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20)),
+                                                    child: const Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Icon(
+                                                              Icons.add_rounded,
+                                                              color:
+                                                                  Colors.white,
+                                                              size: 16),
+                                                          SizedBox(width: 4),
+                                                          Text('Add',
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  fontSize: 12,
+                                                                  fontFamily:
+                                                                      'Poppins',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600)),
+                                                        ]),
+                                                  ),
+                                                ),
+                                              ]),
+                                          const SizedBox(height: 14),
+                                          ...List.generate(
+                                              _meds.length,
+                                              (i) => Container(
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                            bottom: 12),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            14),
+                                                    decoration: BoxDecoration(
+                                                        color: const Color(
+                                                            0xFFF8FAFC),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                        border: Border.all(
+                                                            color: const Color(
+                                                                0xFFE2E8F0))),
+                                                    child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Container(
+                                                                  padding: const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          10,
+                                                                      vertical:
+                                                                          4),
+                                                                  decoration: BoxDecoration(
+                                                                      color: const Color(
+                                                                              0xFF0796DE)
+                                                                          .withOpacity(
+                                                                              0.1),
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              20)),
+                                                                  child: Text(
+                                                                      'Medicine ${i + 1}',
+                                                                      style: const TextStyle(
+                                                                          color: Color(
+                                                                              0xFF0796DE),
+                                                                          fontSize:
+                                                                              11,
+                                                                          fontFamily:
+                                                                              'Poppins',
+                                                                          fontWeight:
+                                                                              FontWeight.w600)),
+                                                                ),
+                                                                if (_meds
+                                                                        .length >
+                                                                    1)
+                                                                  GestureDetector(
+                                                                    onTap: () =>
+                                                                        _removeMed(
+                                                                            i),
+                                                                    child:
+                                                                        Container(
+                                                                      width: 28,
+                                                                      height:
+                                                                          28,
+                                                                      decoration: BoxDecoration(
+                                                                          color: const Color(0xFFEF5350).withOpacity(
+                                                                              0.1),
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(8)),
+                                                                      child: const Icon(
+                                                                          Icons
+                                                                              .remove_rounded,
+                                                                          color: Color(
+                                                                              0xFFEF5350),
+                                                                          size:
+                                                                              16),
+                                                                    ),
+                                                                  ),
+                                                              ]),
+                                                          const SizedBox(
+                                                              height: 10),
+                                                          _lbl(
+                                                              'Medicine Name *'),
+                                                          const SizedBox(
+                                                              height: 5),
+                                                          _tf(
+                                                              _meds[i].name,
+                                                              'e.g. Paracetamol 500mg',
+                                                              Icons
+                                                                  .medication_rounded),
+                                                          const SizedBox(
+                                                              height: 10),
+                                                          Row(children: [
+                                                            Expanded(
+                                                                child: Column(
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                  _lbl(
+                                                                      'Dosage'),
+                                                                  const SizedBox(
+                                                                      height:
+                                                                          5),
+                                                                  _tf(
+                                                                      _meds[i]
+                                                                          .dosage,
+                                                                      'e.g. 2x daily',
+                                                                      Icons
+                                                                          .access_time_rounded),
+                                                                ])),
+                                                            const SizedBox(
+                                                                width: 10),
+                                                            Expanded(
+                                                                child: Column(
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                  _lbl(
+                                                                      'Quantity'),
+                                                                  const SizedBox(
+                                                                      height:
+                                                                          5),
+                                                                  _tf(
+                                                                      _meds[i]
+                                                                          .qty,
+                                                                      'e.g. 10',
+                                                                      Icons
+                                                                          .numbers_rounded,
+                                                                      num:
+                                                                          true),
+                                                                ])),
+                                                          ]),
+                                                        ]),
+                                                  )),
+                                        ]),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 28),
+
+                              // ── Guidelines ──────────────────────────────────
+                              const Text('Important Guidelines',
+                                  style: TextStyle(
+                                      color: Color(0xFF2D2D2D),
+                                      fontSize: 14,
                                       fontFamily: 'Arimo',
                                       fontWeight: FontWeight.w400,
-                                      height: 1.33)),
-                              const SizedBox(height: 4),
-                              GestureDetector(
-                                onTap: () {},
-                                child: const Text('Contact Support',
+                                      height: 1.43)),
+                              const SizedBox(height: 10),
+                              _buildGuideline(
+                                  'Ensure prescription is clear and readable'),
+                              _buildGuideline(
+                                  'Prescription must be issued within the last 6 months'),
+                              _buildGuideline(
+                                  "Doctor's signature and stamp must be visible"),
+                              _buildGuideline(
+                                  'Patient name and date should be clearly visible'),
+                              const SizedBox(height: 20),
+
+                              // ── Privacy ─────────────────────────────────────
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(13),
+                                decoration: ShapeDecoration(
+                                    color: const Color(0xFFEFF6FF),
+                                    shape: RoundedRectangleBorder(
+                                        side: const BorderSide(
+                                            width: 0.83,
+                                            color: Color(0x3310A1EB)),
+                                        borderRadius:
+                                            BorderRadius.circular(14))),
+                                child: const Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('🔒 Privacy Protected:',
+                                          style: TextStyle(
+                                              color: Color(0xFF11A2EB),
+                                              fontSize: 12,
+                                              fontFamily: 'Arimo',
+                                              fontWeight: FontWeight.w400,
+                                              height: 1.33)),
+                                      SizedBox(height: 4),
+                                      Text(
+                                          'Your prescription data is encrypted and securely stored.',
+                                          style: TextStyle(
+                                              color: Color(0xFF354152),
+                                              fontSize: 12,
+                                              fontFamily: 'Arimo',
+                                              fontWeight: FontWeight.w400,
+                                              height: 1.33)),
+                                    ]),
+                              ),
+                              const SizedBox(height: 24),
+
+                              // ── Continue ────────────────────────────────────
+                              SizedBox(
+                                width: double.infinity,
+                                height: 54,
+                                child: ElevatedButton(
+                                  onPressed: _onContinue,
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF0796DE),
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10))),
+                                  child: const Text('Continue',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w500,
+                                          height: 1)),
+                                ),
+                              ),
+                              const SizedBox(height: 22),
+
+                              Center(
+                                  child: Column(children: [
+                                const Text('Need help uploading?',
                                     style: TextStyle(
-                                        color: Color(0xFF11A2EB),
+                                        color: Color(0xFF697282),
                                         fontSize: 12,
                                         fontFamily: 'Arimo',
                                         fontWeight: FontWeight.w400,
-                                        height: 1.33,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor: Color(0xFF11A2EB))),
-                              ),
-                            ])),
-                            const SizedBox(height: 30),
-                          ]),
+                                        height: 1.33)),
+                                const SizedBox(height: 4),
+                                GestureDetector(
+                                  onTap: () {},
+                                  child: const Text('Contact Support',
+                                      style: TextStyle(
+                                          color: Color(0xFF11A2EB),
+                                          fontSize: 12,
+                                          fontFamily: 'Arimo',
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.33,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: Color(0xFF11A2EB))),
+                                ),
+                              ])),
+                              const SizedBox(height: 30),
+                            ]),
+                      ),
                     ),
                   ),
-                ),
+                ]), // closes Stack
               ),
             ]),
           ),
