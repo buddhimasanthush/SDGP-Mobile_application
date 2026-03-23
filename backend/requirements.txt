@@ -4,3 +4,4 @@ python-dotenv
 easyocr
 pillow>=10.0.0
 openai
+pydantic
