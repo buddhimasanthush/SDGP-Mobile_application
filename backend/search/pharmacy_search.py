@@ -86,3 +86,11 @@ async def search_pharmacies(
     """
 
     med_ids = [m.medicine_id for m in medicines]
+    med_qtys = [m.quantity for m in medicines]
+    total_meds = len(medicines)
+
+    # ── Call Supabase RPC ──
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{SUPABASE_URL}/rest/v1/rpc/search_pharmacies",
+            headers={
