@@ -19,8 +19,6 @@ class UserStore {
   String bloodType = '';
   String allergies = '';
   String chronicConditions = '';
-  int age = 0; // 0 = not set
-  double weight = 0; // 0 = not set (kg)
 
   // Flag so the app only shows onboarding once
   bool hasCompletedOnboarding = false;
