@@ -18,10 +18,37 @@ DEEPSEEK_API_KEY = os.environ.get(
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEEPSEEK_MODEL = "deepseek-chat"
 
-# Initialise OpenAI-compatible client pointed at DeepSeek
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
 
 MAX_RETRIES = 2
+
+EXTRACTION_PROMPT = """You are an expert pharmacist AI.
+You will be given OCR text extracted from a medical prescription image.
+Extract ALL information and return a single JSON object matching this structure exactly:
+
+{
+  "confidence": "high",
+  "prescriber": { "name": null, "specialty": null, "contact": null },
+  "patient": { "name": null, "age": null, "gender": null },
+  "diagnosis_notes": "",
+  "medications": [
+    {
+      "drug_name": "Medicine Name",
+      "strength": "500mg",
+      "dosage_form": "tablet",
+      "instructions": "Take after food",
+      "frequency": "twice daily",
+      "duration": "5 days",
+      "quantity": "10"
+    }
+  ]
+}
+
+Rules:
+- Use null for any field you cannot determine
+- If no medications are found, return an empty medications list []
+- Return ONLY the JSON object, no extra text or markdown fences
+"""
 
 # -- EasyOCR Reader (lazy singleton) --
 _easyocr_reader = None
