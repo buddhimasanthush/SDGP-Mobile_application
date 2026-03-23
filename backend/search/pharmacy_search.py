@@ -166,3 +166,11 @@ async def search_pharmacies(
 def _build_suggestion(partials: list[PharmacyResult], total: int) -> str:
     """Generate a helpful fallback message."""
     if not partials:
+        return "No pharmacies found nearby with the requested medicines. Try increasing your search radius."
+
+    best = partials[0]
+    missing = total - best.matched_medicines
+
+    if missing == 1:
+        return (
+            f"{best.pharmacy_name} has {best.matched_medicines}/{total} medicines. "
