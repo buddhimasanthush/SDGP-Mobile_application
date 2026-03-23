@@ -174,3 +174,11 @@ def _build_suggestion(partials: list[PharmacyResult], total: int) -> str:
     if missing == 1:
         return (
             f"{best.pharmacy_name} has {best.matched_medicines}/{total} medicines. "
+            f"1 medicine is unavailable — try an alternative brand or a second pharmacy."
+        )
+
+    return (
+        f"No single pharmacy has all {total} medicines. "
+        f"{best.pharmacy_name} covers {best.matched_medicines}/{total}. "
+        f"Consider splitting your order across pharmacies."
+    )
