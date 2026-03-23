@@ -39,6 +39,13 @@ def preprocess_image(image_path: str) -> str:
     return out_path
 
 
-# -- Handle low-res images --
-def _needs_upscaling(w, h):
-    return max(w, h) < 1000
+# -- OCR text extraction --
+def extract_text_easyocr(image_path: str) -> str:
+    try:
+        reader = _get_easyocr_reader()
+        results = reader.readtext(image_path, detail=1, paragraph=False)
+        lines = [text for (_, text, conf) in results if conf > 0.30]
+        return " ".join(lines).strip()
+    except Exception as e:
+        print(f"EasyOCR error: {e}")
+        return ""
