@@ -10,7 +10,7 @@ import easyocr
 from openai import OpenAI
 from PIL import Image, ImageEnhance, ImageFilter
 
-# -- DeepSeek Configuration --
+# ── DeepSeek Configuration ────────────────────────────────────────────────────
 DEEPSEEK_API_KEY = os.environ.get(
     "DEEPSEEK_API_KEY",
     "sk-12fbe20606204e60b32133f19993ec70"
@@ -18,6 +18,7 @@ DEEPSEEK_API_KEY = os.environ.get(
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEEPSEEK_MODEL = "deepseek-chat"
 
+# Initialise OpenAI-compatible client pointed at DeepSeek
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
 
 MAX_RETRIES = 2
@@ -45,12 +46,13 @@ Extract ALL information and return a single JSON object matching this structure 
 }
 
 Rules:
+- Expand abbreviations: OD=once daily, BD/BID=twice daily, TDS/TID=three times daily, QID=four times daily, SOS=when needed
 - Use null for any field you cannot determine
 - If no medications are found, return an empty medications list []
 - Return ONLY the JSON object, no extra text or markdown fences
 """
 
-# -- EasyOCR Reader (lazy singleton) --
+# ── EasyOCR Reader (lazy singleton) ──────────────────────────────────────────
 _easyocr_reader = None
 
 def _get_easyocr_reader():
@@ -60,7 +62,7 @@ def _get_easyocr_reader():
     return _easyocr_reader
 
 
-# -- Image pre-processing --
+# ── Image pre-processing ─────────────────────────────────────────────────────
 def preprocess_image(image_path: str) -> str:
     img = Image.open(image_path).convert("RGB")
     w, h = img.size
@@ -81,7 +83,7 @@ def preprocess_image(image_path: str) -> str:
     return out_path
 
 
-# -- OCR text extraction --
+# ── OCR text extraction ──────────────────────────────────────────────────────
 def extract_text_easyocr(image_path: str) -> str:
     try:
         reader = _get_easyocr_reader()
