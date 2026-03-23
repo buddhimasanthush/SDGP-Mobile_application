@@ -30,10 +30,13 @@ def read_root():
 def health_check():
     return {"status": "ok"}
 
-# OCR Endpoint
 @app.post("/api/ocr/upload")
 async def upload_prescription(file: UploadFile = File(...)):
     """Endpoint to process prescription images using OCR."""
+    filename_lower = (file.filename or "").lower()
+    if not any(filename_lower.endswith(ext) for ext in ['.png', '.jpg', '.jpeg']):
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a JPG or PNG image.")
+
     temp_file_path = f"temp_{file.filename}"
     with open(temp_file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
