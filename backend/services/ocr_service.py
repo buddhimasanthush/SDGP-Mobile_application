@@ -1,12 +1,27 @@
 import os
 import json
+import base64
 import time
 import re
 from pathlib import Path
 from typing import Optional, List
 
 import easyocr
+from openai import OpenAI
 from PIL import Image, ImageEnhance, ImageFilter
+
+# -- DeepSeek Configuration --
+DEEPSEEK_API_KEY = os.environ.get(
+    "DEEPSEEK_API_KEY",
+    "sk-12fbe20606204e60b32133f19993ec70"
+)
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+DEEPSEEK_MODEL = "deepseek-chat"
+
+# Initialise OpenAI-compatible client pointed at DeepSeek
+client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+
+MAX_RETRIES = 2
 
 # -- EasyOCR Reader (lazy singleton) --
 _easyocr_reader = None
