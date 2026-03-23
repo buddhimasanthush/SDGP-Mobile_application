@@ -62,3 +62,11 @@ class SearchResponse:
 async def search_pharmacies(
     latitude: float,
     longitude: float,
+    medicines: list[MedicineRequest],
+    radius_meters: int = 7000,
+) -> SearchResponse:
+    """
+    Find the best pharmacy for a list of medicines.
+
+    How it works:
+    1. Calls ONE Supabase RPC function (search_pharmacies)
