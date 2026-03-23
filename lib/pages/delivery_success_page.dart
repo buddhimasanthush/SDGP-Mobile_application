@@ -82,14 +82,6 @@ class _DeliverySuccessPageState extends State<DeliverySuccessPage>
       deliveredAt:
           '${now.day}/${now.month}/${now.year}  •  ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
       status: 'Delivered',
-      medicines: const [
-        MedicineItem(
-            name: 'Paracetamol 500mg', category: 'Pain Relief', quantity: 2),
-        MedicineItem(
-            name: 'Amoxicillin 250mg', category: 'Antibiotic', quantity: 1),
-        MedicineItem(
-            name: 'Vitamin C 1000mg', category: 'Supplement', quantity: 3),
-      ],
     ));
 
     Future.delayed(
