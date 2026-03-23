@@ -54,3 +54,11 @@ class SearchResponse:
     partial_matches: list[PharmacyResult]
     suggestion: str | None
 
+
+# ════════════════════════════════════════════════════
+# THE ALGORITHM
+# ════════════════════════════════════════════════════
+
+async def search_pharmacies(
+    latitude: float,
+    longitude: float,
