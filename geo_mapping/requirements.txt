@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+supabase
+python-multipart
+numpy<2.0
+pillow>=10.0.0
+scikit-image==0.24.0
+easyocr
+google-genai
+pydantic
+python-dotenv
+httpx
+openai
