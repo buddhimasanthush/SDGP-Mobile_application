@@ -125,7 +125,9 @@ class _PrescriptionMedicineListPageState
 
   @override
   void dispose() {
-    for (final c in _pillControllers) c.dispose();
+    for (final c in _pillControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -429,7 +431,6 @@ class _PillIconPainter extends CustomPainter {
   final double dotProgress; // 0→1: dot travels around ring
 
   static const _blue = Color(0xFF0796DE);
-  static const _lightBlue = Color(0xFFABE3FF);
   static const _white = Colors.white;
 
   _PillIconPainter({
