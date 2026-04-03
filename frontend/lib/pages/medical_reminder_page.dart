@@ -111,9 +111,15 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
 
   @override
   void dispose() {
-    for (final c in _dayControllers) c.dispose();
-    for (final c in _dotControllers) c.dispose();
-    for (final c in _bgControllers) c.dispose();
+    for (final c in _dayControllers) {
+      c.dispose();
+    }
+    for (final c in _dotControllers) {
+      c.dispose();
+    }
+    for (final c in _bgControllers) {
+      c.dispose();
+    }
     _breathController.dispose();
     super.dispose();
   }
@@ -180,7 +186,7 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? const Color(0xFF0796DE)
-                                : const Color(0xFF0796DE).withOpacity(0.08),
+                                : const Color(0xFF0796DE).withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
@@ -330,14 +336,14 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                       child: Container(
                         width: 153,
                         height: 153,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            begin: const Alignment(0.93, 0.35),
-                            end: const Alignment(0.06, 0.40),
+                            begin: Alignment(0.93, 0.35),
+                            end: Alignment(0.06, 0.40),
                             colors: [
-                              const Color(0xAFFDEDCA),
-                              const Color(0xFF0A9BE2)
+                              Color(0xAFFDEDCA),
+                              Color(0xFF0A9BE2)
                             ],
                           ),
                         ),
@@ -356,14 +362,14 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                       child: Container(
                         width: 89,
                         height: 89,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            begin: const Alignment(0.93, 0.35),
-                            end: const Alignment(0.06, 0.40),
+                            begin: Alignment(0.93, 0.35),
+                            end: Alignment(0.06, 0.40),
                             colors: [
-                              const Color(0xFFFDEDCA),
-                              const Color(0xFF0A9BE2)
+                              Color(0xFFFDEDCA),
+                              Color(0xFF0A9BE2)
                             ],
                           ),
                         ),
@@ -382,14 +388,14 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                       child: Container(
                         width: 94,
                         height: 94,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            begin: const Alignment(0.93, 0.35),
-                            end: const Alignment(0.06, 0.40),
+                            begin: Alignment(0.93, 0.35),
+                            end: Alignment(0.06, 0.40),
                             colors: [
-                              const Color(0xAFFDEDCA),
-                              const Color(0xFF0A9BE2)
+                              Color(0xAFFDEDCA),
+                              Color(0xFF0A9BE2)
                             ],
                           ),
                         ),
@@ -488,7 +494,7 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0796DE).withOpacity(0.3),
+                          color: const Color(0xFF0796DE).withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -526,8 +532,7 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: const Color(0xFF0796DE)
-                                                .withOpacity(
-                                                    isSelected || isToday
+                                                .withValues(alpha: isSelected || isToday
                                                         ? 1.0
                                                         : 0.35),
                                           ),
@@ -541,12 +546,11 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                                           shape: BoxShape.circle,
                                           color: isSelected
                                               ? const Color(0xFF0796DE)
-                                                  .withOpacity(0.15)
+                                                  .withValues(alpha: 0.15)
                                               : Colors.transparent,
                                           border: Border.all(
                                             color: const Color(0xFF0796DE)
-                                                .withOpacity(
-                                                    isSelected ? 1.0 : 0.25),
+                                                .withValues(alpha: isSelected ? 1.0 : 0.25),
                                             width: isSelected ? 2 : 1.5,
                                           ),
                                         ),
@@ -589,13 +593,13 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                                     Icon(Icons.notifications_none,
                                         size: 60,
                                         color: const Color(0xFF0796DE)
-                                            .withOpacity(0.3)),
+                                            .withValues(alpha: 0.3)),
                                     const SizedBox(height: 12),
                                     Text(
                                       'No reminders for this day',
                                       style: TextStyle(
                                         color: const Color(0xFF0796DE)
-                                            .withOpacity(0.5),
+                                            .withValues(alpha: 0.5),
                                         fontSize: 15,
                                         fontFamily: 'Poppins',
                                       ),
@@ -627,7 +631,7 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                                             child: Container(
                                               height: 1,
                                               color: const Color(0xFF0796DE)
-                                                  .withOpacity(0.3),
+                                                  .withValues(alpha: 0.3),
                                             ),
                                           ),
                                         ],
@@ -675,7 +679,7 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: const Color(0xFF0796DE)
-                                .withOpacity(_breathAnim.value),
+                                .withValues(alpha: _breathAnim.value),
                           ),
                         ),
                         child!,
@@ -748,7 +752,7 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0796DE).withOpacity(0.15),
+                      color: const Color(0xFF0796DE).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -766,12 +770,12 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFF0796DE).withOpacity(0.2),
+              color: const Color(0xFF0796DE).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Text('O ',
                     style: TextStyle(
                         color: Color(0xFF0796DE),
