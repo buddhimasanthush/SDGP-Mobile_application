@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/auth_service.dart';
-import 'main_navigation_page.dart';
-import 'onboarding_flow_page.dart';
 import 'user_store.dart';
 
 class OtpVerificationPage extends StatefulWidget {
@@ -78,10 +76,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage>
 
   @override
   void dispose() {
-    for (var c in _controllers) c.dispose();
-    for (var f in _focusNodes) f.dispose();
+    for (var c in _controllers) { c.dispose(); }
+    for (var f in _focusNodes) { f.dispose(); }
     _slideCtrl.dispose();
-    for (final c in _fcs) c.dispose();
+    for (final c in _fcs) { c.dispose(); }
     _timer?.cancel();
     super.dispose();
   }
@@ -318,7 +316,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage>
       width: 48,
       height: 58,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _focusNodes[index].hasFocus 
