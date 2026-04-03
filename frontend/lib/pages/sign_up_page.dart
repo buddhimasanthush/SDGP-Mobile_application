@@ -115,14 +115,14 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
 
     UserStore.instance.name = name[0].toUpperCase() + name.substring(1);
     UserStore.instance.email = email;
-    UserStore.instance.avatarColorValue = _selectedColor.value;
+    UserStore.instance.avatarColorValue = _selectedColor.toARGB32();
     UserStore.instance.emoji = _selectedEmoji;
 
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
             builder: (_) =>
-                OnboardingFlowPage(destination: const MainNavigationPage())));
+                const OnboardingFlowPage(destination: MainNavigationPage())));
   }
 
   void _showEmojiPicker() {
@@ -139,7 +139,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 18),
           const Text('Choose your avatar',
@@ -151,7 +151,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
           const SizedBox(height: 6),
           Text('Tap an emoji to set it as your avatar',
               style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 12,
                   fontFamily: 'Poppins')),
           const SizedBox(height: 20),
@@ -168,16 +168,16 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                         shape: BoxShape.circle,
                         color: _selectedEmoji.isEmpty
                             ? _selectedColor
-                            : Colors.white.withOpacity(0.1),
+                            : Colors.white.withValues(alpha: 0.1),
                         border: Border.all(
                             color: _selectedEmoji.isEmpty
                                 ? Colors.white
-                                : Colors.white.withOpacity(0.2),
+                                : Colors.white.withValues(alpha: 0.2),
                             width: 2)),
                     child: Icon(Icons.person_rounded,
                         color: _selectedEmoji.isEmpty
                             ? Colors.white
-                            : Colors.white.withOpacity(0.5),
+                            : Colors.white.withValues(alpha: 0.5),
                         size: 28))),
             ..._emojiOptions.map((e) => GestureDetector(
                 onTap: () {
@@ -191,8 +191,8 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                     decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: _selectedEmoji == e
-                            ? Colors.white.withOpacity(0.2)
-                            : Colors.white.withOpacity(0.07),
+                            ? Colors.white.withValues(alpha: 0.2)
+                            : Colors.white.withValues(alpha: 0.07),
                         border: Border.all(
                             color: _selectedEmoji == e
                                 ? Colors.white
@@ -324,7 +324,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                                       'Join thousands finding their medications with us.',
                                       style: TextStyle(
                                           color: const Color(0xFF034A83)
-                                              .withOpacity(0.75),
+                                              .withValues(alpha: 0.75),
                                           fontSize: 12,
                                           fontFamily: 'Poppins')),
                                 ]),
@@ -380,13 +380,13 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                                           shape: BoxShape.circle,
                                           color: _selectedEmoji.isEmpty
                                               ? _selectedColor
-                                              : Colors.white.withOpacity(0.12),
+                                              : Colors.white.withValues(alpha: 0.12),
                                           border: Border.all(
                                               color: _selectedColor, width: 3),
                                           boxShadow: [
                                             BoxShadow(
                                                 color: _selectedColor
-                                                    .withOpacity(0.45),
+                                                    .withValues(alpha: 0.45),
                                                 blurRadius: 20,
                                                 offset: const Offset(0, 6))
                                           ]),
@@ -413,7 +413,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                           const SizedBox(height: 8),
                           Text('Tap to choose avatar',
                               style: TextStyle(
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: Colors.white.withValues(alpha: 0.5),
                                   fontSize: 11,
                                   fontFamily: 'Poppins')),
                         ])),
@@ -467,7 +467,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                         Text(
                             'Changes the avatar background colour in real time',
                             style: TextStyle(
-                                color: Colors.white.withOpacity(0.45),
+                                color: Colors.white.withValues(alpha: 0.45),
                                 fontSize: 11,
                                 fontFamily: 'Poppins')),
                         const SizedBox(height: 14),
@@ -496,7 +496,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                                               ? [
                                                   BoxShadow(
                                                       color:
-                                                          c.withOpacity(0.65),
+                                                          c.withValues(alpha: 0.65),
                                                       blurRadius: 10,
                                                       spreadRadius: 1)
                                                 ]
@@ -541,7 +541,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                                         borderRadius:
                                             BorderRadius.circular(100)),
                                     elevation: 4,
-                                    shadowColor: Colors.black.withOpacity(0.2)),
+                                    shadowColor: Colors.black.withValues(alpha: 0.2)),
                                 child: const Text('Create Account',
                                     style: TextStyle(
                                         color: Colors.white,
@@ -606,14 +606,14 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
         decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.45),
+                color: Colors.white.withValues(alpha: 0.45),
                 fontSize: 13,
                 fontFamily: 'Poppins'),
             filled: false,
             enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(100),
                 borderSide:
-                    BorderSide(color: Colors.white.withOpacity(0.5), width: 1)),
+                    BorderSide(color: Colors.white.withValues(alpha: 0.5), width: 1)),
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(100),
                 borderSide: const BorderSide(color: Colors.white, width: 2)),
