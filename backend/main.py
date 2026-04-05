@@ -1,19 +1,39 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
-
-from fastapi import FastAPI, HTTPException, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-import uvicorn
+import logging
+import secrets
 import shutil
+import tempfile
+from datetime import datetime, timezone
 from typing import Optional
 
+import uvicorn
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, EmailStr, Field
+from jose import jwt, JWTError
+
+load_dotenv()
+
+from services import email_service
+from services.email_service import (
+    generate_safe_otp,
+    store_otp,
+    send_otp_email_logic,
+    verify_otp_secure,
+    update_user_password,
+    JWT_SECRET,
+    JWT_ALGORITHM,
+)
 from services.ocr_service import process_prescription_image
+
+# Logging configuration
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="MediFind Backend API")
 
-# CORS — allow the Android emulator and web to reach the backend
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,121 +42,142 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Dependency: JWT Authentication ──────────────────────────────────────────
+async def get_reset_email(token: str = Depends(lambda x: x)) -> str:
+    """Validate reset JWT and extract email."""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        email = payload.get("sub")
+        if email is None or payload.get("purpose") != "password_reset":
+            raise HTTPException(status_code=401, detail="Invalid token.")
+        return email
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Authentication failed.")
+
+# ── Request Models ─────────────────────────────────────────────────────────
+class SendOtpRequest(BaseModel):
+    email: EmailStr
+    purpose: str = Field(..., pattern="^(signup|login|password_reset)$")
+
+class VerifyOtpRequest(BaseModel):
+    email: EmailStr
+    otp: str = Field(..., min_length=6, max_length=6)
+    purpose: str
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    otp: str # For backward compatibility with simpler verification
+    new_password: str = Field(..., min_length=6)
+    token: str # Signed JWT for authorized reset
+
+# ── Endpoints ─────────────────────────────────────────────────────────────
+
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the MediFind Python Backend API!"}
+    return {"message": "Welcome to the MediFind Backend API!"}
 
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
+@app.post("/api/email/send-otp")
+async def api_send_otp(req: SendOtpRequest):
+    """
+    Send a secure 6-digit OTP to the given email.
+    Awaits the SMTP response so the client knows if it succeeded or failed.
+    """
+    logger.info(f"OTP request received for {req.email} (Purpose: {req.purpose})")
+    
+    try:
+        email_clean = req.email.lower().strip()
+        otp = generate_safe_otp()
+        await store_otp(email_clean, otp, req.purpose)
+        
+        # Send email synchronously (waits for attempt)
+        success = await send_otp_email_logic(email_clean, otp, req.purpose)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to send email. Please check server SMTP configuration.")
+        
+        return {"message": "Verification code sent successfully.", "success": True}
+    except Exception as e:
+        logger.error(f"Failed to queue OTP for {req.email}: {e}")
+        raise HTTPException(status_code=500, detail="An error occurred while processing your request.")
 
+@app.post("/api/email/verify-otp")
+async def api_verify_otp(req: VerifyOtpRequest):
+    """
+    Verify a 6-digit code against the bcrypt-hashed storage.
+    Returns a signed JWT (short-lived) upon success.
+    """
+    email = req.email.lower().strip()
+    logger.info(f"OTP verification attempt for {email}")
+    
+    valid, message, token = await verify_otp_secure(email, req.otp.strip())
+    
+    if not valid:
+        logger.warning(f"Failed verification for {email}: {message}")
+        raise HTTPException(status_code=403, detail=message)
+        
+    return {"valid": True, "message": message, "token": token}
 
-# ═══════════════════════════════════════════════════════
-# OCR Endpoint
-# ═══════════════════════════════════════════════════════
+@app.post("/api/email/reset-password")
+async def api_reset_password(req: ResetPasswordRequest):
+    """
+    Secure password reset using a signed verification token.
+    Validates email format and password strength.
+    """
+    logger.info(f"Password reset request for {req.email}")
+    
+    # 1. Validate JWT token independently
+    try:
+        payload = jwt.decode(req.token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        if payload.get("sub") != req.email.lower().strip():
+            raise HTTPException(status_code=401, detail="Token mismatch.")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid reset session. Please verify again.")
+
+    try:
+        # Update password via Supabase Admin API
+        await update_user_password(req.email.lower().strip(), req.new_password)
+        
+        logger.info(f"Password reset successful for {req.email}")
+        return {"message": "Password updated successfully.", "success": True}
+    except Exception as e:
+        logger.error(f"Reset failed for {req.email}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update password.")
+# ── OCR Endpoints ──────────────────────────────────────────────────────────
 
 @app.post("/api/ocr/upload")
-def upload_prescription(file: UploadFile = File(...)):
+async def api_upload_prescription(file: UploadFile = File(...)):
     """
-    Endpoint to process prescription images using OCR (EasyOCR + DeepSeek fallback).
-    Runs synchronously so FastAPI offloads it to a background threadpool.
+    Upload a prescription image, run EasyOCR + DeepSeek for extraction.
+    Returns structured medical data.
     """
-    filename_lower = (file.filename or "").lower()
-    if not any(filename_lower.endswith(ext) for ext in ['.png', '.jpg', '.jpeg']):
-        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a JPG or PNG image.")
-
-    import tempfile
-    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename_lower)[1]) as tmp:
-        shutil.copyfileobj(file.file, tmp)
-        temp_file_path = tmp.name
+    logger.info(f"OCR upload request received: {file.filename}")
+    
+    # Create a temporary file to store the upload
+    suffix = os.path.splitext(file.filename)[1]
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        try:
+            shutil.copyfileobj(file.file, tmp)
+            tmp_path = tmp.name
+        finally:
+            file.file.close()
 
     try:
-        result = process_prescription_image(temp_file_path)
-
-        if isinstance(result, dict) and "error" in result and "medications" not in result:
-            raise HTTPException(status_code=500, detail=f"OCR Processing failed: {result['error']}")
-
-        return {
-            "filename": file.filename,
-            "data": result
-        }
-    except HTTPException:
-        raise
+        # Process the image using the OCR service
+        result = process_prescription_image(tmp_path)
+        
+        if "error" in result:
+            logger.error(f"OCR processing error: {result['error']}")
+            raise HTTPException(status_code=500, detail=result["error"])
+            
+        return {"success": True, "data": result}
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+        logger.error(f"OCR endpoint exception: {e}")
+        raise HTTPException(status_code=500, detail="Prescription processing failed.")
     finally:
-        if os.path.exists(temp_file_path):
-            try:
-                os.remove(temp_file_path)
-            except Exception:
-                pass
-
-
-# ═══════════════════════════════════════════════════════
-# Pharmacy Search Endpoints
-# ═══════════════════════════════════════════════════════
-
-class MedicationInput(BaseModel):
-    drug_name: str
-    quantity: str = "1"
-    strength: Optional[str] = None
-    dosage_form: Optional[str] = None
-    instructions: Optional[str] = None
-    frequency: Optional[str] = None
-    duration: Optional[str] = None
-
-
-class PrescriptionSearchRequest(BaseModel):
-    latitude: float
-    longitude: float
-    medications: list[MedicationInput]
-    radius_meters: int = 7000
-
-
-@app.post("/api/pharmacy/search")
-async def pharmacy_search(req: PrescriptionSearchRequest):
-    """
-    Search nearby pharmacies for medicines.
-    Accepts medicine names (from OCR or manual input) and user location.
-    Queries the Supabase pharmacies + inventory tables directly.
-    """
-    try:
-        from search.pharmacy_search import search_pharmacies_by_names, response_to_dict
-        from search.medicine_resolver import extract_medicines_from_ocr
-
-        # Clean up the medication list
-        medications = [m.model_dump() for m in req.medications]
-        cleaned = extract_medicines_from_ocr(medications)
-
-        if not cleaned:
-            raise HTTPException(status_code=400, detail="No valid medicine names provided.")
-
-        # Run the search
-        result = await search_pharmacies_by_names(
-            latitude=req.latitude,
-            longitude=req.longitude,
-            medicine_names=cleaned,
-            radius_meters=req.radius_meters,
-        )
-
-        return response_to_dict(result)
-
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e))
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Pharmacy search failed: {str(e)}")
-
-
-@app.post("/api/pharmacy/search-by-prescription")
-async def pharmacy_search_by_prescription(req: PrescriptionSearchRequest):
-    """
-    Alias for /api/pharmacy/search — same logic.
-    Takes OCR medication output + user location, searches pharmacies.
-    """
-    return await pharmacy_search(req)
-
+        # Clean up the temporary file
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))

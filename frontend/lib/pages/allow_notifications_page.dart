@@ -97,9 +97,9 @@ class _AllowNotificationsPageState extends State<AllowNotificationsPage>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFF0796DE).withOpacity(0.0),
-                        const Color(0xFF0796DE).withOpacity(0.3),
-                        const Color(0xFF0564B8).withOpacity(0.7),
+                        const Color(0xFF0796DE).withValues(alpha: 0.0),
+                        const Color(0xFF0796DE).withValues(alpha: 0.3),
+                        const Color(0xFF0564B8).withValues(alpha: 0.7),
                         const Color(0xFF001F81),
                       ],
                       stops: const [0.0, 0.3, 0.6, 1.0],
@@ -294,10 +294,10 @@ class _AllowNotificationsPageState extends State<AllowNotificationsPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: ShapeDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         shadows: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)
         ],
       ),
       child: Row(

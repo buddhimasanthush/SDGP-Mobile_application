@@ -11,3 +11,7 @@ pydantic
 python-dotenv
 httpx
 openai
+aiosmtplib
+email-validator
+bcrypt
+python-jose[cryptography]

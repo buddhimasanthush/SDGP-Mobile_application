@@ -85,7 +85,8 @@ const List<Medicine> _demoMedicines = [
 class PrescriptionMedicineListPage extends StatefulWidget {
   final List<Medicine>? medicines;
   final List<dynamic>? rawMedications;
-  const PrescriptionMedicineListPage({super.key, this.medicines, this.rawMedications});
+  const PrescriptionMedicineListPage(
+      {super.key, this.medicines, this.rawMedications});
   @override
   State<PrescriptionMedicineListPage> createState() =>
       _PrescriptionMedicineListPageState();
@@ -125,7 +126,9 @@ class _PrescriptionMedicineListPageState
 
   @override
   void dispose() {
-    for (final c in _pillControllers) c.dispose();
+    for (final c in _pillControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -315,8 +318,8 @@ class _PrescriptionMedicineListPageState
                             context,
                             MaterialPageRoute(
                                 builder: (_) => NearbyPharmacyPage(
-                                    rawMedications: widget.rawMedications,
-                                ))),
+                                      rawMedications: widget.rawMedications,
+                                    ))),
                         style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF0796DE),
                             elevation: 0,
@@ -429,7 +432,6 @@ class _PillIconPainter extends CustomPainter {
   final double dotProgress; // 0→1: dot travels around ring
 
   static const _blue = Color(0xFF0796DE);
-  static const _lightBlue = Color(0xFFABE3FF);
   static const _white = Colors.white;
 
   _PillIconPainter({

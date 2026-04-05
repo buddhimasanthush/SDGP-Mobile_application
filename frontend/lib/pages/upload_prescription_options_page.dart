@@ -218,7 +218,7 @@ class _UploadPrescriptionOptionsPageState
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            PrescriptionCameraPage()),
+                                            const PrescriptionCameraPage()),
                                   );
                                 },
                               ),
@@ -245,7 +245,7 @@ class _UploadPrescriptionOptionsPageState
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            PrescriptionGalleryPage()),
+                                            const PrescriptionGalleryPage()),
                                   );
                                 },
                               ),
@@ -393,14 +393,14 @@ class _UploadPrescriptionOptionsPageState
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                PrescriptionCameraPage()),
+                                                const PrescriptionCameraPage()),
                                       );
                                     } else {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                PrescriptionGalleryPage()),
+                                                const PrescriptionGalleryPage()),
                                       );
                                     }
                                   },

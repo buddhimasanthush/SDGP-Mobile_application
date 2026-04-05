@@ -1,8 +1,25 @@
 
 .vscode/
+.idea/
+.dart_tool/
+.flutter-plugins-dependencies
+build/
+*.log
+
 __pycache__/
 __MACOSX/
+*.pyc
+
 android/
+ios/
+linux/
+macos/
+windows/
+
 supabase/
 venv_audio/
+backend/venv/
+backend/.env
+frontend/.dart_tool/
+frontend/build/
 frontend/build_log.txt

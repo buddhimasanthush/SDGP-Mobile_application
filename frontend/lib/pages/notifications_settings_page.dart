@@ -4,7 +4,8 @@ class NotificationsSettingsPage extends StatefulWidget {
   const NotificationsSettingsPage({super.key});
 
   @override
-  State<NotificationsSettingsPage> createState() => _NotificationsSettingsPageState();
+  State<NotificationsSettingsPage> createState() =>
+      _NotificationsSettingsPageState();
 }
 
 class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
@@ -55,28 +56,31 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
             const SizedBox(height: 30),
             _buildSwitchItem(
                 title: 'Medicine Reminders',
-                subtitle: 'Get notified when it\'s time to take your medication.',
+                subtitle:
+                    'Get notified when it\'s time to take your medication.',
                 value: _medicineReminders,
                 onChanged: (v) => setState(() => _medicineReminders = v)),
             const SizedBox(height: 16),
             _buildSwitchItem(
                 title: 'Order Updates',
-                subtitle: 'Get real-time tracking updates for your medicine orders.',
+                subtitle:
+                    'Get real-time tracking updates for your medicine orders.',
                 value: _orderUpdates,
                 onChanged: (v) => setState(() => _orderUpdates = v)),
             const SizedBox(height: 16),
             _buildSwitchItem(
                 title: 'New Offers & Promotions',
-                subtitle: 'Stay updated with the latest discounts and pharmacy deals.',
+                subtitle:
+                    'Stay updated with the latest discounts and pharmacy deals.',
                 value: _newOffers,
                 onChanged: (v) => setState(() => _newOffers = v)),
             const SizedBox(height: 16),
             _buildSwitchItem(
                 title: 'App Updates & News',
-                subtitle: 'Important announcements about features and services.',
+                subtitle:
+                    'Important announcements about features and services.',
                 value: _appUpdates,
                 onChanged: (v) => setState(() => _appUpdates = v)),
-            
             const SizedBox(height: 40),
             Center(
               child: Text(
@@ -106,7 +110,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -137,8 +141,8 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeTrackColor: const Color(0xFF0796DE).withOpacity(0.5),
-            activeColor: const Color(0xFF0796DE),
+            activeTrackColor: const Color(0xFF0796DE).withValues(alpha: 0.5),
+            activeThumbColor: const Color(0xFF0796DE),
           ),
         ],
       ),

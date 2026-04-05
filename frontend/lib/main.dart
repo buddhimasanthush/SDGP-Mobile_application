@@ -6,8 +6,11 @@ import 'package:medifind_app/pages/welcome_back_page.dart';
 import 'package:medifind_app/pages/sign_in_page.dart';
 import 'package:medifind_app/pages/sign_up_page.dart';
 import 'package:medifind_app/pages/add_medicine_name_page.dart';
+import 'package:medifind_app/services/supabase_client.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseService.initialize();
   runApp(const MediFindApp());
 }
 
