@@ -63,7 +63,7 @@ class PharmacyCard extends StatelessWidget {
                       height: 60,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.10),
+                        color: Colors.white.withValues(alpha: 0.10),
                       ),
                     ),
                   ),
