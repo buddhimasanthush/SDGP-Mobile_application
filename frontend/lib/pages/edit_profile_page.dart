@@ -17,8 +17,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _ageController;
   late TextEditingController _allergiesController;
   late TextEditingController _conditionsController;
-  
-  String _selectedBloodType = UserStore.instance.bloodType.isEmpty ? 'O+' : UserStore.instance.bloodType;
+
+  String _selectedBloodType = UserStore.instance.bloodType.isEmpty
+      ? 'O+'
+      : UserStore.instance.bloodType;
   bool _isSaving = false;
 
   @override
@@ -26,11 +28,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.initState();
     _nameController = TextEditingController(text: UserStore.instance.name);
     _phoneController = TextEditingController(text: UserStore.instance.phone);
-    _dobController = TextEditingController(text: UserStore.instance.dateOfBirth);
-    _weightController = TextEditingController(text: UserStore.instance.weight.toString());
-    _ageController = TextEditingController(text: UserStore.instance.age.toString());
-    _allergiesController = TextEditingController(text: UserStore.instance.allergies);
-    _conditionsController = TextEditingController(text: UserStore.instance.chronicConditions);
+    _dobController =
+        TextEditingController(text: UserStore.instance.dateOfBirth);
+    _weightController =
+        TextEditingController(text: UserStore.instance.weight.toString());
+    _ageController =
+        TextEditingController(text: UserStore.instance.age.toString());
+    _allergiesController =
+        TextEditingController(text: UserStore.instance.allergies);
+    _conditionsController =
+        TextEditingController(text: UserStore.instance.chronicConditions);
   }
 
   @override
@@ -47,21 +54,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isSaving = true);
-    
+
     try {
       UserStore.instance.name = _nameController.text.trim();
       UserStore.instance.phone = _phoneController.text.trim();
       UserStore.instance.dateOfBirth = _dobController.text.trim();
-      UserStore.instance.weight = double.tryParse(_weightController.text) ?? UserStore.instance.weight;
-      UserStore.instance.age = int.tryParse(_ageController.text) ?? UserStore.instance.age;
+      UserStore.instance.weight =
+          double.tryParse(_weightController.text) ?? UserStore.instance.weight;
+      UserStore.instance.age =
+          int.tryParse(_ageController.text) ?? UserStore.instance.age;
       UserStore.instance.bloodType = _selectedBloodType;
       UserStore.instance.allergies = _allergiesController.text.trim();
       UserStore.instance.chronicConditions = _conditionsController.text.trim();
-      
+
       await UserStore.instance.saveToRemote();
-      
+
       if (mounted) {
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -84,16 +93,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Edit Profile', 
-          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+        title: const Text('Edit Profile',
+            style:
+                TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
         backgroundColor: const Color(0xFF0796DE),
         foregroundColor: Colors.white,
         actions: [
           if (_isSaving)
             const Padding(
               padding: EdgeInsets.only(right: 15),
-              child: Center(child: SizedBox(width: 20, height: 20, 
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))),
+              child: Center(
+                  child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2))),
             )
           else
             IconButton(
@@ -111,22 +125,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
             children: [
               _buildSectionLabel('Basic Info'),
               _buildField('Full Name', _nameController, Icons.person_outline),
-              _buildField('Phone Number', _phoneController, Icons.phone_outlined, 
-                keyboardType: TextInputType.phone),
+              _buildField(
+                  'Phone Number', _phoneController, Icons.phone_outlined,
+                  keyboardType: TextInputType.phone),
               _buildField('Date of Birth', _dobController, Icons.cake_outlined),
-              
               const SizedBox(height: 24),
               _buildSectionLabel('Health Stats'),
               Row(children: [
-                Expanded(child: _buildField('Age', _ageController, Icons.calendar_today_outlined, 
-                  keyboardType: TextInputType.number)),
+                Expanded(
+                    child: _buildField(
+                        'Age', _ageController, Icons.calendar_today_outlined,
+                        keyboardType: TextInputType.number)),
                 const SizedBox(width: 15),
-                Expanded(child: _buildField('Weight (kg)', _weightController, Icons.monitor_weight_outlined, 
-                  keyboardType: TextInputType.number)),
+                Expanded(
+                    child: _buildField('Weight (kg)', _weightController,
+                        Icons.monitor_weight_outlined,
+                        keyboardType: TextInputType.number)),
               ]),
-              
               const SizedBox(height: 10),
-              const Text('Blood Type', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Color(0xFF919191))),
+              const Text('Blood Type',
+                  style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 13,
+                      color: Color(0xFF919191))),
               const SizedBox(height: 5),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -139,17 +160,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     value: _selectedBloodType,
                     isExpanded: true,
                     items: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-                        .map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                        .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                        .toList(),
                     onChanged: (v) => setState(() => _selectedBloodType = v!),
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
               _buildSectionLabel('Medical Context'),
-              _buildField('Allergies', _allergiesController, Icons.warning_amber_outlined, maxLines: 2),
-              _buildField('Chronic Conditions', _conditionsController, Icons.medical_services_outlined, maxLines: 2),
-              
+              _buildField('Allergies', _allergiesController,
+                  Icons.warning_amber_outlined,
+                  maxLines: 2),
+              _buildField('Chronic Conditions', _conditionsController,
+                  Icons.medical_services_outlined,
+                  maxLines: 2),
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
@@ -159,9 +183,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0796DE),
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  child: const Text('Save Changes',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               ),
               const SizedBox(height: 20),
@@ -175,12 +202,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _buildSectionLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Text(text, style: const TextStyle(
-        fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A))),
+      child: Text(text,
+          style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1A1A1A))),
     );
   }
 
-  Widget _buildField(String label, TextEditingController ctrl, IconData icon, {TextInputType? keyboardType, int maxLines = 1}) {
+  Widget _buildField(String label, TextEditingController ctrl, IconData icon,
+      {TextInputType? keyboardType, int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: TextFormField(
@@ -196,7 +228,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
         validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
       ),

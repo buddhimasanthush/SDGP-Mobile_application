@@ -120,7 +120,8 @@ class DocVerificationPendingPage extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [Color(0xFFEFA83E), Color(0xFFF89A7D)]),
                       border: Border.all(
-                          width: 3, color: Colors.white.withOpacity(0.50))),
+                          width: 3,
+                          color: Colors.white.withValues(alpha: 0.50))),
                   child: const Icon(Icons.warning_amber_rounded,
                       color: Colors.white, size: 22),
                 )),

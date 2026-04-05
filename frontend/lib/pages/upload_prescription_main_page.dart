@@ -223,7 +223,7 @@ class _UploadPrescriptionMainPageState extends State<UploadPrescriptionMainPage>
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withOpacity(0.14),
+                                color: Colors.black.withValues(alpha: 0.14),
                                 blurRadius: 40,
                                 offset: const Offset(0, 10))
                           ],
@@ -281,7 +281,7 @@ class _UploadPrescriptionMainPageState extends State<UploadPrescriptionMainPage>
                                     context,
                                     MaterialPageRoute(
                                         builder: (_) =>
-                                            UploadPrescriptionOptionsPage())),
+                                            const UploadPrescriptionOptionsPage())),
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF0796DE),
                                     elevation: 0,

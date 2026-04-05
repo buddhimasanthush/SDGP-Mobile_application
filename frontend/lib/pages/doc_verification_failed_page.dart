@@ -137,7 +137,8 @@ class DocVerificationFailedPage extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [Color(0xFFD74444), Color(0xFFF87DB1)]),
                       border: Border.all(
-                          width: 3, color: Colors.white.withOpacity(0.50))),
+                          width: 3,
+                          color: Colors.white.withValues(alpha: 0.50))),
                   child: const Icon(Icons.close, color: Colors.white, size: 22),
                 )),
             // Small red dot — right
@@ -154,7 +155,8 @@ class DocVerificationFailedPage extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [Color(0xFFD74444), Color(0xFFF87DB1)]),
                       border: Border.all(
-                          width: 3, color: Colors.white.withOpacity(0.50))),
+                          width: 3,
+                          color: Colors.white.withValues(alpha: 0.50))),
                 )),
             // Small red dot — left
             Positioned(
@@ -170,7 +172,8 @@ class DocVerificationFailedPage extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [Color(0xFFD74444), Color(0xFFF87DB1)]),
                       border: Border.all(
-                          width: 3, color: Colors.white.withOpacity(0.50))),
+                          width: 3,
+                          color: Colors.white.withValues(alpha: 0.50))),
                 )),
           ]),
         ),

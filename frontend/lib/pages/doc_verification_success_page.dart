@@ -138,7 +138,8 @@ class DocVerificationSuccessPage extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [Color(0xFF30B94E), Color(0xFF7DF898)]),
                       border: Border.all(
-                          width: 3, color: Colors.white.withOpacity(0.50))),
+                          width: 3,
+                          color: Colors.white.withValues(alpha: 0.50))),
                   child: const Icon(Icons.check, color: Colors.white, size: 22),
                 )),
             // Small green dot — right
@@ -155,7 +156,8 @@ class DocVerificationSuccessPage extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [Color(0xFF30B94E), Color(0xFF7DF898)]),
                       border: Border.all(
-                          width: 3, color: Colors.white.withOpacity(0.50))),
+                          width: 3,
+                          color: Colors.white.withValues(alpha: 0.50))),
                 )),
             // Small green dot — left
             Positioned(
@@ -171,7 +173,8 @@ class DocVerificationSuccessPage extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [Color(0xFF30B94E), Color(0xFF7DF898)]),
                       border: Border.all(
-                          width: 3, color: Colors.white.withOpacity(0.50))),
+                          width: 3,
+                          color: Colors.white.withValues(alpha: 0.50))),
                 )),
           ]),
         ),

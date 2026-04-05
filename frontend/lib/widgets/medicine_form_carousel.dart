@@ -86,7 +86,7 @@ class _MedicineFormItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFE68E2D).withOpacity(0.30),
+                    color: const Color(0xFFE68E2D).withValues(alpha: 0.30),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),

@@ -156,14 +156,14 @@ class PharmacyDetailPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Row(
+                  const Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.phone,
                         color: Color(0xFF0796DE),
                       ),
-                      const SizedBox(width: 10),
-                      const Text(
+                      SizedBox(width: 10),
+                      Text(
                         '+94 11 234 5678',
                         style: TextStyle(
                           fontSize: 16,

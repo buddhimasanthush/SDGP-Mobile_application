@@ -105,9 +105,8 @@ class _LocationItem extends StatelessWidget {
           color: isSelected ? const Color(0xFFE3F2FD) : const Color(0xFFF4F4F4),
           border: Border.all(
             width: 2,
-            color: isSelected
-                ? const Color(0xFF0796DE)
-                : const Color(0xFFEFEFEF),
+            color:
+                isSelected ? const Color(0xFF0796DE) : const Color(0xFFEFEFEF),
           ),
           borderRadius: BorderRadius.circular(10),
         ),
@@ -131,9 +130,8 @@ class _LocationItem extends StatelessWidget {
                       color: const Color(0xFF1E1E1E),
                       fontSize: 16,
                       fontFamily: 'Poppins',
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w500,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 4),

@@ -10,11 +10,8 @@ class UploadPrescriptionPage extends StatefulWidget {
 }
 
 class _UploadPrescriptionPageState extends State<UploadPrescriptionPage> {
-  final TextEditingController _otpController = TextEditingController();
-
   @override
   void dispose() {
-    _otpController.dispose();
     super.dispose();
   }
 
@@ -127,69 +124,10 @@ class _UploadPrescriptionPageState extends State<UploadPrescriptionPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => GalleryPickerPage(),
+                                builder: (context) => const GalleryPickerPage(),
                               ),
                             );
                           },
-                        ),
-
-                        const SizedBox(height: 30),
-
-                        // OTP Section
-                        const Text(
-                          'Prescription Authentication Code (OTP)',
-                          style: TextStyle(
-                            color: Color(0xFF2D2D2D),
-                            fontSize: 14,
-                            fontFamily: 'Arimo',
-                            fontWeight: FontWeight.w400,
-                            height: 1.43,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // OTP Input Field
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: const Color(0x33F9FAFB),
-                            border: Border.all(
-                              width: 0.83,
-                              color: const Color(0xFFE5E7EB),
-                            ),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: TextField(
-                            controller: _otpController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter doctor-issued OTP…',
-                              hintStyle: TextStyle(
-                                color: Color(0x7F0A0A0A),
-                                fontSize: 14,
-                                fontFamily: 'Arimo',
-                                fontWeight: FontWeight.w400,
-                              ),
-                              border: InputBorder.none,
-                              isDense: true,
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        const Text(
-                          'This code is provided by your doctor to verify authenticity.',
-                          style: TextStyle(
-                            color: Color(0xFF697282),
-                            fontSize: 12,
-                            fontFamily: 'Arimo',
-                            fontWeight: FontWeight.w400,
-                            height: 1.33,
-                          ),
                         ),
 
                         const SizedBox(height: 30),
@@ -459,15 +397,12 @@ class _UploadPrescriptionPageState extends State<UploadPrescriptionPage> {
                 child: Container(
                   width: 153.81,
                   height: 153.81,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      begin: const Alignment(0.93, 0.35),
-                      end: const Alignment(0.06, 0.40),
-                      colors: [
-                        const Color(0xAFFDEDCA),
-                        const Color(0xFF0A9BE2)
-                      ],
+                      begin: Alignment(0.93, 0.35),
+                      end: Alignment(0.06, 0.40),
+                      colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
                     ),
                   ),
                 ),
@@ -484,15 +419,12 @@ class _UploadPrescriptionPageState extends State<UploadPrescriptionPage> {
                 child: Container(
                   width: 89.35,
                   height: 89.35,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      begin: const Alignment(0.93, 0.35),
-                      end: const Alignment(0.06, 0.40),
-                      colors: [
-                        const Color(0xFFFDEDCA),
-                        const Color(0xFF0A9BE2)
-                      ],
+                      begin: Alignment(0.93, 0.35),
+                      end: Alignment(0.06, 0.40),
+                      colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)],
                     ),
                   ),
                 ),
@@ -509,15 +441,12 @@ class _UploadPrescriptionPageState extends State<UploadPrescriptionPage> {
                 child: Container(
                   width: 94.08,
                   height: 94.08,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      begin: const Alignment(0.93, 0.35),
-                      end: const Alignment(0.06, 0.40),
-                      colors: [
-                        const Color(0xAFFDEDCA),
-                        const Color(0xFF0A9BE2)
-                      ],
+                      begin: Alignment(0.93, 0.35),
+                      end: Alignment(0.06, 0.40),
+                      colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
                     ),
                   ),
                 ),
