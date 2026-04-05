@@ -1,12 +1,14 @@
 # Deploy MediFind Backend To Railway
 
 This repository now includes a root `Dockerfile`, so Railway can deploy directly from the repo root.
+It also includes a root `.python-version` to pin Railway/Railpack to Python `3.12`.
 
 ## 1) Push code to GitHub
 
 Make sure these files are committed:
 - `Dockerfile`
 - `.dockerignore`
+- `.python-version`
 - `backend/.env.example`
 
 Your real `backend/.env` is ignored and should never be committed.
@@ -43,6 +45,16 @@ After deploy, open the generated Railway URL and test:
 - `GET /`
 - `POST /api/email/send-otp`
 - `POST /api/ocr/upload` (if OCR is enabled and dependencies install correctly)
+
+## Build timeout note
+
+If Railway uses Railpack/Nixpacks (instead of the Dockerfile), the backend requirements are now pinned to CPU-only PyTorch wheels via:
+
+- `--extra-index-url https://download.pytorch.org/whl/cpu`
+- `torch==2.11.0+cpu`
+- `torchvision==0.26.0+cpu`
+
+This avoids downloading large CUDA packages that can cause build export timeouts.
 
 ## 5) Point Flutter app to Railway
 
