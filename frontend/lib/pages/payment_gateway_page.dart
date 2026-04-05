@@ -16,8 +16,7 @@ class PaymentGatewayPage extends StatefulWidget {
   State<PaymentGatewayPage> createState() => _PaymentGatewayPageState();
 }
 
-class _PaymentGatewayPageState extends State<PaymentGatewayPage>
-    with TickerProviderStateMixin {
+class _PaymentGatewayPageState extends State<PaymentGatewayPage> {
   final _cardNumberCtrl = TextEditingController();
   final _cardNameCtrl = TextEditingController();
   final _expiryCtrl = TextEditingController();
@@ -26,9 +25,6 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
   bool _isVisa = true;
   bool _obscureCvv = true;
   bool _isProcessing = false;
-
-  late AnimationController _cardFlipController;
-  late Animation<double> _cardFlip;
 
   // Parse base amount and compute fee + total
   double get _baseAmount {
@@ -54,20 +50,11 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
       _expiryCtrl.text.isEmpty ? 'MM/YY' : _expiryCtrl.text;
 
   @override
-  void initState() {
-    super.initState();
-    _cardFlipController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 300));
-    _cardFlip = Tween<double>(begin: 0, end: 1).animate(_cardFlipController);
-  }
-
-  @override
   void dispose() {
     _cardNumberCtrl.dispose();
     _cardNameCtrl.dispose();
     _expiryCtrl.dispose();
     _cvvCtrl.dispose();
-    _cardFlipController.dispose();
     super.dispose();
   }
 
@@ -115,7 +102,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
+                        color: Colors.white.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.arrow_back,
                         color: Colors.white, size: 20),
@@ -230,7 +217,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
                               borderRadius: BorderRadius.circular(100)),
                           elevation: 8,
                           shadowColor:
-                              const Color(0xFF0796DE).withOpacity(0.5)),
+                              const Color(0xFF0796DE).withValues(alpha: 0.5)),
                       child: _isProcessing
                           ? const SizedBox(
                               width: 22,
@@ -249,11 +236,11 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
 
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.lock_rounded,
-                        color: Colors.white.withOpacity(0.4), size: 14),
+                        color: Colors.white.withValues(alpha: 0.4), size: 14),
                     const SizedBox(width: 6),
                     Text('256-bit SSL encrypted & secure',
                         style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
+                            color: Colors.white.withValues(alpha: 0.4),
                             fontSize: 11,
                             fontFamily: 'Poppins')),
                   ]),
@@ -284,7 +271,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
           gradient: gradient,
           boxShadow: [
             BoxShadow(
-                color: const Color(0xFF0796DE).withOpacity(0.4),
+                color: const Color(0xFF0796DE).withValues(alpha: 0.4),
                 blurRadius: 24,
                 offset: const Offset(0, 10))
           ]),
@@ -298,7 +285,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
                 height: 120,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.08)))),
+                    color: Colors.white.withValues(alpha: 0.08)))),
         Positioned(
             right: 30,
             bottom: -30,
@@ -307,7 +294,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
                 height: 100,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.06)))),
+                    color: Colors.white.withValues(alpha: 0.06)))),
         Padding(
           padding: const EdgeInsets.all(22),
           child:
@@ -337,8 +324,8 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
                             height: 28,
                             decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color:
-                                    const Color(0xFFF79E1B).withOpacity(0.85))),
+                                color: const Color(0xFFF79E1B)
+                                    .withValues(alpha: 0.85))),
                       ),
                     ]),
             ]),
@@ -355,7 +342,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('CARD HOLDER',
                     style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 9,
                         fontFamily: 'Poppins',
                         letterSpacing: 1)),
@@ -369,7 +356,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 Text('EXPIRES',
                     style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 9,
                         fontFamily: 'Poppins',
                         letterSpacing: 1)),
@@ -391,7 +378,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
     return Container(
       height: 48,
       decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(100)),
       child: Row(children: [
         _ToggleOption(
@@ -409,15 +396,15 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
   Widget _buildAmountBreakdown() {
     return Container(
       decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.1))),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1))),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       child: Column(children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text('Order Amount',
               style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 13,
                   fontFamily: 'Poppins')),
           Text('RS.${_baseAmount.toStringAsFixed(0)}',
@@ -432,13 +419,13 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
           Row(children: [
             Text('MediFind Fee ',
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 13,
                     fontFamily: 'Poppins')),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                  color: const Color(0xFF0796DE).withOpacity(0.2),
+                  color: const Color(0xFF0796DE).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6)),
               child: const Text('3%',
                   style: TextStyle(
@@ -450,7 +437,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
           ]),
           Text('RS.${_processingFee.toStringAsFixed(0)}',
               style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 14,
                   fontFamily: 'Poppins')),
         ]),
@@ -477,7 +464,7 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
         alignment: Alignment.centerLeft,
         child: Text(text,
             style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 13,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w500)),
@@ -503,14 +490,15 @@ class _PaymentGatewayPageState extends State<PaymentGatewayPage>
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.35),
+            color: Colors.white.withValues(alpha: 0.35),
             fontSize: 14,
             fontFamily: 'Poppins'),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.08),
+        fillColor: Colors.white.withValues(alpha: 0.08),
         enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: Colors.white.withOpacity(0.15))),
+            borderSide:
+                BorderSide(color: Colors.white.withValues(alpha: 0.15))),
         focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: Color(0xFF0796DE), width: 1.5)),

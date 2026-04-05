@@ -42,8 +42,7 @@ class _TermsOfServicesPageState extends State<TermsOfServicesPage>
 
   final ScrollController _scrollController = ScrollController();
   bool _hasScrolledToBottom = false;
-  bool _acceptedTerms = true;
-  bool _canPressAccept = true;
+  bool _acceptedTerms = false;
 
   // ── Orb floating system ───────────────────────────────────────────────────
   late AnimationController _ticker;
@@ -174,7 +173,6 @@ class _TermsOfServicesPageState extends State<TermsOfServicesPage>
         _scrollController.position.maxScrollExtent - 10) {
       if (!_hasScrolledToBottom) setState(() => _hasScrolledToBottom = true);
     }
-    setState(() => _canPressAccept = _acceptedTerms);
   }
 
   @override
@@ -345,7 +343,7 @@ class _TermsOfServicesPageState extends State<TermsOfServicesPage>
                           width: double.infinity,
                           height: 54,
                           child: ElevatedButton(
-                            onPressed: _canPressAccept
+                            onPressed: _acceptedTerms
                                 ? () => Navigator.pushReplacementNamed(
                                     context, '/welcome')
                                 : null,
@@ -356,7 +354,7 @@ class _TermsOfServicesPageState extends State<TermsOfServicesPage>
                                     borderRadius: BorderRadius.circular(10))),
                             child: Text('Accept',
                                 style: TextStyle(
-                                    color: _canPressAccept
+                                    color: _acceptedTerms
                                         ? Colors.white
                                         : Colors.grey.shade500,
                                     fontSize: 16,

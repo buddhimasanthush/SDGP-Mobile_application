@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'reminder_store.dart';
 import 'add_medicine_name_page.dart';
 
@@ -12,29 +13,7 @@ class MedicalReminderPage extends StatefulWidget {
 class _MedicalReminderPageState extends State<MedicalReminderPage>
     with TickerProviderStateMixin {
   DateTime _selectedDate = DateTime.now();
-  int _selectedDayIndex = DateTime.now().weekday % 7;
-
-  static const _monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
-  static const _dayLetters = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
-  // ── Day circle animations ────────────────────────────────────────────────────
-  late List<AnimationController> _dayControllers;
-  late List<Animation<Offset>> _daySlideAnims;
-  late List<AnimationController> _dotControllers;
-  late List<Animation<double>> _dotFadeAnims;
+  DateTime _focusedDay = DateTime.now();
 
   // ── FAB breathing animation ──────────────────────────────────────────────────
   late AnimationController _breathController;
@@ -47,25 +26,6 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
   @override
   void initState() {
     super.initState();
-
-    // Day circles
-    _dayControllers = List.generate(
-        7,
-        (i) => AnimationController(
-            vsync: this, duration: const Duration(milliseconds: 400)));
-    _daySlideAnims = _dayControllers
-        .map((c) => Tween<Offset>(begin: const Offset(1.5, 0), end: Offset.zero)
-            .animate(CurvedAnimation(parent: c, curve: Curves.easeOut)))
-        .toList();
-
-    _dotControllers = List.generate(
-        7,
-        (i) => AnimationController(
-            vsync: this, duration: const Duration(milliseconds: 300)));
-    _dotFadeAnims = _dotControllers
-        .map((c) => Tween<double>(begin: 0.0, end: 1.0)
-            .animate(CurvedAnimation(parent: c, curve: Curves.easeIn)))
-        .toList();
 
     // FAB breath
     _breathController = AnimationController(
@@ -93,173 +53,26 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
         (i) => Tween<Offset>(begin: Offset.zero, end: bgOffsets[i]).animate(
             CurvedAnimation(
                 parent: _bgControllers[i], curve: Curves.easeInOut)));
-
-    _triggerDayAnimations();
-  }
-
-  void _triggerDayAnimations() async {
-    for (int i = 0; i < 7; i++) {
-      await Future.delayed(const Duration(milliseconds: 80));
-      if (mounted) {
-        _dayControllers[i].forward();
-        Future.delayed(const Duration(milliseconds: 260), () {
-          if (mounted) _dotControllers[i].forward();
-        });
-      }
-    }
   }
 
   @override
   void dispose() {
-    for (final c in _dayControllers) c.dispose();
-    for (final c in _dotControllers) c.dispose();
-    for (final c in _bgControllers) c.dispose();
+    for (final c in _bgControllers) {
+      c.dispose();
+    }
     _breathController.dispose();
     super.dispose();
   }
 
-  // ── Month picker dialog ──────────────────────────────────────────────────────
-  Future<void> _showMonthPicker() async {
-    int tempYear = _selectedDate.year;
-    int tempMonth = _selectedDate.month;
-
-    await showDialog(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(builder: (ctx, setDialogState) {
-          return Dialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            backgroundColor: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Year row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.chevron_left,
-                            color: Color(0xFF0796DE)),
-                        onPressed: () => setDialogState(() => tempYear--),
-                      ),
-                      Text(
-                        '$tempYear',
-                        style: const TextStyle(
-                          color: Color(0xFF0796DE),
-                          fontSize: 18,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right,
-                            color: Color(0xFF0796DE)),
-                        onPressed: () => setDialogState(() => tempYear++),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Month grid
-                  GridView.count(
-                    crossAxisCount: 3,
-                    shrinkWrap: true,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 2.2,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: List.generate(12, (i) {
-                      final isSelected = (i + 1) == tempMonth &&
-                          tempYear == _selectedDate.year;
-                      final shortName = _monthNames[i].substring(0, 3);
-                      return GestureDetector(
-                        onTap: () => setDialogState(() => tempMonth = i + 1),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? const Color(0xFF0796DE)
-                                : const Color(0xFF0796DE).withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              shortName,
-                              style: TextStyle(
-                                color: isSelected
-                                    ? Colors.white
-                                    : const Color(0xFF0796DE),
-                                fontSize: 13,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 16),
-                  // Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancel',
-                            style: TextStyle(
-                              color: Color(0xFF9F9EA5),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                            )),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0796DE),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          setState(() {
-                            // Move to the 1st of the selected month/year,
-                            // keep day index on Sunday (0) as default
-                            _selectedDate = DateTime(tempYear, tempMonth, 1);
-                            _selectedDayIndex = _selectedDate.weekday % 7;
-                          });
-                        },
-                        child: const Text('OK',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            )),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
-      },
-    );
-  }
-
-  List<DateTime> _getWeekDays() {
-    final now = _selectedDate;
-    final weekday = now.weekday % 7;
-    final sunday = now.subtract(Duration(days: weekday));
-    return List.generate(7, (i) => sunday.add(Duration(days: i)));
-  }
-
   List<ReminderModel> _getRemindersForDay() {
     return ReminderStore.instance.reminders.where((r) {
-      final dayIndex = _selectedDate.weekday % 7;
-      return r.days[dayIndex];
+      if (r.startDate.isAfter(_selectedDate.add(const Duration(days: 1)))) {
+        return false;
+      }
+      if (r.endDate != null && r.endDate!.isBefore(_selectedDate)) {
+        return false;
+      }
+      return r.days[_selectedDate.weekday % 7];
     }).toList();
   }
 
@@ -292,7 +105,6 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
 
   @override
   Widget build(BuildContext context) {
-    final weekDays = _getWeekDays();
     final dayReminders = _getRemindersForDay();
     final grouped = _groupByTime(dayReminders);
 
@@ -330,15 +142,12 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                       child: Container(
                         width: 153,
                         height: 153,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            begin: const Alignment(0.93, 0.35),
-                            end: const Alignment(0.06, 0.40),
-                            colors: [
-                              const Color(0xAFFDEDCA),
-                              const Color(0xFF0A9BE2)
-                            ],
+                            begin: Alignment(0.93, 0.35),
+                            end: Alignment(0.06, 0.40),
+                            colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
                           ),
                         ),
                       ),
@@ -356,15 +165,12 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                       child: Container(
                         width: 89,
                         height: 89,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            begin: const Alignment(0.93, 0.35),
-                            end: const Alignment(0.06, 0.40),
-                            colors: [
-                              const Color(0xFFFDEDCA),
-                              const Color(0xFF0A9BE2)
-                            ],
+                            begin: Alignment(0.93, 0.35),
+                            end: Alignment(0.06, 0.40),
+                            colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)],
                           ),
                         ),
                       ),
@@ -382,15 +188,12 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                       child: Container(
                         width: 94,
                         height: 94,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            begin: const Alignment(0.93, 0.35),
-                            end: const Alignment(0.06, 0.40),
-                            colors: [
-                              const Color(0xAFFDEDCA),
-                              const Color(0xFF0A9BE2)
-                            ],
+                            begin: Alignment(0.93, 0.35),
+                            end: Alignment(0.06, 0.40),
+                            colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
                           ),
                         ),
                       ),
@@ -425,15 +228,15 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
               Container(
                 color: Colors.transparent,
                 width: double.infinity,
-                child: SafeArea(
+                child: const SafeArea(
                   bottom: false,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                    padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Medical Reminder',
                           style: TextStyle(
                             color: Colors.white,
@@ -442,28 +245,8 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        // Tappable month/year dropdown
-                        GestureDetector(
-                          onTap: _showMonthPicker,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${_monthNames[_selectedDate.month - 1]} ${_selectedDate.year}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const Icon(Icons.keyboard_arrow_down,
-                                  color: Colors.white, size: 20),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 4),
+                        SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -488,95 +271,75 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0796DE).withOpacity(0.3),
+                          color: const Color(0xFF0796DE).withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
 
                       const SizedBox(height: 16),
 
-                      // ── Animated day selector ─────────────────────────────
+                      // ── Full Calendar ─────────────────────────────
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: ClipRect(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: List.generate(7, (i) {
-                              final date = weekDays[i];
-                              final isSelected = i == _selectedDayIndex;
-                              final isToday = date.day == DateTime.now().day &&
-                                  date.month == DateTime.now().month &&
-                                  date.year == DateTime.now().year;
-
-                              return SlideTransition(
-                                position: _daySlideAnims[i],
-                                child: GestureDetector(
-                                  onTap: () => setState(() {
-                                    _selectedDayIndex = i;
-                                    _selectedDate = date;
-                                  }),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      FadeTransition(
-                                        opacity: _dotFadeAnims[i],
-                                        child: Container(
-                                          width: 6,
-                                          height: 6,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: const Color(0xFF0796DE)
-                                                .withOpacity(
-                                                    isSelected || isToday
-                                                        ? 1.0
-                                                        : 0.35),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Container(
-                                        width: 42,
-                                        height: 42,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: isSelected
-                                              ? const Color(0xFF0796DE)
-                                                  .withOpacity(0.15)
-                                              : Colors.transparent,
-                                          border: Border.all(
-                                            color: const Color(0xFF0796DE)
-                                                .withOpacity(
-                                                    isSelected ? 1.0 : 0.25),
-                                            width: isSelected ? 2 : 1.5,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            _dayLetters[i],
-                                            style: TextStyle(
-                                              color: isSelected
-                                                  ? const Color(0xFF0796DE)
-                                                  : isToday
-                                                      ? const Color(0xFF0796DE)
-                                                      : const Color(0xFF9F9EA5),
-                                              fontSize: 15,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: isSelected || isToday
-                                                  ? FontWeight.w700
-                                                  : FontWeight.w400,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: TableCalendar(
+                          firstDay: DateTime.utc(2020, 1, 1),
+                          lastDay: DateTime.utc(2030, 12, 31),
+                          focusedDay: _focusedDay,
+                          selectedDayPredicate: (day) =>
+                              isSameDay(_selectedDate, day),
+                          onDaySelected: (selectedDay, focusedDay) {
+                            setState(() {
+                              _selectedDate = selectedDay;
+                              _focusedDay = focusedDay;
+                            });
+                          },
+                          onPageChanged: (focusedDay) {
+                            _focusedDay = focusedDay;
+                          },
+                          eventLoader: (day) {
+                            return ReminderStore.instance.reminders.where((r) {
+                              if (r.startDate
+                                  .isAfter(day.add(const Duration(days: 1)))) {
+                                return false;
+                              }
+                              if (r.endDate != null &&
+                                  r.endDate!.isBefore(day)) {
+                                return false;
+                              }
+                              return r.days[day.weekday % 7];
+                            }).toList();
+                          },
+                          headerStyle: const HeaderStyle(
+                            formatButtonVisible: false,
+                            titleCentered: true,
+                            leftChevronIcon: Icon(Icons.chevron_left,
+                                color: Color(0xFF0796DE)),
+                            rightChevronIcon: Icon(Icons.chevron_right,
+                                color: Color(0xFF0796DE)),
+                            titleTextStyle: TextStyle(
+                              color: Color(0xFF0A2C8B),
+                              fontSize: 16,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          calendarStyle: const CalendarStyle(
+                            selectedDecoration: BoxDecoration(
+                              color: Color(0xFF0796DE),
+                              shape: BoxShape.circle,
+                            ),
+                            todayDecoration: BoxDecoration(
+                              color: Color(0x660796DE),
+                              shape: BoxShape.circle,
+                            ),
+                            markerDecoration: BoxDecoration(
+                              color: Color(0xFFEF5350),
+                              shape: BoxShape.circle,
+                            ),
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 16),
 
                       // ── Reminder list ──────────────────────────────────────
@@ -589,13 +352,13 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                                     Icon(Icons.notifications_none,
                                         size: 60,
                                         color: const Color(0xFF0796DE)
-                                            .withOpacity(0.3)),
+                                            .withValues(alpha: 0.3)),
                                     const SizedBox(height: 12),
                                     Text(
                                       'No reminders for this day',
                                       style: TextStyle(
                                         color: const Color(0xFF0796DE)
-                                            .withOpacity(0.5),
+                                            .withValues(alpha: 0.5),
                                         fontSize: 15,
                                         fontFamily: 'Poppins',
                                       ),
@@ -627,7 +390,7 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                                             child: Container(
                                               height: 1,
                                               color: const Color(0xFF0796DE)
-                                                  .withOpacity(0.3),
+                                                  .withValues(alpha: 0.3),
                                             ),
                                           ),
                                         ],
@@ -675,7 +438,7 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: const Color(0xFF0796DE)
-                                .withOpacity(_breathAnim.value),
+                                .withValues(alpha: _breathAnim.value),
                           ),
                         ),
                         child!,
@@ -748,7 +511,7 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0796DE).withOpacity(0.15),
+                      color: const Color(0xFF0796DE).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -766,12 +529,12 @@ class _MedicalReminderPageState extends State<MedicalReminderPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFF0796DE).withOpacity(0.2),
+              color: const Color(0xFF0796DE).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Text('O ',
                     style: TextStyle(
                         color: Color(0xFF0796DE),

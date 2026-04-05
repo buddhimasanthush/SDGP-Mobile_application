@@ -140,7 +140,7 @@ class _ServiceListItem extends StatelessWidget {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: const Color(0xFF0796DE).withOpacity(0.1),
+                color: const Color(0xFF0796DE).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(

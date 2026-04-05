@@ -129,7 +129,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
             height: 72,
             decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF0796DE).withOpacity(0.1)),
+                color: const Color(0xFF0796DE).withValues(alpha: 0.1)),
             child: const Icon(Icons.call_rounded,
                 color: Color(0xFF0796DE), size: 34),
           ),
@@ -233,7 +233,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                 height: 44,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF0796DE).withOpacity(0.1)),
+                    color: const Color(0xFF0796DE).withValues(alpha: 0.1)),
                 child: const Icon(Icons.chat_bubble_rounded,
                     color: Color(0xFF0796DE), size: 22),
               ),
@@ -268,12 +268,12 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                                color:
-                                    const Color(0xFF0796DE).withOpacity(0.08),
+                                color: const Color(0xFF0796DE)
+                                    .withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                     color: const Color(0xFF0796DE)
-                                        .withOpacity(0.2))),
+                                        .withValues(alpha: 0.2))),
                             child: Text(msg,
                                 style: const TextStyle(
                                     color: Color(0xFF0796DE),
@@ -379,7 +379,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.12),
+                          color: Colors.white.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12)),
                       child: const Icon(Icons.arrow_back,
                           color: Colors.white, size: 20),
@@ -398,7 +398,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
+                        color: Colors.white.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.info_outline,
                         color: Colors.white, size: 20),
@@ -416,7 +416,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 8))
                     ]),
@@ -450,8 +450,8 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                           Positioned(
                             left: pharmacyPos.dx - 16,
                             top: pharmacyPos.dy - 36,
-                            child: _MapPin(
-                                color: const Color(0xFFF97316),
+                            child: const _MapPin(
+                                color: Color(0xFFF97316),
                                 icon: Icons.local_pharmacy),
                           ),
 
@@ -459,8 +459,8 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                           Positioned(
                             left: homePos.dx - 16,
                             top: homePos.dy - 36,
-                            child: _MapPin(
-                                color: const Color(0xFF0796DE),
+                            child: const _MapPin(
+                                color: Color(0xFF0796DE),
                                 icon: Icons.home_rounded),
                           ),
 
@@ -481,7 +481,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                                     boxShadow: [
                                       BoxShadow(
                                           color: const Color(0xFF0796DE)
-                                              .withOpacity(0.5),
+                                              .withValues(alpha: 0.5),
                                           blurRadius: 12,
                                           spreadRadius: 2)
                                     ]),
@@ -533,9 +533,9 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                     const SizedBox(height: 14),
 
                     // ETA
-                    Text('Estimated delivery time',
+                    const Text('Estimated delivery time',
                         style: TextStyle(
-                            color: const Color(0xFF64748B),
+                            color: Color(0xFF64748B),
                             fontSize: 12,
                             fontFamily: 'Poppins')),
                     Text('$_etaMinutes – ${_etaMinutes + 10} min',
@@ -561,9 +561,9 @@ class _OrderTrackingPageState extends State<OrderTrackingPage>
                       child: Container(
                           width: 2, height: 20, color: const Color(0xFFCDD5E0)),
                     ),
-                    _RouteRow(
+                    const _RouteRow(
                         icon: Icons.home_rounded,
-                        color: const Color(0xFF0796DE),
+                        color: Color(0xFF0796DE),
                         title: 'Home',
                         subtitle: '95/5 St. Sebastien road, Nugegoda'),
                     const Divider(height: 24, color: Color(0xFFE2E8F0)),
@@ -663,7 +663,7 @@ class _MapPin extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2),
             boxShadow: [
-              BoxShadow(color: color.withOpacity(0.4), blurRadius: 8)
+              BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8)
             ]),
         child: Icon(icon, color: Colors.white, size: 16),
       ),
@@ -700,7 +700,7 @@ class _RoutePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // Grey remaining path
     final greyPaint = Paint()
-      ..color = Colors.grey.withOpacity(0.4)
+      ..color = Colors.grey.withValues(alpha: 0.4)
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -783,7 +783,7 @@ class _MapPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final thinRoad = Paint()
-      ..color = Colors.white.withOpacity(0.7)
+      ..color = Colors.white.withValues(alpha: 0.7)
       ..strokeWidth = 7;
 
     final blockPaint = Paint()..color = const Color(0xFFD5CFC7);
@@ -881,7 +881,7 @@ class _OrderStepper extends StatelessWidget {
                     : const Color(0xFFE2E8F0),
                 border: current
                     ? Border.all(
-                        color: const Color(0xFF0796DE).withOpacity(0.3),
+                        color: const Color(0xFF0796DE).withValues(alpha: 0.3),
                         width: 4)
                     : null),
             child: done
@@ -926,7 +926,7 @@ class _RouteRow extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12)),
         child: Icon(icon, color: color, size: 22),
       ),
