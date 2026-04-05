@@ -17,12 +17,12 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
 
   bool _showReminderTime = false;
   bool _showFrequency = false;
-  final List<String> _selectedTimes = [];
+  List<String> _selectedTimes = [];
 
   // Frequency state
   String _selectedFrequency =
       'Days of week'; // Days of week | Interval | Cycle | As needed
-  final List<bool> _selectedDays = [
+  List<bool> _selectedDays = [
     true,
     true,
     true,
@@ -59,7 +59,7 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
     final diff = selected.difference(now);
     final hrs = diff.inHours;
     final mins = diff.inMinutes % 60;
-    return '+ Rings in $hrs hr $mins min';
+    return '+ Rings in ${hrs} hr ${mins} min';
   }
 
   // Slide animation for timer section
@@ -573,7 +573,7 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
                               child: Center(
                                 child: Text(
                                   _getRingsText(),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
                                     fontFamily: 'Poppins',
@@ -634,9 +634,9 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFF0796DE).withValues(alpha: 0.0),
-                        const Color(0xFF0796DE).withValues(alpha: 0.3),
-                        const Color(0xFF0564B8).withValues(alpha: 0.7),
+                        const Color(0xFF0796DE).withOpacity(0.0),
+                        const Color(0xFF0796DE).withOpacity(0.3),
+                        const Color(0xFF0564B8).withOpacity(0.7),
                         const Color(0xFF001F81),
                       ],
                       stops: const [0.0, 0.3, 0.6, 1.0],
@@ -1005,8 +1005,8 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
-                          children: [
+                        Row(
+                          children: const [
                             Icon(Icons.play_arrow,
                                 color: Color(0xFF0796DE), size: 18),
                             SizedBox(width: 6),
@@ -1053,8 +1053,8 @@ class _AddMedicineNamePageState extends State<AddMedicineNamePage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
-                          children: [
+                        Row(
+                          children: const [
                             Icon(Icons.stop,
                                 color: Color(0xFF0796DE), size: 18),
                             SizedBox(width: 6),
@@ -1492,9 +1492,7 @@ class _CustomCalendarDialogState extends State<_CustomCalendarDialog> {
         DateTime(_displayMonth.year, _displayMonth.month + 1, 0).day;
     final startWeekday = firstDay.weekday % 7; // Sun=0
     final cells = <DateTime?>[];
-    for (int i = 0; i < startWeekday; i++) {
-      cells.add(null);
-    }
+    for (int i = 0; i < startWeekday; i++) cells.add(null);
     for (int d = 1; d <= daysInMonth; d++) {
       cells.add(DateTime(_displayMonth.year, _displayMonth.month, d));
     }

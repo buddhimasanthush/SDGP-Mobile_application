@@ -44,8 +44,8 @@ class CameraCapturePage extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.6),
-                      Colors.black.withValues(alpha: 0),
+                      Colors.black.withOpacity(0.6),
+                      Colors.black.withOpacity(0),
                     ],
                   ),
                 ),
@@ -64,8 +64,8 @@ class CameraCapturePage extends StatelessWidget {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.6),
-                      Colors.black.withValues(alpha: 0),
+                      Colors.black.withOpacity(0.6),
+                      Colors.black.withOpacity(0),
                     ],
                   ),
                 ),
@@ -74,19 +74,19 @@ class CameraCapturePage extends StatelessWidget {
                     const Spacer(),
                     // Capture button
                     GestureDetector(
-                      onTap: () async {
+                      onTap: () {
                         // Simulate capture, show uploading dialog, then go to success
                         _showUploadingDialog(context);
-                        await Future.delayed(const Duration(seconds: 2));
-                        if (!context.mounted) return;
-                        Navigator.pop(context); // Close dialog
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const DocVerificationSuccessPage(),
-                          ),
-                        );
+                        Future.delayed(const Duration(seconds: 2), () {
+                          Navigator.pop(context); // Close dialog
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const DocVerificationSuccessPage(),
+                            ),
+                          );
+                        });
                       },
                       child: Container(
                         width: 80,
@@ -156,7 +156,7 @@ class CameraCapturePage extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.4),
+                          color: Colors.black.withOpacity(0.4),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -184,7 +184,7 @@ class CameraCapturePage extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
+                        color: Colors.black.withOpacity(0.4),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -208,7 +208,7 @@ class CameraCapturePage extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.7),
+                    color: Colors.black.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: const Text(
@@ -234,7 +234,7 @@ class CameraCapturePage extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.45),
+      barrierColor: Colors.black.withOpacity(0.45),
       builder: (context) => Center(
         child: Material(
           color: Colors.transparent,
@@ -246,15 +246,15 @@ class CameraCapturePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                    color: const Color(0xFF0796DE).withValues(alpha: 0.18),
+                    color: const Color(0xFF0796DE).withOpacity(0.18),
                     blurRadius: 24,
                     offset: const Offset(0, 6)),
               ],
             ),
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 48,
                   height: 48,
                   child: CircularProgressIndicator(
@@ -263,8 +263,8 @@ class CameraCapturePage extends StatelessWidget {
                         AlwaysStoppedAnimation<Color>(Color(0xFF0796DE)),
                   ),
                 ),
-                SizedBox(height: 20),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   'Uploading document...',
                   style: TextStyle(
                     color: Color(0xFF2D2D2D),
@@ -274,8 +274,8 @@ class CameraCapturePage extends StatelessWidget {
                     decoration: TextDecoration.none,
                   ),
                 ),
-                SizedBox(height: 6),
-                Text(
+                const SizedBox(height: 6),
+                const Text(
                   'Please wait',
                   style: TextStyle(
                     color: Color(0xFF9F9EA5),

@@ -158,16 +158,16 @@ class _PharmacyListPageState extends State<PharmacyListPage>
                     ],
                   ),
                 ),
-                const Row(
+                Row(
                   children: [
-                    SizedBox(width: 24),
-                    Icon(
+                    const SizedBox(width: 24),
+                    const Icon(
                       Icons.location_on,
                       color: Color(0xFFA2E0FF),
                       size: 18,
                     ),
-                    SizedBox(width: 5),
-                    Text(
+                    const SizedBox(width: 5),
+                    const Text(
                       'Send to ',
                       style: TextStyle(
                         color: Color(0xFFA2E0FF),
@@ -176,7 +176,7 @@ class _PharmacyListPageState extends State<PharmacyListPage>
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'My Home',
                       style: TextStyle(
                         color: Color(0xFFDEF4FF),
@@ -263,7 +263,7 @@ class _PharmacyListCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -278,7 +278,7 @@ class _PharmacyListCard extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0796DE).withValues(alpha: 0.1),
+                    color: const Color(0xFF0796DE).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -314,20 +314,20 @@ class _PharmacyListCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            const Row(
+            Row(
               children: [
                 Text(
                   'Not Available',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontFamily: 'Poppins',
                     color: Color(0xFF919191),
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Text(
                   'Total',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontFamily: 'Poppins',
                     color: Color(0xFF919191),
@@ -435,7 +435,7 @@ class _StatBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -454,7 +454,7 @@ class _StatBox extends StatelessWidget {
               fontSize: 16,
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w700,
-              color: color.withValues(alpha: 0.8),
+              color: color.withOpacity(0.8),
             ),
           ),
         ],

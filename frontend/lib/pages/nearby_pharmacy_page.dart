@@ -262,28 +262,28 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
           circleId: const CircleId('r4'),
           center: _userPos,
           radius: r,
-          strokeColor: const Color(0xFF0796DE).withValues(alpha: 0.5),
+          strokeColor: const Color(0xFF0796DE).withOpacity(0.5),
           strokeWidth: 2,
           fillColor: Colors.transparent),
       Circle(
           circleId: const CircleId('r3'),
           center: _userPos,
           radius: r * 0.75,
-          strokeColor: const Color(0xFF0796DE).withValues(alpha: 0.35),
+          strokeColor: const Color(0xFF0796DE).withOpacity(0.35),
           strokeWidth: 1,
           fillColor: Colors.transparent),
       Circle(
           circleId: const CircleId('r2'),
           center: _userPos,
           radius: r * 0.50,
-          strokeColor: const Color(0xFF0796DE).withValues(alpha: 0.25),
+          strokeColor: const Color(0xFF0796DE).withOpacity(0.25),
           strokeWidth: 1,
           fillColor: Colors.transparent),
       Circle(
           circleId: const CircleId('r1'),
           center: _userPos,
           radius: r * 0.25,
-          strokeColor: const Color(0xFF0796DE).withValues(alpha: 0.18),
+          strokeColor: const Color(0xFF0796DE).withOpacity(0.18),
           strokeWidth: 1,
           fillColor: Colors.transparent),
     };
@@ -377,10 +377,10 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
             GoogleMap(
               onMapCreated: (ctrl) {
                 _mapController = ctrl;
+                ctrl.setMapStyle(_mapStyle);
               },
               initialCameraPosition:
                   const CameraPosition(target: _userPos, zoom: 15.5),
-              style: _mapStyle,
               mapType: MapType.normal,
               myLocationEnabled: false,
               zoomControlsEnabled: false,
@@ -448,7 +448,7 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 5),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
+                          color: Colors.white.withOpacity(0.18),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -491,8 +491,7 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                           Border.all(color: const Color(0xFF0796DE), width: 3),
                       boxShadow: [
                         BoxShadow(
-                            color:
-                                const Color(0xFF0796DE).withValues(alpha: 0.6),
+                            color: const Color(0xFF0796DE).withOpacity(0.6),
                             blurRadius: 14,
                             spreadRadius: 5)
                       ],
@@ -561,7 +560,7 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.20),
+                        color: Colors.black.withOpacity(0.20),
                         blurRadius: 8,
                         offset: const Offset(0, 2))
                   ],
@@ -577,8 +576,7 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 4)
+                        color: Colors.black.withOpacity(0.12), blurRadius: 4)
                   ],
                 ),
                 child: Text(p.name,
@@ -1026,7 +1024,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFF0796DE).withValues(alpha: 0.08)
+                    ? const Color(0xFF0796DE).withOpacity(0.08)
                     : Colors.white,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
@@ -1086,9 +1084,9 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                   border:
                       Border.all(color: const Color(0xFF0796DE), width: 1.5),
                   borderRadius: BorderRadius.circular(14)),
-              child: const Row(
+              child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                  children: const [
                     Icon(Icons.add_location_alt_outlined,
                         color: Color(0xFF0796DE), size: 18),
                     SizedBox(width: 8),
@@ -1125,13 +1123,13 @@ class _RingsPainter extends CustomPainter {
           Offset(cx, cy),
           r,
           Paint()
-            ..color = Colors.white.withValues(alpha: fills[i])
+            ..color = Colors.white.withOpacity(fills[i])
             ..style = PaintingStyle.fill);
       canvas.drawCircle(
           Offset(cx, cy),
           r,
           Paint()
-            ..color = Colors.white.withValues(alpha: strokes[i])
+            ..color = Colors.white.withOpacity(strokes[i])
             ..style = PaintingStyle.stroke
             ..strokeWidth = i == 3 ? 2.0 : 1.2);
     }

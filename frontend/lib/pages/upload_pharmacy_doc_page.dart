@@ -119,8 +119,7 @@ class UploadPharmacyDocPage extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        const GalleryPickerPage(),
+                                    builder: (context) => GalleryPickerPage(),
                                   ),
                                 );
                               },
@@ -285,6 +284,28 @@ class UploadPharmacyDocPage extends StatelessWidget {
     );
   }
 
+  void _showUploadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Uploading document...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildOptionCard({
     required BuildContext context,
     required IconData icon,
@@ -297,7 +318,7 @@ class UploadPharmacyDocPage extends StatelessWidget {
         width: double.infinity,
         height: 94,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.6),
+          color: Colors.white.withOpacity(0.6),
           borderRadius: BorderRadius.circular(8),
           boxShadow: const [
             BoxShadow(
@@ -398,12 +419,15 @@ class UploadPharmacyDocPage extends StatelessWidget {
                 child: Container(
                   width: 153.81,
                   height: 153.81,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      begin: Alignment(0.93, 0.35),
-                      end: Alignment(0.06, 0.40),
-                      colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
+                      begin: const Alignment(0.93, 0.35),
+                      end: const Alignment(0.06, 0.40),
+                      colors: [
+                        const Color(0xAFFDEDCA),
+                        const Color(0xFF0A9BE2)
+                      ],
                     ),
                   ),
                 ),
@@ -420,12 +444,15 @@ class UploadPharmacyDocPage extends StatelessWidget {
                 child: Container(
                   width: 89.35,
                   height: 89.35,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      begin: Alignment(0.93, 0.35),
-                      end: Alignment(0.06, 0.40),
-                      colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)],
+                      begin: const Alignment(0.93, 0.35),
+                      end: const Alignment(0.06, 0.40),
+                      colors: [
+                        const Color(0xFFFDEDCA),
+                        const Color(0xFF0A9BE2)
+                      ],
                     ),
                   ),
                 ),
@@ -442,12 +469,15 @@ class UploadPharmacyDocPage extends StatelessWidget {
                 child: Container(
                   width: 94.08,
                   height: 94.08,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      begin: Alignment(0.93, 0.35),
-                      end: Alignment(0.06, 0.40),
-                      colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
+                      begin: const Alignment(0.93, 0.35),
+                      end: const Alignment(0.06, 0.40),
+                      colors: [
+                        const Color(0xAFFDEDCA),
+                        const Color(0xFF0A9BE2)
+                      ],
                     ),
                   ),
                 ),

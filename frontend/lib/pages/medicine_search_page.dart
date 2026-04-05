@@ -11,7 +11,7 @@ class MedicineSearchPage extends StatefulWidget {
 
 class _MedicineSearchPageState extends State<MedicineSearchPage> {
   late TextEditingController _searchController;
-  final List<Map<String, dynamic>> _allMedicines = [
+  List<Map<String, dynamic>> _allMedicines = [
     {
       'name': 'Panadol 500mg',
       'category': 'Pain Relief',
@@ -144,7 +144,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: Colors.black.withOpacity(0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -156,7 +156,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                         width: 60,
                         height: 60,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0796DE).withValues(alpha: 0.1),
+                          color: const Color(0xFF0796DE).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Center(
@@ -216,8 +216,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child:
-                            const Text('Add', style: TextStyle(fontSize: 12)),
+                        child: const Text('Add', style: TextStyle(fontSize: 12)),
                       ),
                     ],
                   ),

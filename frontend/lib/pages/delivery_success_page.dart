@@ -122,8 +122,7 @@ class _DeliverySuccessPageState extends State<DeliverySuccessPage>
                       shape: BoxShape.circle,
                       border: Border.all(
                           width: 30,
-                          color: const Color(0xFF10A2EA)
-                              .withValues(alpha: 0.3))))),
+                          color: const Color(0xFF10A2EA).withOpacity(0.3))))),
           Positioned(
               right: -50,
               bottom: 100,
@@ -134,8 +133,7 @@ class _DeliverySuccessPageState extends State<DeliverySuccessPage>
                       shape: BoxShape.circle,
                       border: Border.all(
                           width: 30,
-                          color: const Color(0xFF10A2EA)
-                              .withValues(alpha: 0.2))))),
+                          color: const Color(0xFF10A2EA).withOpacity(0.2))))),
 
           // Confetti
           AnimatedBuilder(
@@ -179,11 +177,9 @@ class _DeliverySuccessPageState extends State<DeliverySuccessPage>
                       height: 140,
                       decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color:
-                              const Color(0xFF0796DE).withValues(alpha: 0.15),
+                          color: const Color(0xFF0796DE).withOpacity(0.15),
                           border: Border.all(
-                              color: const Color(0xFF0796DE)
-                                  .withValues(alpha: 0.3),
+                              color: const Color(0xFF0796DE).withOpacity(0.3),
                               width: 2)),
                       child: Center(
                         child: ScaleTransition(
@@ -227,7 +223,7 @@ class _DeliverySuccessPageState extends State<DeliverySuccessPage>
                             'Your order from ${widget.pharmacyName}\nhas been delivered successfully.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.65),
+                                color: Colors.white.withOpacity(0.65),
                                 fontSize: 14,
                                 fontFamily: 'Poppins',
                                 height: 1.5)),
@@ -244,10 +240,10 @@ class _DeliverySuccessPageState extends State<DeliverySuccessPage>
                       opacity: _contentOpacity,
                       child: Container(
                         decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
+                            color: Colors.white.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.12))),
+                                color: Colors.white.withOpacity(0.12))),
                         padding: const EdgeInsets.all(20),
                         child: Column(children: [
                           _ReceiptRow(
@@ -261,10 +257,10 @@ class _DeliverySuccessPageState extends State<DeliverySuccessPage>
                               valueColor: const Color(0xFF11A2EB),
                               valueBold: true),
                           const Divider(color: Colors.white12, height: 24),
-                          const _ReceiptRow(
+                          _ReceiptRow(
                               label: 'Status',
                               value: 'Delivered ✓',
-                              valueColor: Color(0xFF4CAF50)),
+                              valueColor: const Color(0xFF4CAF50)),
                           const SizedBox(height: 8),
                           _ReceiptRow(
                               label: 'Order ID',
@@ -292,7 +288,7 @@ class _DeliverySuccessPageState extends State<DeliverySuccessPage>
                                 borderRadius: BorderRadius.circular(100)),
                             elevation: 8,
                             shadowColor:
-                                const Color(0xFF0796DE).withValues(alpha: 0.5)),
+                                const Color(0xFF0796DE).withOpacity(0.5)),
                         child: const Text('Back to Home',
                             style: TextStyle(
                                 color: Colors.white,
@@ -329,7 +325,7 @@ class _ReceiptRow extends StatelessWidget {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Text(label,
           style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: Colors.white.withOpacity(0.5),
               fontSize: 13,
               fontFamily: 'Poppins')),
       Text(value,

@@ -102,7 +102,7 @@ class _ServiceItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0796DE).withValues(alpha: 0.30),
+                    color: const Color(0xFF0796DE).withOpacity(0.30),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -118,7 +118,7 @@ class _ServiceItem extends StatelessWidget {
                       height: 50,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.10),
+                        color: Colors.white.withOpacity(0.10),
                       ),
                     ),
                   ),
@@ -130,7 +130,7 @@ class _ServiceItem extends StatelessWidget {
                       height: 38,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.08),
+                        color: Colors.white.withOpacity(0.08),
                       ),
                     ),
                   ),

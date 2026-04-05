@@ -29,7 +29,7 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.5),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (context) => Material(
         type: MaterialType.transparency,
         child: Center(
@@ -115,8 +115,8 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.75),
-                      Colors.black.withValues(alpha: 0)
+                      Colors.black.withOpacity(0.75),
+                      Colors.black.withOpacity(0)
                     ],
                   ),
                 ),
@@ -149,7 +149,7 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                     height: 36,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: ShapeDecoration(
-                      color: Colors.black.withValues(alpha: 0.70),
+                      color: Colors.black.withOpacity(0.70),
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(100)),
                       ),
@@ -180,8 +180,8 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.60),
-                      Colors.black.withValues(alpha: 0)
+                      Colors.black.withOpacity(0.60),
+                      Colors.black.withOpacity(0)
                     ],
                   ),
                 ),
@@ -193,15 +193,15 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                       child: Container(
                         width: 80,
                         height: 80,
-                        decoration: const ShapeDecoration(
+                        decoration: ShapeDecoration(
                           color: Colors.white,
-                          shape: RoundedRectangleBorder(
+                          shape: const RoundedRectangleBorder(
                             side: BorderSide(
                                 width: 3.70, color: Color(0xFF11A2EB)),
                             borderRadius:
                                 BorderRadius.all(Radius.circular(100)),
                           ),
-                          shadows: [
+                          shadows: const [
                             BoxShadow(
                                 color: Color(0x19000000),
                                 blurRadius: 6,
@@ -254,7 +254,7 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                           width: 40,
                           height: 40,
                           decoration: ShapeDecoration(
-                              color: Colors.black.withValues(alpha: 0.40),
+                              color: Colors.black.withOpacity(0.40),
                               shape: const OvalBorder()),
                           child: const Icon(Icons.arrow_back,
                               color: Colors.white, size: 20),
@@ -275,7 +275,7 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
                           width: 40,
                           height: 40,
                           decoration: ShapeDecoration(
-                              color: Colors.black.withValues(alpha: 0.40),
+                              color: Colors.black.withOpacity(0.40),
                               shape: const OvalBorder()),
                           child: Icon(
                               _flashOn ? Icons.flash_on : Icons.flash_off,

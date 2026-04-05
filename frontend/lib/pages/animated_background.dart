@@ -11,79 +11,79 @@ class AnimatedBackground extends StatefulWidget {
 class _AnimatedBackgroundState extends State<AnimatedBackground> {
   static final List<_CircleDef> _defs = [
     // ── TOP ────────────────────────────────────────────────────────
-    const _CircleDef(
+    _CircleDef(
         x: 0.10,
         y: -0.10,
         size: 183,
         bw: 30,
         ring: true,
-        color: Color(0xFF10A2EA)),
-    const _CircleDef(
+        color: const Color(0xFF10A2EA)),
+    _CircleDef(
         x: 0.90,
         y: 0.07,
         size: 167,
         bw: 30,
         ring: true,
-        color: Color(0xFF10A2EA)),
-    const _CircleDef(
+        color: const Color(0xFF10A2EA)),
+    _CircleDef(
         x: 0.30,
         y: 0.03,
         size: 94,
         op: 0.30,
-        grad: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]),
-    const _CircleDef(
+        grad: [const Color(0xAFFDEDCA), const Color(0xFF0A9BE2)]),
+    _CircleDef(
         x: 0.09,
         y: 0.09,
         size: 89,
         op: 0.30,
-        grad: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)]),
-    const _CircleDef(
-        x: 0.55, y: 0.14, size: 48, op: 0.18, color: Color(0xFF10A2EA)),
+        grad: [const Color(0xFFFDEDCA), const Color(0xFF0A9BE2)]),
+    _CircleDef(
+        x: 0.55, y: 0.14, size: 48, op: 0.18, color: const Color(0xFF10A2EA)),
     // ── MIDDLE ─────────────────────────────────────────────────────
-    const _CircleDef(
+    _CircleDef(
         x: 0.35,
         y: 0.27,
         size: 154,
         op: 0.28,
-        grad: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]),
-    const _CircleDef(
+        grad: [const Color(0xAFFDEDCA), const Color(0xFF0A9BE2)]),
+    _CircleDef(
         x: -0.05,
         y: 0.42,
         size: 130,
         bw: 22,
         ring: true,
-        color: Color(0xFF10A2EA)),
-    const _CircleDef(
-        x: 0.20, y: 0.48, size: 58, op: 0.15, color: Color(0xFF10A2EA)),
+        color: const Color(0xFF10A2EA)),
+    _CircleDef(
+        x: 0.20, y: 0.48, size: 58, op: 0.15, color: const Color(0xFF10A2EA)),
     // ── BOTTOM — 2 rings, 2 blobs, 1 dot ──────────────────────────
-    const _CircleDef(
+    _CircleDef(
         x: 0.12,
         y: 0.85,
         size: 160,
         bw: 28,
         ring: true,
-        color: Color(0xFF10A2EA)),
-    const _CircleDef(
+        color: const Color(0xFF10A2EA)),
+    _CircleDef(
         x: 0.88,
         y: 0.90,
         size: 140,
         bw: 24,
         ring: true,
-        color: Color(0xFF10A2EA)),
-    const _CircleDef(
+        color: const Color(0xFF10A2EA)),
+    _CircleDef(
         x: 0.70,
         y: 0.76,
         size: 105,
         op: 0.22,
-        grad: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)]),
-    const _CircleDef(
+        grad: [const Color(0xAFFDEDCA), const Color(0xFF0A9BE2)]),
+    _CircleDef(
         x: 0.18,
         y: 0.90,
         size: 75,
         op: 0.20,
-        grad: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)]),
-    const _CircleDef(
-        x: 0.50, y: 0.95, size: 50, op: 0.18, color: Color(0xFF10A2EA)),
+        grad: [const Color(0xFFFDEDCA), const Color(0xFF0A9BE2)]),
+    _CircleDef(
+        x: 0.50, y: 0.95, size: 50, op: 0.18, color: const Color(0xFF10A2EA)),
   ];
 
   @override
@@ -107,7 +107,8 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> {
 class _FloatingCircleWidget extends StatefulWidget {
   final _CircleDef def;
   final int delay;
-  const _FloatingCircleWidget({required this.def, required this.delay});
+  const _FloatingCircleWidget(
+      {required this.def, required this.delay, super.key});
 
   @override
   State<_FloatingCircleWidget> createState() => _FloatingCircleWidgetState();

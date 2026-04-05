@@ -43,6 +43,7 @@ class HelpSupportPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 30),
+            
             _buildContactItem(
                 icon: Icons.email_outlined,
                 title: 'Email us',
@@ -60,6 +61,7 @@ class HelpSupportPage extends StatelessWidget {
                 title: 'Live Chat',
                 subtitle: 'Chat with our support team',
                 onTap: () {}),
+            
             const SizedBox(height: 40),
             const Text(
               'Frequently Asked Questions',
@@ -98,7 +100,7 @@ class HelpSupportPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             )
@@ -109,7 +111,7 @@ class HelpSupportPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF0796DE).withValues(alpha: 0.1),
+                color: const Color(0xFF0796DE).withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: const Color(0xFF0796DE)),
@@ -133,8 +135,7 @@ class HelpSupportPage extends StatelessWidget {
               ],
             ),
             const Spacer(),
-            const Icon(Icons.arrow_forward_ios,
-                size: 16, color: Color(0xFFBDBDBD)),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFFBDBDBD)),
           ],
         ),
       ),

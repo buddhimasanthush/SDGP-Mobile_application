@@ -23,7 +23,7 @@ class PrescriptionGalleryPage extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.5),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (ctx) => Material(
         type: MaterialType.transparency,
         child: Center(
@@ -75,7 +75,6 @@ class PrescriptionGalleryPage extends StatelessWidget {
       ),
     );
     Future.delayed(const Duration(seconds: 2), () {
-      if (!context.mounted) return;
       Navigator.pop(context);
       onDone();
     });

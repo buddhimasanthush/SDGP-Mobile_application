@@ -55,8 +55,7 @@ class _PreviousOrdersPageState extends State<PreviousOrdersPage>
                               shape: BoxShape.circle,
                               border: Border.all(
                                   width: 22,
-                                  color:
-                                      Colors.white.withValues(alpha: 0.12))))),
+                                  color: Colors.white.withOpacity(0.12))))),
                   Positioned(
                       left: -20,
                       bottom: -20,
@@ -65,7 +64,7 @@ class _PreviousOrdersPageState extends State<PreviousOrdersPage>
                           height: 100,
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.06)))),
+                              color: Colors.white.withOpacity(0.06)))),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8, 8, 16, 20),
                     child: FadeTransition(
@@ -77,20 +76,15 @@ class _PreviousOrdersPageState extends State<PreviousOrdersPage>
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  if (Navigator.canPop(context))
-                                    IconButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        icon: const Icon(Icons.arrow_back,
-                                            color: Colors.white, size: 24))
-                                  else
-                                    const SizedBox(
-                                        width: 48), // Spacer to balance
+                                  IconButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      icon: const Icon(Icons.arrow_back,
+                                          color: Colors.white, size: 24)),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.15),
+                                        color: Colors.white.withOpacity(0.15),
                                         borderRadius:
                                             BorderRadius.circular(20)),
                                     child: Text(
@@ -163,10 +157,9 @@ class _PreviousOrdersPageState extends State<PreviousOrdersPage>
             height: 100,
             decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF0796DE).withValues(alpha: 0.08)),
+                color: const Color(0xFF0796DE).withOpacity(0.08)),
             child: Icon(Icons.receipt_long_rounded,
-                color: const Color(0xFF0796DE).withValues(alpha: 0.4),
-                size: 48),
+                color: const Color(0xFF0796DE).withOpacity(0.4), size: 48),
           ),
           const SizedBox(height: 20),
           const Text('No orders yet',
@@ -178,7 +171,7 @@ class _PreviousOrdersPageState extends State<PreviousOrdersPage>
           const SizedBox(height: 8),
           Text('Your completed orders will appear here',
               style: TextStyle(
-                  color: const Color(0xFF64748B).withValues(alpha: 0.8),
+                  color: const Color(0xFF64748B).withOpacity(0.8),
                   fontSize: 13,
                   fontFamily: 'Poppins')),
         ],
@@ -237,7 +230,7 @@ class _OrderCardState extends State<_OrderCard>
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                    color: const Color(0xFF0796DE).withValues(alpha: 0.07),
+                    color: const Color(0xFF0796DE).withOpacity(0.07),
                     blurRadius: 16,
                     offset: const Offset(0, 4))
               ]),
@@ -252,7 +245,7 @@ class _OrderCardState extends State<_OrderCard>
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                        color: const Color(0xFF0796DE).withValues(alpha: 0.1),
+                        color: const Color(0xFF0796DE).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(14)),
                     child: const Icon(Icons.local_pharmacy_rounded,
                         color: Color(0xFF0796DE), size: 26),
@@ -281,7 +274,7 @@ class _OrderCardState extends State<_OrderCard>
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                        color: const Color(0xFF4CAF50).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20)),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
                       Container(

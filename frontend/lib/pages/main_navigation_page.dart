@@ -163,9 +163,7 @@ class _HomePageContentState extends State<HomePageContent>
 
   @override
   void dispose() {
-    for (final c in _fcs) {
-      c.dispose();
-    }
+    for (final c in _fcs) c.dispose();
     super.dispose();
   }
 
@@ -216,14 +214,14 @@ class _HomePageContentState extends State<HomePageContent>
                     child: Container(
                         width: 153.81,
                         height: 153.81,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
-                                begin: Alignment(0.93, 0.35),
-                                end: Alignment(0.06, 0.40),
+                                begin: const Alignment(0.93, 0.35),
+                                end: const Alignment(0.06, 0.40),
                                 colors: [
-                                  Color(0xAFFDEDCA),
-                                  Color(0xFF0A9BE2)
+                                  const Color(0xAFFDEDCA),
+                                  const Color(0xFF0A9BE2)
                                 ]))))),
           ),
           // Top right small blob
@@ -237,14 +235,14 @@ class _HomePageContentState extends State<HomePageContent>
                     child: Container(
                         width: 89.35,
                         height: 89.35,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
-                                begin: Alignment(0.93, 0.35),
-                                end: Alignment(0.06, 0.40),
+                                begin: const Alignment(0.93, 0.35),
+                                end: const Alignment(0.06, 0.40),
                                 colors: [
-                                  Color(0xFFFDEDCA),
-                                  Color(0xFF0A9BE2)
+                                  const Color(0xFFFDEDCA),
+                                  const Color(0xFF0A9BE2)
                                 ]))))),
           ),
           // Top middle blob
@@ -258,14 +256,14 @@ class _HomePageContentState extends State<HomePageContent>
                     child: Container(
                         width: 94.08,
                         height: 94.08,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
-                                begin: Alignment(0.93, 0.35),
-                                end: Alignment(0.06, 0.40),
+                                begin: const Alignment(0.93, 0.35),
+                                end: const Alignment(0.06, 0.40),
                                 colors: [
-                                  Color(0xAFFDEDCA),
-                                  Color(0xFF0A9BE2)
+                                  const Color(0xAFFDEDCA),
+                                  const Color(0xFF0A9BE2)
                                 ]))))),
           ),
           // Top right border ring
@@ -569,7 +567,7 @@ class _BannerCarouselState extends State<_BannerCarousel> {
             decoration: BoxDecoration(
                 color: active
                     ? const Color(0xFF0796DE)
-                    : const Color(0xFF0796DE).withValues(alpha: 0.3),
+                    : const Color(0xFF0796DE).withOpacity(0.3),
                 borderRadius: BorderRadius.circular(4)),
           );
         }),

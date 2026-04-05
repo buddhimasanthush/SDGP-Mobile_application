@@ -25,13 +25,7 @@ class _OnboardingFlowPageState extends State<OnboardingFlowPage> {
   }
 
   void _finish() {
-    _finishOnboarding();
-  }
-
-  Future<void> _finishOnboarding() async {
     UserStore.instance.hasCompletedOnboarding = true;
-    await UserStore.instance.saveToRemote();
-    if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => widget.destination),
@@ -109,9 +103,9 @@ class _OnboardingScaffold extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      const Color(0xFF0796DE).withValues(alpha: 0.0),
-                      const Color(0xFF0796DE).withValues(alpha: 0.3),
-                      const Color(0xFF0564B8).withValues(alpha: 0.7),
+                      const Color(0xFF0796DE).withOpacity(0.0),
+                      const Color(0xFF0796DE).withOpacity(0.3),
+                      const Color(0xFF0564B8).withOpacity(0.7),
                       const Color(0xFF001F81),
                     ],
                     stops: const [0.0, 0.3, 0.6, 1.0],
@@ -140,7 +134,7 @@ class _OnboardingScaffold extends StatelessWidget {
                               decoration: BoxDecoration(
                                   color: active
                                       ? Colors.white
-                                      : Colors.white.withValues(alpha: 0.35),
+                                      : Colors.white.withOpacity(0.35),
                                   borderRadius: BorderRadius.circular(4)),
                             );
                           }),
@@ -149,7 +143,7 @@ class _OnboardingScaffold extends StatelessWidget {
                           onTap: onSkip,
                           child: Text('Skip',
                               style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.65),
+                                  color: Colors.white.withOpacity(0.65),
                                   fontSize: 14,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500)),
@@ -165,7 +159,7 @@ class _OnboardingScaffold extends StatelessWidget {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.18),
+                        color: Colors.white.withOpacity(0.18),
                         shape: BoxShape.circle),
                     child: Center(
                         child:
@@ -192,7 +186,7 @@ class _OnboardingScaffold extends StatelessWidget {
                     child: Text(subtitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.75),
+                            color: Colors.white.withOpacity(0.75),
                             fontSize: 13.5,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w400,
@@ -210,8 +204,7 @@ class _OnboardingScaffold extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                              color: const Color(0xFF052F84)
-                                  .withValues(alpha: 0.25),
+                              color: const Color(0xFF052F84).withOpacity(0.25),
                               blurRadius: 40,
                               offset: const Offset(0, 8))
                         ],
@@ -431,7 +424,7 @@ class _StepPhoneState extends State<_StepPhone> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('Mobile Number',
               style: TextStyle(
-                  color: const Color(0xFF0796DE).withValues(alpha: 0.6),
+                  color: const Color(0xFF0796DE).withOpacity(0.6),
                   fontSize: 12,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500)),
@@ -441,7 +434,7 @@ class _StepPhoneState extends State<_StepPhone> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                    color: const Color(0xFF0796DE).withValues(alpha: 0.08),
+                    color: const Color(0xFF0796DE).withOpacity(0.08),
                     borderRadius: BorderRadius.circular(14)),
                 child: const Text('+94 🇱🇰',
                     style: TextStyle(
@@ -470,7 +463,7 @@ class _StepPhoneState extends State<_StepPhone> {
                         border: InputBorder.none))),
           ]),
           const SizedBox(height: 4),
-          Divider(color: const Color(0xFF0796DE).withValues(alpha: 0.15)),
+          Divider(color: const Color(0xFF0796DE).withOpacity(0.15)),
           const SizedBox(height: 6),
           Row(children: [
             Icon(Icons.lock_outline_rounded,
@@ -808,7 +801,7 @@ class _ChipPicker extends StatelessWidget {
             decoration: BoxDecoration(
                 color: selected.isEmpty
                     ? const Color(0xFF0796DE)
-                    : const Color(0xFF0796DE).withValues(alpha: 0.08),
+                    : const Color(0xFF0796DE).withOpacity(0.08),
                 borderRadius: BorderRadius.circular(30)),
             child: Text('✓  None',
                 style: TextStyle(
@@ -838,7 +831,7 @@ class _ChipPicker extends StatelessWidget {
                 decoration: BoxDecoration(
                     color: sel
                         ? const Color(0xFF0796DE)
-                        : const Color(0xFF0796DE).withValues(alpha: 0.08),
+                        : const Color(0xFF0796DE).withOpacity(0.08),
                     borderRadius: BorderRadius.circular(30)),
                 child: Text(o,
                     style: TextStyle(
@@ -851,7 +844,7 @@ class _ChipPicker extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 14),
-        Divider(color: const Color(0xFF0796DE).withValues(alpha: 0.12)),
+        Divider(color: const Color(0xFF0796DE).withOpacity(0.12)),
         const SizedBox(height: 8),
         TextField(
           controller: customCtrl,

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../services/auth_service.dart';
-import 'user_store.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -128,54 +125,10 @@ class _SplashScreenState extends State<SplashScreen>
     // Wait for spin to finish
     await Future.delayed(const Duration(milliseconds: 1500));
 
-    final isLoggedIn = await _restoreStartupSession();
-
+    // Navigate to terms of services page
     if (mounted) {
-      if (isLoggedIn) {
-        Navigator.of(context).pushReplacementNamed('/home');
-      } else {
-        Navigator.of(context).pushReplacementNamed('/terms');
-      }
+      Navigator.of(context).pushReplacementNamed('/terms');
     }
-  }
-
-  Future<bool> _restoreStartupSession() async {
-    try {
-      await UserStore.instance.loadFromLocal();
-      final prefs = await SharedPreferences.getInstance();
-
-      if (AuthService.currentSession != null) {
-        await UserStore.instance.syncFromRemote();
-        return true;
-      }
-
-      final isLoggedInViaSmtp = prefs.getBool('is_logged_in_via_smtp') == true;
-      final savedEmail = prefs.getString('smtp_logged_in_email')?.trim();
-
-      if (isLoggedInViaSmtp && savedEmail != null && savedEmail.isNotEmpty) {
-        try {
-          await AuthService.signInByEmail(savedEmail);
-          await UserStore.instance.syncFromRemote();
-          return AuthService.currentSession != null;
-        } catch (_) {
-          await prefs.remove('is_logged_in_via_smtp');
-          await prefs.remove('smtp_logged_in_email');
-          await UserStore.instance.clearLocal();
-          return false;
-        }
-      }
-
-      if (isLoggedInViaSmtp) {
-        await prefs.remove('is_logged_in_via_smtp');
-        await prefs.remove('smtp_logged_in_email');
-      }
-
-      await UserStore.instance.clearLocal();
-    } catch (_) {
-      return false;
-    }
-
-    return false;
   }
 
   @override
@@ -365,12 +318,12 @@ class _SplashScreenState extends State<SplashScreen>
               child: Container(
                 width: 153.81,
                 height: 153.81,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    begin: Alignment(0.93, 0.35),
-                    end: Alignment(0.06, 0.40),
-                    colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
+                    begin: const Alignment(0.93, 0.35),
+                    end: const Alignment(0.06, 0.40),
+                    colors: [const Color(0xAFFDEDCA), const Color(0xFF0A9BE2)],
                   ),
                 ),
               ),
@@ -387,12 +340,12 @@ class _SplashScreenState extends State<SplashScreen>
               child: Container(
                 width: 89.35,
                 height: 89.35,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    begin: Alignment(0.93, 0.35),
-                    end: Alignment(0.06, 0.40),
-                    colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)],
+                    begin: const Alignment(0.93, 0.35),
+                    end: const Alignment(0.06, 0.40),
+                    colors: [const Color(0xFFFDEDCA), const Color(0xFF0A9BE2)],
                   ),
                 ),
               ),
@@ -409,12 +362,12 @@ class _SplashScreenState extends State<SplashScreen>
               child: Container(
                 width: 94.08,
                 height: 94.08,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    begin: Alignment(0.93, 0.35),
-                    end: Alignment(0.06, 0.40),
-                    colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
+                    begin: const Alignment(0.93, 0.35),
+                    end: const Alignment(0.06, 0.40),
+                    colors: [const Color(0xAFFDEDCA), const Color(0xFF0A9BE2)],
                   ),
                 ),
               ),
@@ -460,12 +413,12 @@ class _SplashScreenState extends State<SplashScreen>
               child: Container(
                 width: 153.81,
                 height: 153.81,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    begin: Alignment(0.93, 0.35),
-                    end: Alignment(0.06, 0.40),
-                    colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
+                    begin: const Alignment(0.93, 0.35),
+                    end: const Alignment(0.06, 0.40),
+                    colors: [const Color(0xAFFDEDCA), const Color(0xFF0A9BE2)],
                   ),
                 ),
               ),
@@ -482,12 +435,12 @@ class _SplashScreenState extends State<SplashScreen>
               child: Container(
                 width: 89.35,
                 height: 89.35,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    begin: Alignment(0.93, 0.35),
-                    end: Alignment(0.06, 0.40),
-                    colors: [Color(0xFFFDEDCA), Color(0xFF0A9BE2)],
+                    begin: const Alignment(0.93, 0.35),
+                    end: const Alignment(0.06, 0.40),
+                    colors: [const Color(0xFFFDEDCA), const Color(0xFF0A9BE2)],
                   ),
                 ),
               ),
@@ -504,12 +457,12 @@ class _SplashScreenState extends State<SplashScreen>
               child: Container(
                 width: 94.08,
                 height: 94.08,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    begin: Alignment(0.93, 0.35),
-                    end: Alignment(0.06, 0.40),
-                    colors: [Color(0xAFFDEDCA), Color(0xFF0A9BE2)],
+                    begin: const Alignment(0.93, 0.35),
+                    end: const Alignment(0.06, 0.40),
+                    colors: [const Color(0xAFFDEDCA), const Color(0xFF0A9BE2)],
                   ),
                 ),
               ),
