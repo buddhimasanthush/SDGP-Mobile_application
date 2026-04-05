@@ -9,6 +9,7 @@ Make sure these files are committed:
 - `Dockerfile`
 - `.dockerignore`
 - `.python-version`
+- `requirements.txt`
 - `backend/.env.example`
 
 Your real `backend/.env` is ignored and should never be committed.
@@ -19,6 +20,11 @@ Your real `backend/.env` is ignored and should never be committed.
 2. Click `New Project` -> `Deploy from GitHub repo`.
 3. Select this repository.
 4. Railway should detect the root `Dockerfile` automatically.
+
+Important:
+- In Railway service settings, clear any custom `Build Command`.
+- If it is set to `docker build -t medifind-backend .`, remove it.
+- Reason: Railpack containers cannot run Docker-in-Docker (`docker: not found`).
 
 ## 3) Add environment variables in Railway
 
@@ -55,6 +61,8 @@ If Railway uses Railpack/Nixpacks (instead of the Dockerfile), the backend requi
 - `torchvision==0.26.0+cpu`
 
 This avoids downloading large CUDA packages that can cause build export timeouts.
+
+Also, this repo now has a root `requirements.txt` that points to `backend/requirements.txt` so Railpack installs the intended dependency set.
 
 ## 5) Point Flutter app to Railway
 
