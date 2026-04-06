@@ -13,7 +13,14 @@ class ApiService {
     const definedBaseUrl = String.fromEnvironment('API_BASE_URL');
     if (definedBaseUrl.isNotEmpty) return _normalizeBaseUrl(definedBaseUrl);
 
-    if (kReleaseMode) return _productionBaseUrl;
+    // By default, always hit production backend so mobile debug builds
+    // don't silently point to localhost and appear to hang.
+    const useLocalBackend = bool.fromEnvironment(
+      'USE_LOCAL_BACKEND',
+      defaultValue: false,
+    );
+    if (!useLocalBackend || kReleaseMode) return _productionBaseUrl;
+
     if (kIsWeb) return 'http://127.0.0.1:8000/api';
     if (Platform.isAndroid) return 'http://10.0.2.2:8000/api';
     return 'http://127.0.0.1:8000/api';
@@ -90,6 +97,19 @@ class ApiService {
         final String medicalHistory =
             (data['diagnosis_notes'] ?? '').toString();
         final String confidence = (data['confidence'] ?? 'high').toString();
+
+        if (parsedMedicines.isEmpty) {
+          final diagnosis = medicalHistory.trim();
+          final message = diagnosis.isNotEmpty
+              ? diagnosis
+              : 'Could not detect medicines from this image. Please upload a clearer prescription photo.';
+          return {
+            'success': false,
+            'error': message,
+            'rawMedications': medsList,
+            'confidence': confidence,
+          };
+        }
 
         return {
           'medicines': parsedMedicines,
