@@ -1,12 +1,9 @@
 import os
 import json
-import base64
 import time
 import re
-from pathlib import Path
-from typing import Optional, List
-
-import easyocr
+import multiprocessing as mp
+from queue import Empty
 from openai import OpenAI
 from PIL import Image, ImageEnhance, ImageFilter
 
@@ -22,6 +19,14 @@ if not DEEPSEEK_API_KEY:
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
 
 MAX_RETRIES = 2
+EASYOCR_MIN_CONFIDENCE = float(os.environ.get("EASYOCR_MIN_CONFIDENCE", "0.30"))
+EASYOCR_TIMEOUT_SECONDS = int(os.environ.get("EASYOCR_TIMEOUT_SECONDS", "20"))
+EASYOCR_ENABLED = os.environ.get("EASYOCR_ENABLED", "true").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 EXTRACTION_PROMPT = """You are an expert pharmacist AI.
 You will be given OCR text extracted from a medical prescription image.
@@ -52,14 +57,20 @@ Rules:
 - Return ONLY the JSON object, no extra text or markdown fences
 """
 
-# ── EasyOCR Reader (lazy singleton) ──────────────────────────────────────────
-_easyocr_reader = None
+# ── EasyOCR isolated worker ──────────────────────────────────────────────────
+def _easyocr_worker(image_path: str, min_conf: float, output_queue: mp.Queue) -> None:
+    """
+    Run EasyOCR in a child process so model crashes/OOM do not kill FastAPI worker.
+    """
+    try:
+        import easyocr  # Lazy import keeps main process lightweight
 
-def _get_easyocr_reader():
-    global _easyocr_reader
-    if _easyocr_reader is None:
-        _easyocr_reader = easyocr.Reader(['en'], gpu=False, verbose=False)
-    return _easyocr_reader
+        reader = easyocr.Reader(["en"], gpu=False, verbose=False)
+        results = reader.readtext(image_path, detail=1, paragraph=False)
+        lines = [text for (_, text, conf) in results if conf > min_conf]
+        output_queue.put({"text": " ".join(lines).strip()})
+    except BaseException as exc:
+        output_queue.put({"error": f"{type(exc).__name__}: {exc}"})
 
 
 # ── Image pre-processing ─────────────────────────────────────────────────────
@@ -85,14 +96,56 @@ def preprocess_image(image_path: str) -> str:
 
 # ── OCR text extraction ──────────────────────────────────────────────────────
 def extract_text_easyocr(image_path: str) -> str:
+    if not EASYOCR_ENABLED:
+        print("EasyOCR is disabled via EASYOCR_ENABLED; skipping OCR stage.")
+        return ""
+
+    queue: mp.Queue = mp.get_context("spawn").Queue()
+    process = mp.get_context("spawn").Process(
+        target=_easyocr_worker,
+        args=(image_path, EASYOCR_MIN_CONFIDENCE, queue),
+        daemon=True,
+    )
+
     try:
-        reader = _get_easyocr_reader()
-        results = reader.readtext(image_path, detail=1, paragraph=False)
-        lines = [text for (_, text, conf) in results if conf > 0.30]
-        return " ".join(lines).strip()
+        process.start()
+        process.join(EASYOCR_TIMEOUT_SECONDS)
+
+        if process.is_alive():
+            process.terminate()
+            process.join(timeout=2)
+            print(
+                f"EasyOCR timed out after {EASYOCR_TIMEOUT_SECONDS}s. "
+                "Continuing with fallback parser."
+            )
+            return ""
+
+        if process.exitcode and process.exitcode != 0:
+            print(
+                f"EasyOCR worker exited abnormally with code {process.exitcode}. "
+                "Continuing with fallback parser."
+            )
+            return ""
+
+        try:
+            payload = queue.get_nowait()
+        except Empty:
+            print("EasyOCR returned no payload. Continuing with fallback parser.")
+            return ""
+
+        if isinstance(payload, dict) and payload.get("error"):
+            print(f"EasyOCR worker error: {payload['error']}")
+            return ""
+
+        return (payload or {}).get("text", "").strip()
     except Exception as e:
         print(f"EasyOCR error: {e}")
         return ""
+    finally:
+        try:
+            queue.close()
+        except Exception:
+            pass
 
 
 # ── DeepSeek structured extraction ───────────────────────────────────────────
