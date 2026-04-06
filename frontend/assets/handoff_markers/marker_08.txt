@@ -1,0 +1,3 @@
+Frontend asset handoff marker 08
+Branch: Main
+Sequence: 08 of 23
