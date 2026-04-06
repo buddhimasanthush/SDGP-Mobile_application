@@ -50,7 +50,7 @@ class ApiService {
           .add(await http.MultipartFile.fromPath('file', imageFile.path));
 
       final streamedResponse =
-          await request.send().timeout(const Duration(seconds: 120));
+          await request.send().timeout(const Duration(seconds: 180));
       final respStr = await streamedResponse.stream.bytesToString();
       debugPrint(
           'ApiService: response status = ${streamedResponse.statusCode}');
@@ -58,6 +58,16 @@ class ApiService {
 
       if (streamedResponse.statusCode == 200) {
         final jsonMap = jsonDecode(respStr) as Map<String, dynamic>;
+
+        // Server returns 200 with success=false for OCR content failures
+        // (unreadable image, no medicines detected) -- not a network error.
+        if (jsonMap['success'] == false) {
+          final errMsg =
+              (jsonMap['error'] ?? 'Could not process prescription').toString();
+          debugPrint('ApiService: OCR content failure: \$errMsg');
+          return {'success': false, 'error': errMsg};
+        }
+
         final data = jsonMap['data'] as Map<String, dynamic>;
 
         List<Medicine> parsedMedicines = [];
@@ -122,8 +132,32 @@ class ApiService {
         // Try to parse error detail from response
         String errorMsg = 'Server error (${streamedResponse.statusCode})';
         try {
-          final errJson = jsonDecode(respStr);
-          errorMsg = errJson['detail'] ?? errorMsg;
+          final errJson = jsonDecode(respStr) as Map<String, dynamic>;
+          final detail = errJson['detail'];
+          if (detail is String) {
+            errorMsg = detail;
+          } else if (detail is Map<String, dynamic>) {
+            final msg = detail['message']?.toString();
+            final stage = detail['stage']?.toString();
+            final validation = detail['validation'];
+            final v = validation is Map<String, dynamic>
+                ? ' (${validation['field'] ?? 'field'}: ${validation['reason'] ?? validation.toString()})'
+                : '';
+            errorMsg = [
+              if (msg != null && msg.isNotEmpty) msg,
+              if (stage != null && stage.isNotEmpty) '[stage: $stage]',
+            ].join(' ').trim();
+            if (v.isNotEmpty) errorMsg = '$errorMsg$v';
+            if (errorMsg.isEmpty) errorMsg = 'Validation failed.';
+          } else if (errJson['validation_errors'] is List) {
+            final errors = (errJson['validation_errors'] as List)
+                .whereType<Map<String, dynamic>>()
+                .map((e) => '${e['field']}: ${e['message']}')
+                .join(', ');
+            if (errors.isNotEmpty) {
+              errorMsg = 'Request validation failed: $errors';
+            }
+          }
         } catch (_) {}
         return {'success': false, 'error': errorMsg};
       }

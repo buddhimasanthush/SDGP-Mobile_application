@@ -9,21 +9,23 @@ from typing import Any
 from openai import OpenAI
 from PIL import Image, ImageEnhance, ImageFilter
 
-# DeepSeek configuration
+# DeepSeek configuration  (NLP extraction only — not vision)
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEEPSEEK_MODEL = "deepseek-chat"
 DEEPSEEK_TIMEOUT_SECONDS = float(os.environ.get("DEEPSEEK_TIMEOUT_SECONDS", "45"))
 MAX_RETRIES = int(os.environ.get("DEEPSEEK_MAX_RETRIES", "2"))
 
-# OCR configuration
+# OCR configuration (EasyOCR — CPU, no GPU on Railway)
 EASYOCR_ENABLED = os.environ.get("EASYOCR_ENABLED", "true").strip().lower() in {
     "1",
     "true",
     "yes",
     "on",
 }
-EASYOCR_TIMEOUT_SECONDS = int(os.environ.get("EASYOCR_TIMEOUT_SECONDS", "20"))
+# Railway CPU-only servers need longer than the old 20-second timeout.
+# First-run model load alone can take 30–60 s; subsequent calls ~5–20 s.
+EASYOCR_TIMEOUT_SECONDS = int(os.environ.get("EASYOCR_TIMEOUT_SECONDS", "90"))
 EASYOCR_MIN_CONFIDENCE = float(os.environ.get("EASYOCR_MIN_CONFIDENCE", "0.20"))
 EASYOCR_MIN_CONFIDENCE_PROCESSED = float(
     os.environ.get("EASYOCR_MIN_CONFIDENCE_PROCESSED", str(EASYOCR_MIN_CONFIDENCE))
@@ -79,6 +81,8 @@ def _default_response() -> dict:
         "patient": {"name": None, "age": None, "gender": None},
         "diagnosis_notes": "",
         "medications": [],
+        "validation": None,
+        "stage": None,
     }
 
 
@@ -106,7 +110,6 @@ def _get_easyocr_reader():
     with _easyocr_lock:
         if _easyocr_reader is None:
             import easyocr
-
             _easyocr_reader = easyocr.Reader(["en"], gpu=False, verbose=False)
             print("EasyOCR reader initialized.")
     return _easyocr_reader
@@ -116,7 +119,10 @@ async def initialize_ocr() -> None:
     if not EASYOCR_ENABLED:
         print("EasyOCR warmup skipped: EASYOCR_ENABLED=false")
         return
+    # Warm up the reader at startup so the first real request doesn't time out.
+    print("Warming up EasyOCR reader (this may take up to 60 s on CPU-only servers)...")
     await asyncio.to_thread(_get_easyocr_reader)
+    print("EasyOCR warmup complete.")
 
 
 def _preprocess_image_sync(image_path: str, processed_path: str) -> str:
@@ -258,6 +264,7 @@ async def extract_best_ocr_text(original_image_path: str, processed_image_path: 
 
 
 async def extract_with_deepseek(ocr_text: str, retries: int = MAX_RETRIES) -> dict:
+    """NLP extraction only — receives raw OCR text, returns structured JSON."""
     if not ocr_text.strip():
         return {"error": "No text extracted from image"}
     if not DEEPSEEK_API_KEY:
@@ -271,7 +278,7 @@ async def extract_with_deepseek(ocr_text: str, retries: int = MAX_RETRIES) -> di
 
     for attempt in range(1, retries + 2):
         try:
-            print(f"DeepSeek attempt {attempt}...")
+            print(f"DeepSeek NLP attempt {attempt}...")
             response = await asyncio.wait_for(
                 asyncio.to_thread(
                     client.chat.completions.create,
@@ -319,17 +326,8 @@ async def extract_with_deepseek(ocr_text: str, retries: int = MAX_RETRIES) -> di
 def build_medicines_from_ocr_text(ocr_text: str) -> dict:
     medicines = []
     med_keywords = [
-        "mg",
-        "ml",
-        "tablet",
-        "capsule",
-        "syrup",
-        "tab",
-        "cap",
-        "injection",
-        "drops",
-        "cream",
-        "ointment",
+        "mg", "ml", "tablet", "capsule", "syrup",
+        "tab", "cap", "injection", "drops", "cream", "ointment",
     ]
     raw_lines = re.split(r"[,;\n]", ocr_text)
     seen = set()
@@ -380,19 +378,36 @@ async def process_prescription_image(image_path: str) -> dict:
 
     # Validate upload before any heavy processing.
     if not image.exists():
-        return _merge_response(error="Uploaded image file not found.", status_code=400)
+        return _merge_response(
+            error="Uploaded image file not found.",
+            status_code=400,
+            stage="upload_validation",
+            validation={"field": "file", "reason": "missing_file"},
+        )
     if image.stat().st_size <= 0:
-        return _merge_response(error="Uploaded image file is empty.", status_code=400)
+        return _merge_response(
+            error="Uploaded image file is empty.",
+            status_code=400,
+            stage="upload_validation",
+            validation={"field": "file", "reason": "empty_file"},
+        )
     try:
         with Image.open(image_path) as img:
             img.verify()
     except Exception:
-        return _merge_response(error="Uploaded file is not a valid image.", status_code=400)
+        return _merge_response(
+            error="Uploaded file is not a valid image.",
+            status_code=400,
+            stage="upload_validation",
+            validation={"field": "file", "reason": "invalid_image_bytes"},
+        )
 
     try:
         await preprocess_image(image_path, str(processed_image))
+
+        # Step 1 — EasyOCR: extract raw text from the image
         ocr_text = await extract_best_ocr_text(image_path, str(processed_image))
-        print(f"OCR extracted chars={len(ocr_text)}")
+        print(f"EasyOCR extracted chars={len(ocr_text)}")
 
         if not ocr_text.strip():
             return _merge_response(
@@ -402,24 +417,35 @@ async def process_prescription_image(image_path: str) -> dict:
                     "medications": [],
                 },
                 error="Could not read any text from the image. Please try a clearer photo.",
-                status_code=422,
+                status_code=200,  # Valid request — image just unreadable
+                stage="ocr_text_extraction",
+                validation={"field": "ocr_text", "reason": "empty_or_unreadable_text"},
             )
 
+        # Step 2 — DeepSeek NLP: parse raw text into structured medicine data
         result = await extract_with_deepseek(ocr_text)
         if isinstance(result, dict) and "error" in result:
-            print(f"DeepSeek error: {result['error']} -> using heuristic fallback")
+            print(f"DeepSeek NLP error: {result['error']} -> using heuristic fallback")
             result = build_medicines_from_ocr_text(ocr_text)
 
         normalized = _merge_response(result)
         if not normalized["medications"]:
             return _merge_response(
                 normalized,
-                error="Could not detect medicines from this image.",
-                status_code=422,
+                error="Could not detect medicines from this image. Please upload a clearer prescription photo.",
+                status_code=200,  # Valid request — no medicines found
+                stage="medication_extraction",
+                validation={"field": "medications", "reason": "no_medicines_detected"},
             )
         return normalized
+
     except Exception as exc:
-        return _merge_response(error=f"OCR pipeline failed: {exc}", status_code=500)
+        return _merge_response(
+            error=f"OCR pipeline failed: {exc}",
+            status_code=500,
+            stage="ocr_pipeline",
+            validation={"field": "pipeline", "reason": "unexpected_exception"},
+        )
     finally:
         for path in files_to_cleanup:
             try:
