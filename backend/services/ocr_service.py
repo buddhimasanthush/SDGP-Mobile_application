@@ -1,32 +1,46 @@
-import os
+import asyncio
 import json
-import time
+import os
 import re
-import multiprocessing as mp
-from queue import Empty
+import threading
+from pathlib import Path
+from typing import Any
+
 from openai import OpenAI
 from PIL import Image, ImageEnhance, ImageFilter
 
-# ── DeepSeek Configuration ────────────────────────────────────────────────────
+# DeepSeek configuration
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEEPSEEK_MODEL = "deepseek-chat"
+DEEPSEEK_TIMEOUT_SECONDS = float(os.environ.get("DEEPSEEK_TIMEOUT_SECONDS", "45"))
+MAX_RETRIES = int(os.environ.get("DEEPSEEK_MAX_RETRIES", "2"))
 
-if not DEEPSEEK_API_KEY:
-    print("WARNING: DEEPSEEK_API_KEY not found in environment!")
-
-# Initialise OpenAI-compatible client pointed at DeepSeek
-client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
-
-MAX_RETRIES = 2
-EASYOCR_MIN_CONFIDENCE = float(os.environ.get("EASYOCR_MIN_CONFIDENCE", "0.20"))
-EASYOCR_TIMEOUT_SECONDS = int(os.environ.get("EASYOCR_TIMEOUT_SECONDS", "20"))
+# OCR configuration
 EASYOCR_ENABLED = os.environ.get("EASYOCR_ENABLED", "true").strip().lower() in {
     "1",
     "true",
     "yes",
     "on",
 }
+EASYOCR_TIMEOUT_SECONDS = int(os.environ.get("EASYOCR_TIMEOUT_SECONDS", "20"))
+EASYOCR_MIN_CONFIDENCE = float(os.environ.get("EASYOCR_MIN_CONFIDENCE", "0.20"))
+EASYOCR_MIN_CONFIDENCE_PROCESSED = float(
+    os.environ.get("EASYOCR_MIN_CONFIDENCE_PROCESSED", str(EASYOCR_MIN_CONFIDENCE))
+)
+EASYOCR_MIN_CONFIDENCE_ORIGINAL = float(
+    os.environ.get("EASYOCR_MIN_CONFIDENCE_ORIGINAL", str(EASYOCR_MIN_CONFIDENCE))
+)
+EASYOCR_ACCEPT_MIN_CHARS = int(os.environ.get("EASYOCR_ACCEPT_MIN_CHARS", "50"))
+EASYOCR_ACCEPT_MIN_WORDS = int(os.environ.get("EASYOCR_ACCEPT_MIN_WORDS", "8"))
+
+if not DEEPSEEK_API_KEY:
+    print("WARNING: DEEPSEEK_API_KEY not found in environment.")
+
+client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+
+_easyocr_reader: Any | None = None
+_easyocr_lock = threading.Lock()
 
 EXTRACTION_PROMPT = """You are an expert pharmacist AI.
 You will be given OCR text extracted from a medical prescription image.
@@ -57,24 +71,55 @@ Rules:
 - Return ONLY the JSON object, no extra text or markdown fences
 """
 
-# ── EasyOCR isolated worker ──────────────────────────────────────────────────
-def _easyocr_worker(image_path: str, min_conf: float, output_queue: mp.Queue) -> None:
-    """
-    Run EasyOCR in a child process so model crashes/OOM do not kill FastAPI worker.
-    """
-    try:
-        import easyocr  # Lazy import keeps main process lightweight
 
-        reader = easyocr.Reader(["en"], gpu=False, verbose=False)
-        results = reader.readtext(image_path, detail=1, paragraph=True)
-        lines = [text for (_, text, conf) in results if conf > min_conf]
-        output_queue.put({"text": " ".join(lines).strip()})
-    except BaseException as exc:
-        output_queue.put({"error": f"{type(exc).__name__}: {exc}"})
+def _default_response() -> dict:
+    return {
+        "confidence": "none",
+        "prescriber": {"name": None, "specialty": None, "contact": None},
+        "patient": {"name": None, "age": None, "gender": None},
+        "diagnosis_notes": "",
+        "medications": [],
+    }
 
 
-# ── Image pre-processing ─────────────────────────────────────────────────────
-def preprocess_image(image_path: str) -> str:
+def _merge_response(payload: dict | None = None, **overrides: Any) -> dict:
+    merged = _default_response()
+    if payload:
+        merged.update(payload)
+    merged.update(overrides)
+    if merged.get("prescriber") is None:
+        merged["prescriber"] = {"name": None, "specialty": None, "contact": None}
+    if merged.get("patient") is None:
+        merged["patient"] = {"name": None, "age": None, "gender": None}
+    if "medications" not in merged or merged["medications"] is None:
+        merged["medications"] = []
+    if "diagnosis_notes" not in merged or merged["diagnosis_notes"] is None:
+        merged["diagnosis_notes"] = ""
+    return merged
+
+
+def _get_easyocr_reader():
+    global _easyocr_reader
+    if _easyocr_reader is not None:
+        return _easyocr_reader
+
+    with _easyocr_lock:
+        if _easyocr_reader is None:
+            import easyocr
+
+            _easyocr_reader = easyocr.Reader(["en"], gpu=False, verbose=False)
+            print("EasyOCR reader initialized.")
+    return _easyocr_reader
+
+
+async def initialize_ocr() -> None:
+    if not EASYOCR_ENABLED:
+        print("EasyOCR warmup skipped: EASYOCR_ENABLED=false")
+        return
+    await asyncio.to_thread(_get_easyocr_reader)
+
+
+def _preprocess_image_sync(image_path: str, processed_path: str) -> str:
     img = Image.open(image_path).convert("RGB")
     w, h = img.size
     if max(w, h) < 1000:
@@ -88,233 +133,280 @@ def preprocess_image(image_path: str) -> str:
     img_grey = img.convert("L")
     img_sharp = img_grey.filter(ImageFilter.SHARPEN)
     img_contrast = ImageEnhance.Contrast(img_sharp).enhance(2.0)
-
-    out_path = image_path + "_processed.png"
-    img_contrast.save(out_path)
-    return out_path
+    img_contrast.save(processed_path)
+    return processed_path
 
 
-# ── OCR text extraction ──────────────────────────────────────────────────────
-def extract_text_easyocr(image_path: str, min_conf: float | None = None) -> str:
+async def preprocess_image(image_path: str, processed_path: str) -> str:
+    return await asyncio.to_thread(_preprocess_image_sync, image_path, processed_path)
+
+
+def _word_quality_metrics(text: str) -> tuple[int, int]:
+    words = re.findall(r"[A-Za-z0-9]{2,}", text)
+    useful_words = [w for w in words if len(w) > 3]
+    return len(words), len(useful_words)
+
+
+def _extract_text_easyocr_sync(image_path: str, min_conf: float) -> dict:
+    reader = _get_easyocr_reader()
+    raw_results = reader.readtext(image_path, detail=1, paragraph=True)
+
+    accepted_texts: list[str] = []
+    accepted_conf: list[float] = []
+    for _, text, conf in raw_results:
+        if conf < min_conf:
+            continue
+        text_value = (text or "").strip()
+        if not text_value:
+            continue
+        accepted_texts.append(text_value)
+        accepted_conf.append(float(conf))
+
+    joined = " ".join(accepted_texts).strip()
+    all_words, useful_words = _word_quality_metrics(joined)
+    avg_conf = (sum(accepted_conf) / len(accepted_conf)) if accepted_conf else 0.0
+    quality_score = useful_words * avg_conf
+    return {
+        "text": joined,
+        "avg_conf": avg_conf,
+        "word_count": all_words,
+        "useful_word_count": useful_words,
+        "quality_score": quality_score,
+    }
+
+
+async def extract_text_easyocr(image_path: str, min_conf: float) -> dict:
     if not EASYOCR_ENABLED:
-        print("EasyOCR is disabled via EASYOCR_ENABLED; skipping OCR stage.")
-        return ""
+        return {
+            "text": "",
+            "avg_conf": 0.0,
+            "word_count": 0,
+            "useful_word_count": 0,
+            "quality_score": 0.0,
+        }
+    try:
+        return await asyncio.wait_for(
+            asyncio.to_thread(_extract_text_easyocr_sync, image_path, min_conf),
+            timeout=EASYOCR_TIMEOUT_SECONDS,
+        )
+    except asyncio.TimeoutError:
+        print(f"EasyOCR timeout on {image_path} after {EASYOCR_TIMEOUT_SECONDS}s")
+        return {
+            "text": "",
+            "avg_conf": 0.0,
+            "word_count": 0,
+            "useful_word_count": 0,
+            "quality_score": 0.0,
+        }
+    except Exception as exc:
+        print(f"EasyOCR error on {image_path}: {exc}")
+        return {
+            "text": "",
+            "avg_conf": 0.0,
+            "word_count": 0,
+            "useful_word_count": 0,
+            "quality_score": 0.0,
+        }
 
-    queue: mp.Queue = mp.get_context("spawn").Queue()
-    process = mp.get_context("spawn").Process(
-        target=_easyocr_worker,
-        args=(image_path, min_conf if min_conf is not None else EASYOCR_MIN_CONFIDENCE, queue),
-        daemon=True,
+
+async def extract_best_ocr_text(original_image_path: str, processed_image_path: str) -> str:
+    processed = await extract_text_easyocr(
+        processed_image_path, EASYOCR_MIN_CONFIDENCE_PROCESSED
+    )
+    processed_text = processed["text"]
+    if (
+        len(processed_text) >= EASYOCR_ACCEPT_MIN_CHARS
+        and processed["useful_word_count"] >= EASYOCR_ACCEPT_MIN_WORDS
+    ):
+        print(
+            f"OCR accepted processed image directly (chars={len(processed_text)}, "
+            f"useful_words={processed['useful_word_count']}, avg_conf={processed['avg_conf']:.3f})"
+        )
+        return processed_text
+
+    original = await extract_text_easyocr(
+        original_image_path, EASYOCR_MIN_CONFIDENCE_ORIGINAL
     )
 
-    try:
-        process.start()
-        process.join(EASYOCR_TIMEOUT_SECONDS)
-
-        if process.is_alive():
-            process.terminate()
-            process.join(timeout=2)
-            print(
-                f"EasyOCR timed out after {EASYOCR_TIMEOUT_SECONDS}s. "
-                "Continuing with fallback parser."
-            )
-            return ""
-
-        if process.exitcode and process.exitcode != 0:
-            print(
-                f"EasyOCR worker exited abnormally with code {process.exitcode}. "
-                "Continuing with fallback parser."
-            )
-            return ""
-
-        try:
-            payload = queue.get_nowait()
-        except Empty:
-            print("EasyOCR returned no payload. Continuing with fallback parser.")
-            return ""
-
-        if isinstance(payload, dict) and payload.get("error"):
-            print(f"EasyOCR worker error: {payload['error']}")
-            return ""
-
-        return (payload or {}).get("text", "").strip()
-    except Exception as e:
-        print(f"EasyOCR error: {e}")
-        return ""
-    finally:
-        try:
-            queue.close()
-        except Exception:
-            pass
+    # Use meaningful quality score, not raw character length.
+    candidates = [("processed", processed), ("original", original)]
+    best_name, best_payload = max(candidates, key=lambda item: item[1]["quality_score"])
+    print(
+        f"OCR selected {best_name} image "
+        f"(score={best_payload['quality_score']:.3f}, "
+        f"useful_words={best_payload['useful_word_count']}, "
+        f"avg_conf={best_payload['avg_conf']:.3f})"
+    )
+    return best_payload["text"]
 
 
-def extract_best_ocr_text(original_image_path: str, processed_image_path: str) -> str:
-    """
-    Run OCR on both original and pre-processed images and keep the richest text.
-    """
-    candidates: list[tuple[str, str]] = []
-
-    original_text = extract_text_easyocr(original_image_path, min_conf=0.15)
-    if original_text:
-        candidates.append(("original", original_text))
-
-    processed_text = extract_text_easyocr(processed_image_path, min_conf=EASYOCR_MIN_CONFIDENCE)
-    if processed_text:
-        candidates.append(("processed", processed_text))
-
-    if not candidates:
-        return ""
-
-    best_source, best_text = max(candidates, key=lambda item: len(item[1]))
-    print(f"OCR best source={best_source}, chars={len(best_text)}")
-    return best_text
-
-
-# ── DeepSeek structured extraction ───────────────────────────────────────────
-def extract_with_deepseek(ocr_text: str, retries: int = MAX_RETRIES) -> dict:
-    """Send OCR text to DeepSeek chat model and return parsed JSON."""
+async def extract_with_deepseek(ocr_text: str, retries: int = MAX_RETRIES) -> dict:
     if not ocr_text.strip():
         return {"error": "No text extracted from image"}
+    if not DEEPSEEK_API_KEY:
+        return {"error": "DeepSeek API key not configured"}
 
     user_message = (
-        f"Here is the OCR text extracted from a prescription image:\n\n"
+        "Here is the OCR text extracted from a prescription image:\n\n"
         f"---\n{ocr_text}\n---\n\n"
-        f"Please extract all medicine and prescription details into the JSON format described."
+        "Please extract all medicine and prescription details into the JSON format described."
     )
 
     for attempt in range(1, retries + 2):
         try:
             print(f"DeepSeek attempt {attempt}...")
-            response = client.chat.completions.create(
-                model=DEEPSEEK_MODEL,
-                messages=[
-                    {"role": "system", "content": EXTRACTION_PROMPT},
-                    {"role": "user",   "content": user_message},
-                ],
-                temperature=0.1,
-                max_tokens=2048,
-                timeout=45.0,  # Enforce a strict 45-second timeout to prevent infinite hangs
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    client.chat.completions.create,
+                    model=DEEPSEEK_MODEL,
+                    messages=[
+                        {"role": "system", "content": EXTRACTION_PROMPT},
+                        {"role": "user", "content": user_message},
+                    ],
+                    temperature=0.1,
+                    max_tokens=2048,
+                    timeout=DEEPSEEK_TIMEOUT_SECONDS,
+                ),
+                timeout=DEEPSEEK_TIMEOUT_SECONDS + 5,
             )
 
-            raw_text = response.choices[0].message.content.strip()
-            print(f"DeepSeek raw response ({len(raw_text)} chars)")
+            raw_text = (response.choices[0].message.content or "").strip()
+            print(f"DeepSeek raw response chars={len(raw_text)}")
 
-            # Strip markdown code fences if present
             if raw_text.startswith("```"):
-                raw_text = re.sub(r'^```(?:json)?\s*', '', raw_text)
-                raw_text = re.sub(r'\s*```$', '', raw_text).strip()
+                raw_text = re.sub(r"^```(?:json)?\s*", "", raw_text)
+                raw_text = re.sub(r"\s*```$", "", raw_text).strip()
 
-            return json.loads(raw_text)
-
-        except json.JSONDecodeError as je:
-            print(f"DeepSeek JSON parse error: {je}")
+            parsed = json.loads(raw_text)
+            return parsed if isinstance(parsed, dict) else {"error": "DeepSeek response is not an object"}
+        except json.JSONDecodeError:
             if attempt <= retries:
-                time.sleep(2)
+                await asyncio.sleep(2)
                 continue
-            return {"error": f"Failed to parse DeepSeek response as JSON"}
-
-        except Exception as e:
-            err_str = str(e)
+            return {"error": "Failed to parse DeepSeek response as JSON"}
+        except Exception as exc:
+            err_str = str(exc)
             print(f"DeepSeek attempt {attempt} error: {err_str}")
             if "429" in err_str or "rate" in err_str.lower():
                 if attempt <= retries:
-                    time.sleep(5 * attempt)
+                    await asyncio.sleep(5 * attempt)
                     continue
                 return {"error": "QUOTA_EXCEEDED"}
             if attempt <= retries:
-                time.sleep(3)
+                await asyncio.sleep(3)
                 continue
             return {"error": f"DeepSeek failed: {err_str}"}
-
     return {"error": "DeepSeek failed after all retries"}
 
 
-# ── Heuristic fallback parser ─────────────────────────────────────────────────
 def build_medicines_from_ocr_text(ocr_text: str) -> dict:
-    """Last-resort fallback: heuristically parse medicines from OCR text."""
     medicines = []
-    med_keywords = ["mg", "ml", "tablet", "capsule", "syrup", "tab", "cap",
-                    "injection", "drops", "cream", "ointment"]
-
-    raw_lines = re.split(r'[,;\n]', ocr_text)
-
+    med_keywords = [
+        "mg",
+        "ml",
+        "tablet",
+        "capsule",
+        "syrup",
+        "tab",
+        "cap",
+        "injection",
+        "drops",
+        "cream",
+        "ointment",
+    ]
+    raw_lines = re.split(r"[,;\n]", ocr_text)
     seen = set()
     for line in raw_lines:
         line = line.strip()
-        if any(kw in line.lower() for kw in med_keywords) and len(line) > 4:
-            if line not in seen:
-                seen.add(line)
-                medicines.append({
+        if any(kw in line.lower() for kw in med_keywords) and len(line) > 4 and line not in seen:
+            seen.add(line)
+            medicines.append(
+                {
                     "drug_name": line,
                     "strength": "",
                     "dosage_form": "tablet",
                     "instructions": "As directed by doctor",
                     "frequency": "As directed",
                     "duration": "As directed",
-                    "quantity": "1"
-                })
+                    "quantity": "1",
+                }
+            )
 
     if not medicines:
         tokens = [t for t in ocr_text.split() if len(t) > 4][:5]
-        for t in tokens:
-            medicines.append({
-                "drug_name": t,
-                "strength": "",
-                "dosage_form": "tablet",
-                "instructions": "As directed by doctor",
-                "frequency": "As directed",
-                "duration": "As directed",
-                "quantity": "1"
-            })
+        for token in tokens:
+            medicines.append(
+                {
+                    "drug_name": token,
+                    "strength": "",
+                    "dosage_form": "tablet",
+                    "instructions": "As directed by doctor",
+                    "frequency": "As directed",
+                    "duration": "As directed",
+                    "quantity": "1",
+                }
+            )
 
-    return {
-        "confidence": "low",
-        "prescriber": None,
-        "patient": None,
-        "diagnosis_notes": "Extracted using OCR fallback",
-        "medications": medicines
-    }
+    return _merge_response(
+        {
+            "confidence": "low",
+            "diagnosis_notes": "Extracted using OCR fallback",
+            "medications": medicines,
+        }
+    )
 
 
-# ── Main pipeline ─────────────────────────────────────────────────────────────
-def process_prescription_image(image_path: str) -> dict:
-    """Process an uploaded prescription: EasyOCR -> DeepSeek -> fallback."""
-    processed_path = None
+async def process_prescription_image(image_path: str) -> dict:
+    image = Path(image_path)
+    processed_image = Path(f"{image_path}_processed.png")
+    files_to_cleanup = [processed_image]
+
+    # Validate upload before any heavy processing.
+    if not image.exists():
+        return _merge_response(error="Uploaded image file not found.", status_code=400)
+    if image.stat().st_size <= 0:
+        return _merge_response(error="Uploaded image file is empty.", status_code=400)
     try:
-        # Step 1: pre-process & EasyOCR
-        processed_path = preprocess_image(image_path)
-        ocr_text = extract_best_ocr_text(image_path, processed_path)
-        print(f"EasyOCR extracted {len(ocr_text)} chars: {ocr_text[:200]}")
+        with Image.open(image_path) as img:
+            img.verify()
+    except Exception:
+        return _merge_response(error="Uploaded file is not a valid image.", status_code=400)
+
+    try:
+        await preprocess_image(image_path, str(processed_image))
+        ocr_text = await extract_best_ocr_text(image_path, str(processed_image))
+        print(f"OCR extracted chars={len(ocr_text)}")
 
         if not ocr_text.strip():
-            return {
-                "confidence": "none",
-                "diagnosis_notes": "Could not read any text from the image. Please try a clearer photo.",
-                "medications": []
-            }
+            return _merge_response(
+                {
+                    "confidence": "none",
+                    "diagnosis_notes": "Could not read any text from the image. Please try a clearer photo.",
+                    "medications": [],
+                },
+                error="Could not read any text from the image. Please try a clearer photo.",
+                status_code=422,
+            )
 
-        # Step 2: send OCR text to DeepSeek for structured extraction
-        result = extract_with_deepseek(ocr_text)
-
-        # Step 3: if DeepSeek failed, fall back to heuristic parser
+        result = await extract_with_deepseek(ocr_text)
         if isinstance(result, dict) and "error" in result:
-            print(f"DeepSeek error: {result['error']}  ->  using heuristic fallback")
+            print(f"DeepSeek error: {result['error']} -> using heuristic fallback")
             result = build_medicines_from_ocr_text(ocr_text)
 
-        # Ensure required fields
-        if "medications" not in result:
-            result["medications"] = []
-        if "diagnosis_notes" not in result:
-            result["diagnosis_notes"] = ""
-
-        return result
-
-    except Exception as e:
-        print(f"Error in process_prescription_image: {e}")
-        return {"error": str(e)}
+        normalized = _merge_response(result)
+        if not normalized["medications"]:
+            return _merge_response(
+                normalized,
+                error="Could not detect medicines from this image.",
+                status_code=422,
+            )
+        return normalized
+    except Exception as exc:
+        return _merge_response(error=f"OCR pipeline failed: {exc}", status_code=500)
     finally:
-        if processed_path and os.path.exists(processed_path):
+        for path in files_to_cleanup:
             try:
-                os.remove(processed_path)
+                if path.exists():
+                    path.unlink()
             except Exception:
                 pass

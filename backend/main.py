@@ -9,7 +9,7 @@ import uvicorn
 import shutil
 from typing import Optional
 
-from services.ocr_service import process_prescription_image
+from services.ocr_service import initialize_ocr, process_prescription_image
 from services.password_reset_service import PasswordResetService
 
 app = FastAPI(title="MediFind Backend API")
@@ -51,12 +51,21 @@ def health_check():
     return {"status": "ok"}
 
 
+@app.on_event("startup")
+async def startup_event():
+    try:
+        await initialize_ocr()
+    except Exception as exc:
+        # Keep service available even if OCR warmup fails; endpoint will return explicit errors.
+        print(f"OCR warmup failed at startup: {exc}")
+
+
 # ═══════════════════════════════════════════════════════
 # OCR Endpoint
 # ═══════════════════════════════════════════════════════
 
 @app.post("/api/ocr/upload")
-def upload_prescription(file: UploadFile = File(...)):
+async def upload_prescription(file: UploadFile = File(...)):
     """
     Endpoint to process prescription images using OCR (EasyOCR + DeepSeek fallback).
     Runs synchronously so FastAPI offloads it to a background threadpool.
@@ -71,15 +80,11 @@ def upload_prescription(file: UploadFile = File(...)):
         temp_file_path = tmp.name
 
     try:
-        result = process_prescription_image(temp_file_path)
+        result = await process_prescription_image(temp_file_path)
 
-        if isinstance(result, dict) and "error" in result and "medications" not in result:
-            raise HTTPException(status_code=500, detail=f"OCR Processing failed: {result['error']}")
-        if isinstance(result, dict) and not result.get("medications"):
-            detail = (result.get("diagnosis_notes") or "").strip()
-            if not detail:
-                detail = "OCR could not detect medicines from this image."
-            raise HTTPException(status_code=422, detail=detail)
+        if isinstance(result, dict) and result.get("error"):
+            status_code = int(result.get("status_code", 500))
+            raise HTTPException(status_code=status_code, detail=str(result["error"]))
 
         return {
             "filename": file.filename,
