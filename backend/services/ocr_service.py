@@ -149,18 +149,35 @@ def _word_quality_metrics(text: str) -> tuple[int, int]:
 
 def _extract_text_easyocr_sync(image_path: str, min_conf: float) -> dict:
     reader = _get_easyocr_reader()
-    raw_results = reader.readtext(image_path, detail=1, paragraph=True)
+    raw_results = reader.readtext(image_path, detail=1, paragraph=False)
 
     accepted_texts: list[str] = []
     accepted_conf: list[float] = []
-    for _, text, conf in raw_results:
-        if conf < min_conf:
+    for item in raw_results:
+        text_value = ""
+        conf_value = 0.0
+
+        # EasyOCR may return:
+        # - (bbox, text, conf) in common detail=1 mode
+        # - (bbox, text) or (text, conf) in some edge/library variants
+        if isinstance(item, (list, tuple)):
+            if len(item) >= 3:
+                if isinstance(item[1], str):
+                    text_value = item[1].strip()
+                conf_value = float(item[2] or 0.0)
+            elif len(item) == 2:
+                if isinstance(item[0], str):
+                    text_value = item[0].strip()
+                    conf_value = float(item[1] or 0.0) if isinstance(item[1], (int, float)) else 1.0
+                elif isinstance(item[1], str):
+                    text_value = item[1].strip()
+                    conf_value = 1.0
+
+        if conf_value < min_conf or not text_value:
             continue
-        text_value = (text or "").strip()
-        if not text_value:
-            continue
+
         accepted_texts.append(text_value)
-        accepted_conf.append(float(conf))
+        accepted_conf.append(conf_value)
 
     joined = " ".join(accepted_texts).strip()
     all_words, useful_words = _word_quality_metrics(joined)
