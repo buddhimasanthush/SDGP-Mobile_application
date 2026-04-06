@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "sdgp1201",
+    "database": "medifind",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "postgres",
+    "password": "sdgp1201",
+    "database": "medifind_test",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "sdgp1201",
+    "database": "medifind_prod",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
