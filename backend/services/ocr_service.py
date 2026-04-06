@@ -19,7 +19,7 @@ if not DEEPSEEK_API_KEY:
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
 
 MAX_RETRIES = 2
-EASYOCR_MIN_CONFIDENCE = float(os.environ.get("EASYOCR_MIN_CONFIDENCE", "0.30"))
+EASYOCR_MIN_CONFIDENCE = float(os.environ.get("EASYOCR_MIN_CONFIDENCE", "0.20"))
 EASYOCR_TIMEOUT_SECONDS = int(os.environ.get("EASYOCR_TIMEOUT_SECONDS", "20"))
 EASYOCR_ENABLED = os.environ.get("EASYOCR_ENABLED", "true").strip().lower() in {
     "1",
@@ -66,7 +66,7 @@ def _easyocr_worker(image_path: str, min_conf: float, output_queue: mp.Queue) ->
         import easyocr  # Lazy import keeps main process lightweight
 
         reader = easyocr.Reader(["en"], gpu=False, verbose=False)
-        results = reader.readtext(image_path, detail=1, paragraph=False)
+        results = reader.readtext(image_path, detail=1, paragraph=True)
         lines = [text for (_, text, conf) in results if conf > min_conf]
         output_queue.put({"text": " ".join(lines).strip()})
     except BaseException as exc:
@@ -95,7 +95,7 @@ def preprocess_image(image_path: str) -> str:
 
 
 # ── OCR text extraction ──────────────────────────────────────────────────────
-def extract_text_easyocr(image_path: str) -> str:
+def extract_text_easyocr(image_path: str, min_conf: float | None = None) -> str:
     if not EASYOCR_ENABLED:
         print("EasyOCR is disabled via EASYOCR_ENABLED; skipping OCR stage.")
         return ""
@@ -103,7 +103,7 @@ def extract_text_easyocr(image_path: str) -> str:
     queue: mp.Queue = mp.get_context("spawn").Queue()
     process = mp.get_context("spawn").Process(
         target=_easyocr_worker,
-        args=(image_path, EASYOCR_MIN_CONFIDENCE, queue),
+        args=(image_path, min_conf if min_conf is not None else EASYOCR_MIN_CONFIDENCE, queue),
         daemon=True,
     )
 
@@ -146,6 +146,28 @@ def extract_text_easyocr(image_path: str) -> str:
             queue.close()
         except Exception:
             pass
+
+
+def extract_best_ocr_text(original_image_path: str, processed_image_path: str) -> str:
+    """
+    Run OCR on both original and pre-processed images and keep the richest text.
+    """
+    candidates: list[tuple[str, str]] = []
+
+    original_text = extract_text_easyocr(original_image_path, min_conf=0.15)
+    if original_text:
+        candidates.append(("original", original_text))
+
+    processed_text = extract_text_easyocr(processed_image_path, min_conf=EASYOCR_MIN_CONFIDENCE)
+    if processed_text:
+        candidates.append(("processed", processed_text))
+
+    if not candidates:
+        return ""
+
+    best_source, best_text = max(candidates, key=lambda item: len(item[1]))
+    print(f"OCR best source={best_source}, chars={len(best_text)}")
+    return best_text
 
 
 # ── DeepSeek structured extraction ───────────────────────────────────────────
@@ -261,7 +283,7 @@ def process_prescription_image(image_path: str) -> dict:
     try:
         # Step 1: pre-process & EasyOCR
         processed_path = preprocess_image(image_path)
-        ocr_text = extract_text_easyocr(processed_path)
+        ocr_text = extract_best_ocr_text(image_path, processed_path)
         print(f"EasyOCR extracted {len(ocr_text)} chars: {ocr_text[:200]}")
 
         if not ocr_text.strip():

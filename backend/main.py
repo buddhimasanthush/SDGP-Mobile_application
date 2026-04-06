@@ -75,6 +75,11 @@ def upload_prescription(file: UploadFile = File(...)):
 
         if isinstance(result, dict) and "error" in result and "medications" not in result:
             raise HTTPException(status_code=500, detail=f"OCR Processing failed: {result['error']}")
+        if isinstance(result, dict) and not result.get("medications"):
+            detail = (result.get("diagnosis_notes") or "").strip()
+            if not detail:
+                detail = "OCR could not detect medicines from this image."
+            raise HTTPException(status_code=422, detail=detail)
 
         return {
             "filename": file.filename,
