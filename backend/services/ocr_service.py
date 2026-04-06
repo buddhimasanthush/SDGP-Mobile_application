@@ -17,8 +17,6 @@ DEEPSEEK_MODEL = "deepseek-chat"
 
 if not DEEPSEEK_API_KEY:
     print("WARNING: DEEPSEEK_API_KEY not found in environment!")
-else:
-    print(f"DeepSeek OCR initialized with key: {DEEPSEEK_API_KEY[:6]}...{DEEPSEEK_API_KEY[-4:]}")
 
 # Initialise OpenAI-compatible client pointed at DeepSeek
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)

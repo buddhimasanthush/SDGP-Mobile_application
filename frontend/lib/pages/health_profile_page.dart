@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'user_store.dart';
 import 'sign_in_page.dart';
+import '../services/auth_service.dart';
 
 // ── Orb physics ───────────────────────────────────────────────────────────────
 class _OrbState {
@@ -234,7 +235,8 @@ class _HealthProfilePageState extends State<HealthProfilePage>
                   const SizedBox(width: 12),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () {
+                      onTap: () async {
+                        await AuthService.signOut();
                         // Clear user data
                         UserStore.instance.name = 'User';
                         UserStore.instance.email = '';
@@ -581,7 +583,8 @@ class _StatChip extends StatelessWidget {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.11), shape: BoxShape.circle),
+                    color: color.withValues(alpha: 0.11),
+                    shape: BoxShape.circle),
                 child: Icon(icon, color: color, size: 17)),
             const SizedBox(height: 7),
             Text(value,

@@ -42,8 +42,8 @@ class _TermsOfServicesPageState extends State<TermsOfServicesPage>
 
   final ScrollController _scrollController = ScrollController();
   bool _hasScrolledToBottom = false;
-  bool _acceptedTerms = true;
-  bool _canPressAccept = true;
+  bool _acceptedTerms = false;
+  bool _canPressAccept = false;
 
   // ── Orb floating system ───────────────────────────────────────────────────
   late AnimationController _ticker;
@@ -174,7 +174,6 @@ class _TermsOfServicesPageState extends State<TermsOfServicesPage>
         _scrollController.position.maxScrollExtent - 10) {
       if (!_hasScrolledToBottom) setState(() => _hasScrolledToBottom = true);
     }
-    setState(() => _canPressAccept = _acceptedTerms);
   }
 
   @override
@@ -213,6 +212,9 @@ class _TermsOfServicesPageState extends State<TermsOfServicesPage>
 
   @override
   Widget build(BuildContext context) {
+    // Keep button state in sync with checkbox on every rebuild.
+    _canPressAccept = _acceptedTerms;
+
     if (!_orbsInited) {
       final size = MediaQuery.of(context).size;
       _screenW = size.width;

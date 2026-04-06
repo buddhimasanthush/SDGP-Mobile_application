@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'sign_up_page.dart';
 import 'user_store.dart';
+import '../services/auth_service.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -13,6 +14,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
   final _passwordCtrl = TextEditingController();
   bool _rememberMe = true;
   bool _obscurePass = true;
+  bool _isLoading = false;
 
   late AnimationController _slideCtrl;
   late Animation<Offset> _slideAnim;
@@ -163,8 +165,10 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                                   border: Border.all(
                                       color: const Color(0xFF979797))))),
                       const SizedBox(height: 28),
-                      _lbl('Username'),
-                      _fld(ctrl: _usernameCtrl, hint: 'Enter your username'),
+                      _lbl('Email or Username'),
+                      _fld(
+                          ctrl: _usernameCtrl,
+                          hint: 'Enter your email or username'),
                       const SizedBox(height: 20),
                       _lbl('Password'),
                       _fld(
@@ -207,7 +211,8 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                                       fontFamily: 'Poppins')),
                             ]),
                             TextButton(
-                                onPressed: () {},
+                                onPressed: () => Navigator.pushNamed(
+                                    context, '/forgot_password'),
                                 child: const Text('Forgot password?',
                                     style: TextStyle(
                                         color: Colors.white,
@@ -221,25 +226,61 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {
-                            final u = _usernameCtrl.text.trim();
-                            if (u.isNotEmpty) {
-                              UserStore.instance.profileName =
-                                  u[0].toUpperCase() + u.substring(1);
-                            }
-                            Navigator.pushReplacementNamed(context, '/home');
-                          },
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  final identifier = _usernameCtrl.text.trim();
+                                  final password = _passwordCtrl.text;
+                                  if (identifier.isEmpty || password.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Enter both email/username and password.')),
+                                    );
+                                    return;
+                                  }
+
+                                  setState(() => _isLoading = true);
+                                  try {
+                                    await AuthService.signInWithIdentifier(
+                                      identifier: identifier,
+                                      password: password,
+                                    );
+                                    await UserStore.instance.syncFromRemote();
+                                    if (!mounted) return;
+                                    Navigator.pushReplacementNamed(
+                                        context, '/home');
+                                  } catch (e) {
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Sign in failed: $e'),
+                                      ),
+                                    );
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() => _isLoading = false);
+                                    }
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF0796DE),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(100)),
                               elevation: 4),
-                          child: const Text('Sign In',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700)),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Text('Sign In',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w700)),
                         ),
                       ),
                       const SizedBox(height: 28),
@@ -306,8 +347,8 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
           filled: false,
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(100),
-              borderSide:
-                  BorderSide(color: Colors.white.withValues(alpha: 0.5), width: 1)),
+              borderSide: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.5), width: 1)),
           focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(100),
               borderSide: const BorderSide(color: Colors.white, width: 2)),

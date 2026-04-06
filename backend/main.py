@@ -22,10 +22,21 @@ def _get_password_reset_service() -> PasswordResetService:
         _password_reset_service = PasswordResetService()
     return _password_reset_service
 
-# CORS — allow the Android emulator and web to reach the backend
+def _cors_origins() -> list[str]:
+    raw = os.environ.get("CORS_ORIGINS", "").strip()
+    if raw:
+        return [o.strip() for o in raw.split(",") if o.strip()]
+    # Safe defaults for local development only.
+    return [
+        "http://127.0.0.1:8000",
+        "http://10.0.2.2:8000",
+        "http://localhost:3000",
+    ]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -6,8 +6,31 @@ import 'package:medifind_app/pages/welcome_back_page.dart';
 import 'package:medifind_app/pages/sign_in_page.dart';
 import 'package:medifind_app/pages/sign_up_page.dart';
 import 'package:medifind_app/pages/add_medicine_name_page.dart';
+import 'package:medifind_app/pages/forgot_password_page.dart';
+import 'package:medifind_app/services/supabase_client.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await SupabaseService.initialize();
+  } catch (e) {
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                'App configuration error: $e',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    return;
+  }
   runApp(const MediFindApp());
 }
 
@@ -32,6 +55,7 @@ class MediFindApp extends StatelessWidget {
         '/welcome': (context) => const WelcomeBackPage(),
         '/signin': (context) => const SignInPage(),
         '/signup': (context) => const SignUpPage(),
+        '/forgot_password': (context) => const ForgotPasswordPage(),
         '/home': (context) => const MainNavigationPage(),
         '/add_medicine_name': (context) => const AddMedicineNamePage(),
       },

@@ -1,8 +1,12 @@
 import os
 from supabase import create_client, Client
 
-SUPABASE_URL = "https://zdgugonfvsadghkijfnh.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkZ3Vnb25mdnNhZGdoa2lqZm5oIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MjQ4MjI5NSwiZXhwIjoyMDU4MDY2Mjk1fQ.X2xheN0eIixP5MrtC1fOf2kK_-J8Ecl3T-_6N4aK8zU"
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise RuntimeError("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.")
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 try:

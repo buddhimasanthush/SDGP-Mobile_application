@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../services/auth_service.dart';
+import 'user_store.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -125,10 +127,17 @@ class _SplashScreenState extends State<SplashScreen>
     // Wait for spin to finish
     await Future.delayed(const Duration(milliseconds: 1500));
 
-    // Navigate to terms of services page
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/terms');
+    if (!mounted) return;
+
+    // Restore authenticated session if available.
+    if (AuthService.currentSession != null) {
+      await UserStore.instance.syncFromRemote();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed('/home');
+      return;
     }
+
+    Navigator.of(context).pushReplacementNamed('/terms');
   }
 
   @override

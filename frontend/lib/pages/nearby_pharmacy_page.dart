@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'payment_gateway_page.dart';
+import '../services/api_service.dart';
 
 // ── Custom blue/white map style ───────────────────────────────────────────────
 const _mapStyle = '''
@@ -30,6 +31,7 @@ class _Pharmacy {
   final String name;
   final String location;
   final String distance;
+  final double distanceMeters;
   final double price;
   final int available;
   final int total;
@@ -44,6 +46,7 @@ class _Pharmacy {
     required this.name,
     required this.location,
     required this.distance,
+    this.distanceMeters = 0,
     required this.price,
     required this.available,
     required this.total,
@@ -240,6 +243,9 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
   bool _showMarkers = false;
   _Pharmacy? _selected;
   String _deliveryLabel = 'My Home';
+  bool _loadingSearch = false;
+  String? _searchError;
+  List<_Pharmacy> _apiPharmacies = [];
 
   GoogleMapController? _mapController;
 
@@ -305,7 +311,118 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
     _labelAnim = Tween<double>(begin: 0.0, end: 1.0)
         .animate(CurvedAnimation(parent: _labelCtrl, curve: Curves.easeInOut));
 
+    _loadPharmaciesFromApi();
     _runScanSequence();
+  }
+
+  Future<void> _loadPharmaciesFromApi() async {
+    final meds = widget.rawMedications;
+    if (meds == null || meds.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _loadingSearch = true;
+      _searchError = null;
+    });
+
+    final result = await ApiService.searchPharmaciesByPrescription(
+      latitude: _userPos.latitude,
+      longitude: _userPos.longitude,
+      medications: meds,
+      radiusMeters: 10000,
+    );
+
+    if (!mounted) return;
+
+    if (result['success'] == true) {
+      final data = result['data'] as Map<String, dynamic>? ?? {};
+      final best = data['best_match'];
+      final alternatives = data['alternatives'] as List<dynamic>? ?? [];
+      final partial = data['partial_matches'] as List<dynamic>? ?? [];
+      final combined = <dynamic>[
+        if (best != null) best,
+        ...alternatives,
+        ...partial,
+      ];
+
+      final mapped = <_Pharmacy>[];
+      for (var i = 0; i < combined.length; i++) {
+        final item = combined[i];
+        if (item is Map<String, dynamic>) {
+          mapped.add(_pharmacyFromApi(item, i));
+        }
+      }
+
+      setState(() {
+        _apiPharmacies = mapped;
+        _searchError = mapped.isEmpty
+            ? (data['suggestion']?.toString() ?? 'No nearby pharmacies found.')
+            : null;
+        _loadingSearch = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _loadingSearch = false;
+      _searchError = result['error']?.toString() ?? 'Pharmacy search failed.';
+    });
+  }
+
+  _Pharmacy _pharmacyFromApi(Map<String, dynamic> pharmacy, int index) {
+    final name = (pharmacy['pharmacy_name'] ?? 'Nearby Pharmacy').toString();
+    final distanceMeters =
+        (pharmacy['distance_meters'] as num?)?.toDouble() ?? 0.0;
+    final distanceText = distanceMeters <= 0
+        ? 'Near you'
+        : '${(distanceMeters / 1000).toStringAsFixed(1)}km away';
+
+    final notAvailableList = pharmacy['not_available'] as List<dynamic>? ?? [];
+    final notAvailable = notAvailableList
+        .map((e) => e.toString())
+        .where((e) => e.trim().isNotEmpty)
+        .join(', ');
+
+    final matchedCount = (pharmacy['matched_count'] as num?)?.toInt() ?? 0;
+    final totalRequired = (pharmacy['total_required'] as num?)?.toInt() ?? 0;
+    final price = (pharmacy['total_price'] as num?)?.toDouble() ?? 0.0;
+    final score = totalRequired > 0
+        ? (matchedCount / totalRequired * 100).clamp(0, 100).round()
+        : 0;
+    final accepted = score;
+    final cancelled = (100 - score).clamp(0, 100);
+    final rating = (3.8 + (score / 100) * 1.2).clamp(3.8, 5.0);
+
+    final colors = <Color>[
+      const Color(0xFFD4A017),
+      const Color(0xFF9B2AA0),
+      const Color(0xFF1565C0),
+      const Color(0xFF00897B),
+      const Color(0xFFE53935),
+      const Color(0xFFF57C00),
+      const Color(0xFF6A1B9A),
+    ];
+
+    final latOffset = 0.0025 * ((index % 3) - 1);
+    final lngOffset = 0.0028 * ((index % 4) - 1.5);
+
+    return _Pharmacy(
+      name: name,
+      location: 'Nearby',
+      distance: distanceText,
+      distanceMeters: distanceMeters,
+      price: price,
+      available: matchedCount,
+      total: totalRequired,
+      notAvailable: notAvailable,
+      accepted: accepted,
+      cancelled: cancelled,
+      rating: double.parse(rating.toStringAsFixed(1)),
+      brandColor: colors[index % colors.length],
+      latLng:
+          LatLng(_userPos.latitude + latOffset, _userPos.longitude + lngOffset),
+    );
   }
 
   void _runScanSequence() async {
@@ -362,10 +479,16 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
   }
 
   List<_Pharmacy> get _currentPharmacies => _stage == 0
-      ? _pharmacies1km
+      ? (_apiPharmacies.isNotEmpty
+          ? _apiPharmacies.where((p) => p.distanceMeters <= 1000).toList()
+          : _pharmacies1km)
       : _stage == 1
-          ? _pharmacies5km
-          : _pharmacies10km;
+          ? (_apiPharmacies.isNotEmpty
+              ? _apiPharmacies.where((p) => p.distanceMeters <= 5000).toList()
+              : _pharmacies5km)
+          : (_apiPharmacies.isNotEmpty
+              ? _apiPharmacies.where((p) => p.distanceMeters <= 10000).toList()
+              : _pharmacies10km);
 
   @override
   Widget build(BuildContext context) {
@@ -491,7 +614,8 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                           Border.all(color: const Color(0xFF0796DE), width: 3),
                       boxShadow: [
                         BoxShadow(
-                            color: const Color(0xFF0796DE).withValues(alpha: 0.6),
+                            color:
+                                const Color(0xFF0796DE).withValues(alpha: 0.6),
                             blurRadius: 14,
                             spreadRadius: 5)
                       ],
@@ -542,9 +666,14 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
         Offset(w * 0.65, h * 0.50),
       ];
       return Stack(
-          children:
-              List.generate(min(positions.length, _pharmacies10km.length), (i) {
-        final p = _pharmacies10km[i];
+          children: List.generate(
+              min(
+                  positions.length,
+                  (_apiPharmacies.isNotEmpty ? _apiPharmacies : _pharmacies10km)
+                      .length), (i) {
+        final data =
+            _apiPharmacies.isNotEmpty ? _apiPharmacies : _pharmacies10km;
+        final p = data[i];
         final pos = positions[i];
         return Positioned(
           left: pos.dx - 28,
@@ -576,7 +705,8 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12), blurRadius: 4)
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 4)
                   ],
                 ),
                 child: Text(p.name,
@@ -679,8 +809,31 @@ class _NearbyPharmacyPageState extends State<NearbyPharmacyPage>
                           fontFamily: 'Poppins'))),
           ]),
         ),
-        if (_selected != null)
+        if (_loadingSearch)
+          const Expanded(
+            child: Center(
+              child: CircularProgressIndicator(color: Color(0xFF0796DE)),
+            ),
+          )
+        else if (_selected != null)
           _buildSelectedCard(_selected!)
+        else if (pharmacies.isEmpty)
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  _searchError ?? 'No pharmacies found in this radius.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF697282),
+                    fontSize: 13,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+            ),
+          )
         else
           Expanded(
               child: GridView.builder(

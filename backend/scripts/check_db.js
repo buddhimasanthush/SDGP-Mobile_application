@@ -1,8 +1,12 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-const url = 'https://zdgugonfvsadghkijfnh.supabase.co';
-const anonKey = 'sb_publishable_yFf517gDvREqKsR75e6Jxg_JLkl6Uu1';
+const url = process.env.SUPABASE_URL;
+const anonKey = process.env.SUPABASE_ANON_KEY;
+
+if (!url || !anonKey) {
+  throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY environment variables are required.');
+}
 
 const supabase = createClient(url, anonKey);
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'user_store.dart';
 import 'onboarding_flow_page.dart';
 import 'main_navigation_page.dart';
+import '../services/auth_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -18,6 +19,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
   bool _rememberMe = true;
   bool _obscurePassword = true;
   bool _obscureRePassword = true;
+  bool _isLoading = false;
   String _selectedEmoji = '';
   Color _selectedColor = const Color(0xFF0796DE);
 
@@ -90,7 +92,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
     ));
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -113,16 +115,43 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
       return;
     }
 
-    UserStore.instance.name = name[0].toUpperCase() + name.substring(1);
-    UserStore.instance.email = email;
-    UserStore.instance.avatarColorValue = _selectedColor.toARGB32();
-    UserStore.instance.emoji = _selectedEmoji;
+    setState(() => _isLoading = true);
+    try {
+      final response = await AuthService.signUp(
+        email: email,
+        password: password,
+        fullName: name,
+        avatarColor: _selectedColor.toARGB32(),
+        emoji: _selectedEmoji,
+      );
 
-    Navigator.pushReplacement(
+      // If email confirmation is enabled, session can be null here.
+      if (response.session == null) {
+        _showError('Account created. Please verify your email, then sign in.');
+        if (!mounted) return;
+        Navigator.pop(context);
+        return;
+      }
+
+      UserStore.instance.name = name[0].toUpperCase() + name.substring(1);
+      UserStore.instance.email = email;
+      UserStore.instance.avatarColorValue = _selectedColor.toARGB32();
+      UserStore.instance.emoji = _selectedEmoji;
+      await UserStore.instance.syncFromRemote();
+
+      if (!mounted) return;
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (_) =>
-                const OnboardingFlowPage(destination: MainNavigationPage())));
+          builder: (_) =>
+              const OnboardingFlowPage(destination: MainNavigationPage()),
+        ),
+      );
+    } catch (e) {
+      _showError('Sign up failed: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showEmojiPicker() {
@@ -380,7 +409,8 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                                           shape: BoxShape.circle,
                                           color: _selectedEmoji.isEmpty
                                               ? _selectedColor
-                                              : Colors.white.withValues(alpha: 0.12),
+                                              : Colors.white
+                                                  .withValues(alpha: 0.12),
                                           border: Border.all(
                                               color: _selectedColor, width: 3),
                                           boxShadow: [
@@ -495,8 +525,8 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                                           boxShadow: sel
                                               ? [
                                                   BoxShadow(
-                                                      color:
-                                                          c.withValues(alpha: 0.65),
+                                                      color: c.withValues(
+                                                          alpha: 0.65),
                                                       blurRadius: 10,
                                                       spreadRadius: 1)
                                                 ]
@@ -534,20 +564,29 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton(
-                                onPressed: _submit,
+                                onPressed: _isLoading ? null : _submit,
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF0796DE),
                                     shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(100)),
                                     elevation: 4,
-                                    shadowColor: Colors.black.withValues(alpha: 0.2)),
-                                child: const Text('Create Account',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w700)))),
+                                    shadowColor:
+                                        Colors.black.withValues(alpha: 0.2)),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white),
+                                      )
+                                    : const Text('Create Account',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w700)))),
                         const SizedBox(height: 28),
 
                         Center(
@@ -612,8 +651,8 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
             filled: false,
             enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(100),
-                borderSide:
-                    BorderSide(color: Colors.white.withValues(alpha: 0.5), width: 1)),
+                borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.5), width: 1)),
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(100),
                 borderSide: const BorderSide(color: Colors.white, width: 2)),

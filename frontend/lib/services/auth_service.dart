@@ -1,101 +1,178 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'api_service.dart';
 import 'supabase_client.dart';
 
 class AuthService {
   static final SupabaseClient _supabase = SupabaseService.client;
 
-  // Sign up with Email and Password
+  static bool _isEmail(String value) => value.contains('@');
+
   static Future<AuthResponse> signUp({
     required String email,
     required String password,
     required String fullName,
     int? avatarColor,
     String? emoji,
-    String role = 'patient', // Default to patient
+    String role = 'patient',
   }) async {
+    final normalizedEmail = email.trim().toLowerCase();
     final response = await _supabase.auth.signUp(
-      email: email,
+      email: normalizedEmail,
       password: password,
       data: {'full_name': fullName},
     );
 
     if (response.user != null) {
-      // Create initial profile record
+      final userId = response.user!.id;
+
+      await _supabase.from('profiles').upsert({
+        'id': userId,
+        'full_name': fullName,
+        'email': normalizedEmail,
+        'avatar_color': avatarColor,
+        'emoji': emoji,
+        'role': role,
+      });
+
+      // Backward-compatible credential mapping.
+      // Passwords are never stored here; Supabase Auth keeps hashed credentials.
+      await _supabase.from('user_logins').upsert({
+        'id': userId,
+        'username': normalizedEmail,
+        'email': normalizedEmail,
+      });
+
+      // New normalized auth identity table (if migration is applied).
       try {
-        await _supabase.from('profiles').upsert({
-          'id': response.user!.id,
-          'full_name': fullName,
-          'email': email,
-          'avatar_color': avatarColor,
-          'emoji': emoji,
-          'role': role,
+        await _supabase.from('user_credentials').upsert({
+          'user_id': userId,
+          'username': normalizedEmail,
+          'email': normalizedEmail,
         });
       } catch (e) {
-        debugPrint('Error creating profile during signup: $e');
-        // If profile creation fails, the user is in a broken state. Throw to the UI so it can handle it.
-        throw Exception('Account created but profile setup failed. Please contact support. Details: $e');
+        debugPrint(
+            'user_credentials upsert skipped (migration likely pending): $e');
       }
     }
 
     return response;
   }
 
-  // Sign in with Email and Password
-  static Future<AuthResponse> signIn({
-    required String email,
+  static Future<String?> getEmailByIdentifier(String identifier) async {
+    final clean = identifier.trim();
+    if (clean.isEmpty) return null;
+    if (_isEmail(clean)) {
+      return clean.toLowerCase();
+    }
+
+    // Preferred normalized table.
+    try {
+      final row = await _supabase
+          .from('user_credentials')
+          .select('email')
+          .eq('username', clean)
+          .maybeSingle();
+      final email = row?['email'] as String?;
+      if (email != null && email.isNotEmpty) return email.toLowerCase();
+    } catch (_) {}
+
+    // Backward compatibility.
+    try {
+      final row = await _supabase
+          .from('user_logins')
+          .select('email')
+          .eq('username', clean)
+          .maybeSingle();
+      final email = row?['email'] as String?;
+      if (email != null && email.isNotEmpty) return email.toLowerCase();
+    } catch (_) {}
+
+    // RPC compatibility.
+    try {
+      final response = await _supabase.rpc(
+        'get_email_by_username',
+        params: {'input_username': clean},
+      );
+      if (response is String && response.isNotEmpty) {
+        return response.toLowerCase();
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
+  static Future<AuthResponse> signInWithIdentifier({
+    required String identifier,
     required String password,
   }) async {
-    return await _supabase.auth.signInWithPassword(
-      email: email,
-      password: password,
+    final email = await getEmailByIdentifier(identifier);
+    if (email == null) {
+      throw const AuthException('No account found for this email/username.');
+    }
+    return _supabase.auth.signInWithPassword(email: email, password: password);
+  }
+
+  static Future<void> sendPasswordReset(String identifier) async {
+    final email = await getEmailByIdentifier(identifier);
+    if (email == null) {
+      throw const AuthException('No account found for this email/username.');
+    }
+    await _supabase.auth.resetPasswordForEmail(
+      email,
+      redirectTo: kIsWeb ? null : 'io.supabase.flutter://reset-callback/',
     );
   }
 
-  // Save custom username and plain-text password to user_logins table
-  static Future<void> saveCustomCredentials({
-    required String uid,
-    required String username,
-    required String password,
-    required String email,
+  static Future<Map<String, String?>> sendPasswordResetOtp(
+      String identifier) async {
+    final result =
+        await ApiService.requestPasswordResetOtp(identifier: identifier);
+    final ok = result['success'] == true;
+    if (!ok) {
+      throw AuthException(result['error']?.toString() ?? 'Failed to send OTP.');
+    }
+    return {
+      'email': (result['email']?.toString() ?? identifier).trim(),
+      'delivery': result['delivery']?.toString(),
+      'devOtp': result['dev_otp']?.toString(),
+    };
+  }
+
+  static Future<void> resetPasswordWithOtp({
+    required String identifier,
+    required String otp,
+    required String newPassword,
   }) async {
-    try {
-      debugPrint('DEBUG: saveCustomCredentials called — uid=$uid, username=$username, email=$email');
-      debugPrint('DEBUG: Current session user: ${_supabase.auth.currentUser?.id}');
-      await _supabase.from('user_logins').upsert({
-        'id': uid,
-        'username': username,
-        'password_plain': password,
-        'email': email,
-      });
-      debugPrint('DEBUG: saveCustomCredentials SUCCESS ✓');
-    } catch (e) {
-      debugPrint('ERROR: saveCustomCredentials FAILED — $e');
-      // Rethrow so the caller knows something went wrong
-      rethrow;
+    final result = await ApiService.verifyPasswordResetOtp(
+      identifier: identifier,
+      otp: otp,
+      newPassword: newPassword,
+    );
+    final ok = result['success'] == true;
+    if (!ok) {
+      throw AuthException(
+          result['error']?.toString() ?? 'Failed to reset password.');
     }
   }
 
-  // Send OTP to email
+  // Backward compatibility with existing OTP screens.
   static Future<void> sendEmailOtp(String email) async {
     await _supabase.auth.signInWithOtp(
-      email: email,
-      shouldCreateUser: false, // Ensure we don't create new users here
+      email: email.trim().toLowerCase(),
+      shouldCreateUser: false,
     );
   }
 
-  // Verify OTP token
-  // Verify OTP token with fallback support
   static Future<String?> verifyEmailOtp({
     required String email,
     required String token,
-    required String type, // Preferred type: 'signup', 'login', or 'magiclink'
+    required String type,
   }) async {
-    final cleanEmail = email.toLowerCase().trim();
+    final cleanEmail = email.trim().toLowerCase();
     final cleanToken = token.trim();
-    
-    // List of types to try in order
-    List<OtpType> typesToTry = [];
+
+    List<OtpType> typesToTry;
     if (type == 'signup') {
       typesToTry = [OtpType.signup, OtpType.email];
     } else if (type == 'magiclink') {
@@ -107,108 +184,23 @@ class AuthService {
     String? lastError;
     for (final otpType in typesToTry) {
       try {
-        debugPrint('Attempting verification: email=$cleanEmail, token=$cleanToken, type=$otpType');
         final response = await _supabase.auth.verifyOTP(
           email: cleanEmail,
           token: cleanToken,
           type: otpType,
         );
-        
         if (response.user != null) {
-          debugPrint('Verification successful with type: $otpType');
-          return null; // No error means success
+          return null;
         }
       } catch (e) {
         lastError = e.toString();
-        debugPrint('Verification failed for type $otpType: $lastError');
       }
     }
-
     return lastError ?? 'Invalid OTP code';
   }
 
-  // Sign in using custom credentials (username and plain-text password)
-  static Future<Map<String, dynamic>?> getCredentialsByUsername(String username) async {
-    return await _supabase
-        .from('user_logins')
-        .select('id, password_plain')
-        .eq('username', username)
-        .maybeSingle();
-  }
+  static Future<void> signOut() => _supabase.auth.signOut();
 
-  // Get profile by UID (to get the email for Supabase Auth)
-  static Future<Map<String, dynamic>?> getProfile(String uid) async {
-    return await _supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', uid)
-        .maybeSingle();
-  }
-
-  // Get email by username — tries RPC first, falls back to direct table query
-  static Future<String?> getEmailByUsername(String username) async {
-    // 1. Try the RPC function (if it exists)
-    try {
-      final response = await _supabase.rpc(
-        'get_email_by_username',
-        params: {'input_username': username},
-      );
-      if (response != null) {
-        debugPrint('DEBUG: getEmailByUsername via RPC → $response');
-        return response as String;
-      }
-    } catch (e) {
-      debugPrint('DEBUG: RPC get_email_by_username not available: $e');
-    }
-
-    // 2. Fallback: query user_logins table directly
-    try {
-      final row = await _supabase
-          .from('user_logins')
-          .select('email')
-          .eq('username', username)
-          .maybeSingle();
-      if (row != null && row['email'] != null) {
-        debugPrint('DEBUG: getEmailByUsername via table → ${row['email']}');
-        return row['email'] as String;
-      }
-    } catch (e) {
-      debugPrint('DEBUG: user_logins table query failed: $e');
-    }
-
-    return null;
-  }
-
-  // Custom Admin Sign In (checks custom 'admins' table)
-  static Future<Map<String, dynamic>?> signInAsAdmin({
-    required String username,
-    required String password,
-  }) async {
-    final response = await _supabase
-        .from('admins')
-        .select()
-        .eq('username', username)
-        .eq('password_hash', password) // Plain text as per screenshot
-        .maybeSingle();
-    return response;
-  }
-
-  // Sign in using Email OTP (Passwordless)
-  static Future<void> signInWithEmailOtp(String email) async {
-    await _supabase.auth.signInWithOtp(
-      email: email,
-      emailRedirectTo: kIsWeb ? null : 'io.supabase.flutter://login-callback/',
-    );
-  }
-
-  // Sign out
-  static Future<void> signOut() async {
-    await _supabase.auth.signOut();
-  }
-
-  // Get current session
   static Session? get currentSession => _supabase.auth.currentSession;
-
-  // Get current user
   static User? get currentUser => _supabase.auth.currentUser;
 }

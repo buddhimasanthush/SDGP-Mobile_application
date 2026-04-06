@@ -1,9 +1,14 @@
 import psycopg2
 import sys
+import os
 
 def apply_sql():
-    conn_str = "postgresql://postgres:Medifindsdgp12345@db.zdgugonfvsadghkijfnh.supabase.co:5432/postgres"
-    sql_file = "database/add_external_dbs.sql"
+    conn_str = os.environ.get("DATABASE_URL", "").strip()
+    sql_file = os.environ.get("SQL_FILE", "database/add_external_dbs.sql")
+
+    if not conn_str:
+        print("Error: DATABASE_URL environment variable is required.")
+        sys.exit(1)
 
     try:
         conn = psycopg2.connect(conn_str)

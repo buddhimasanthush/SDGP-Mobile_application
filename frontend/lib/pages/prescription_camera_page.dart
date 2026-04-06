@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'prescription_medicine_list_page.dart';
+import '../services/api_service.dart';
 
 class PrescriptionCameraPage extends StatefulWidget {
   const PrescriptionCameraPage({super.key});
@@ -9,23 +12,63 @@ class PrescriptionCameraPage extends StatefulWidget {
 
 class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
   bool _flashOn = false;
+  bool _processing = false;
+  final ImagePicker _picker = ImagePicker();
 
-  void _onCapture() {
-    _showDialog('Uploading prescription...', 'Please wait a moment', () {
-      // Step 2: AI scanning dialog
-      _showDialog('MediFind AI is scanning\nyour prescription...',
-          'Extracting medicine details', () {
-        // Step 3: go to medicine list
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (_) => const PrescriptionMedicineListPage()),
-        );
-      });
-    });
+  Future<void> _onCapture() async {
+    if (_processing) return;
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 95,
+        maxWidth: 2200,
+      );
+      if (image == null) return;
+      await _processPrescription(File(image.path));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not access camera. Please try again.'),
+          backgroundColor: Color(0xFF0796DE),
+        ),
+      );
+    }
   }
 
-  void _showDialog(String title, String subtitle, VoidCallback onDone) {
+  Future<void> _processPrescription(File imageFile) async {
+    setState(() => _processing = true);
+    _showLoadingDialog('MediFind AI is scanning\nyour prescription...',
+        'Extracting medicine details');
+    final result = await ApiService.uploadPrescription(imageFile);
+    if (!mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+    setState(() => _processing = false);
+
+    if (result['success'] == true) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PrescriptionMedicineListPage(
+            medicines: (result['medicines'] as List<Medicine>?) ?? const [],
+            rawMedications: result['rawMedications'] as List<dynamic>?,
+          ),
+        ),
+      );
+      return;
+    }
+
+    final err =
+        (result['error'] ?? 'Failed to process prescription').toString();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(err),
+        backgroundColor: const Color(0xFF0796DE),
+      ),
+    );
+  }
+
+  void _showLoadingDialog(String title, String subtitle) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -80,12 +123,6 @@ class _PrescriptionCameraPageState extends State<PrescriptionCameraPage> {
         ),
       ),
     );
-
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      Navigator.pop(context);
-      onDone();
-    });
   }
 
   @override

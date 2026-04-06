@@ -77,7 +77,25 @@ class MatchedMedicine:
     price: float
 
 
-# ... (PharmacyResult and SearchResponse remain the same) ...
+@dataclass
+class PharmacyResult:
+    pharmacy_id: str
+    pharmacy_name: str
+    distance_meters: float
+    is_full_match: bool
+    matched_count: int
+    total_required: int
+    total_price: float
+    items: list[MatchedMedicine]
+    not_available: list[str]
+
+
+@dataclass
+class SearchResponse:
+    best_match: Optional[PharmacyResult]
+    alternatives: list[PharmacyResult]
+    partial_matches: list[PharmacyResult]
+    suggestion: Optional[str]
 
 # ════════════════════════════════════════════════════
 # THE SEARCH ALGORITHM
