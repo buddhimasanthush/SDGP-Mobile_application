@@ -9,3 +9,10 @@ Suggested contents:
 - app store artwork
 
 Keep filenames lowercase with underscores for consistency.
+
+Subfolders:
+- `logos`
+- `banners`
+- `social`
+- `app_store`
+- `docs`
